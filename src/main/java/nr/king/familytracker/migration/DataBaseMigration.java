@@ -15,7 +15,7 @@ public class DataBaseMigration {
 
    @PostConstruct
     public void doPatchForSchema() {
-        jdbcTemplateProvider.getTemplate().query("select schema_name from location_tracking_users", resultSet -> {
+        jdbcTemplateProvider.getTemplate().query("select schema_name from WE_TRACK_USERS", resultSet -> {
             Flyway flyway1 = Flyway.configure().dataSource(jdbcTemplateProvider.getTemplate().getDataSource())
                     .locations("classpath:db/migration").schemas(resultSet.getString("schema_name")).load();
             flyway1.migrate();

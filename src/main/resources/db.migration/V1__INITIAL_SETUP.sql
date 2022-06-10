@@ -8,8 +8,11 @@ CREATE TABLE WE_TRACK_USERS
     ONE_SIGNAL_EXTERNAL_USERID       TEXT,
     MOBILE_VERSION                   TEXT,
     Expiry_TIME                      TEXT,
+    IS_USER_CREATED_IN_WETRACK_SERVICE BOOLEAN,
     IS_PURCHASED                      BOOLEAN,
+    TOKEN_HEADER                      TEXT,
     SCHEMA_NAME                      TEXT,
+    IS_NUMBER_ADDER                  BOOLEAN,
     CREATED_AT    TIMESTAMP NOT NULL,
     UPDATED_AT    TIMESTAMP NOT NULL,
     PRIMARY KEY (ID,USER_ID)

@@ -13,7 +13,7 @@ import static org.apache.logging.log4j.core.impl.ThrowableFormatOptions.MESSAGE;
 
 
 @RestControllerAdvice
-@RequestMapping("/location-tracker")
+@RequestMapping("/we_track")
 public class BaseController {
 
     private static final Logger logger = LogManager.getLogger(BaseController.class);
