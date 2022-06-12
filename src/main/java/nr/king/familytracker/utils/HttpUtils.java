@@ -94,14 +94,14 @@ public class HttpUtils {
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody requestBody = RequestBody.create(mediaType, body);
         request.post(requestBody);
-        HttpResponse httpResponse = GetReponse(url, client, request);
+        HttpResponse httpResponse = GetReponse(url, client, request,body);
         return httpResponse;
     }
 
-    private HttpResponse GetReponse(String url, OkHttpClient client, Request.Builder request) throws IOException {
+    private HttpResponse GetReponse(String url, OkHttpClient client, Request.Builder request, String requestBody) throws IOException {
         Response response = client.newCall(request.build()).execute();
         HttpResponse httpResponse = new HttpResponse(response.code(), response.body().string(), response.headers());
-        logger.info(String.format("\nRequested Url is - %s - Response Code is - %s", url, httpResponse.getResponseCode()));
+        logger.info(String.format("\nRequested Url is - %s - Response Code is - %s -Request Body is -%s", url, httpResponse.getResponseCode(),requestBody));
         return httpResponse;
     }
 }

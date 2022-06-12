@@ -3,11 +3,7 @@ package nr.king.familytracker.repo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.exceptions.FailedResponseException;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
-import nr.king.familytracker.migration.DataBaseMigration;
-import nr.king.familytracker.model.http.ApiResponse;
-import nr.king.familytracker.model.http.AppUserModel;
-import nr.king.familytracker.model.http.HttpResponse;
-import nr.king.familytracker.model.http.PhoneModel;
+import nr.king.familytracker.model.http.*;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.provisioning.UserProvisioning;
 import nr.king.familytracker.utils.CommonUtils;
@@ -15,7 +11,6 @@ import nr.king.familytracker.utils.HttpUtils;
 import nr.king.familytracker.utils.ResponseUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.joda.time.DateTimeZone;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.ResponseEntity;
@@ -24,10 +19,13 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.UUID;
 
 import static nr.king.familytracker.constant.LocationTrackingConstants.*;
@@ -119,13 +117,20 @@ public class HomeRepo {
 
                             AppUserModel appUserModel = objectMapper.readValue(httpResponse.getResponse(), AppUserModel.class);
                             if (!appUserModel.getFollowings().get(0).getIsActive()) {
-                                HomeModel innerHomeModel = commonUtils.getHomeModel(numberSet.getString("TOKEN_HEADER"));
+                                HomeModel innerHomeModel = commonUtils.getHomeModel(numberSet.getString("TOKEN_HEADER"), false);
                                 HttpResponse innerCreateUser = checkUserFromWeTrackService(
                                         innerHomeModel
                                 );
 
                                 if (innerCreateUser.getResponseCode() == 200) {
-                                    doUpdateUserCreationinWetrack(innerHomeModel);
+                                    updatePhoneNumberDetails(new PhoneModel(
+                                                    homeModel.getId(),
+                                                    numberSet.getString("NICK_NAME"),
+                                                    numberSet.getString("NUMBER"),
+                                                    numberSet.getString("COUNTRY_CODE"),
+                                                    numberSet.getString("PUSH_TOKEN")
+                                            )
+                                    );
                                 } else {
                                     logger.info("Response while updating the server call " + httpResponse.getResponseCode(), httpResponse.getResponse());
                                     return responseUtils.constructResponse(200, commonUtils.writeAsString(
@@ -147,7 +152,7 @@ public class HomeRepo {
 
                 } else {
                     HttpResponse httpResponse = checkUserFromWeTrackService(homeModel);
-                    logger.info("Response from inital create" + httpResponse.getResponseCode(), httpResponse.getResponse());
+                    logger.info("Response from inital create" + httpResponse.getResponseCode() + httpResponse.getResponse());
                     if (httpResponse.getResponseCode() == 200) {
                         int count = doUpdateUserCreationinWetrack(homeModel);
                         if (count == 1) {
@@ -155,11 +160,11 @@ public class HomeRepo {
                                     ApiResponse(true,
                                     "User Created Successfully")));
                         }
+                    } else {
+                        return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper, new
+                                ApiResponse(false,
+                                "User Created UnSuccessfully")));
                     }
-                    return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper, new
-                            ApiResponse(false,
-                            "User Created UnSuccessfully")));
-
                 }
 
             }
@@ -198,14 +203,12 @@ public class HomeRepo {
                                                 phoneModel
                                         )
                                 );
-                                if (httpResponse.getResponseCode()==200)
-                                {
+                                if (httpResponse.getResponseCode() == 200) {
                                     int count = updatePhoneNumberDetails(phoneModel);
                                     logger.info("Updated phoneNumber count" + count);
                                     isNumberFound = true;
-                                }
-                                else{
-                                  return addNewNumbeIntoWeTrackServer(phoneModel);
+                                } else {
+                                    return addNewNumbeIntoWeTrackServer(phoneModel, false);
                                 }
                             }
                         }
@@ -216,11 +219,11 @@ public class HomeRepo {
                                             new ApiResponse(true,
                                                     "Mobile Number Updated Successfully")));
                         } else {
-                          return   addNewNumbeIntoWeTrackServer(phoneModel);
+                            return addNewNumbeIntoWeTrackServer(phoneModel, false);
                         }
 
                     } else {
-                        return addNewNumbeIntoWeTrackServer(phoneModel);
+                        return addNewNumbeIntoWeTrackServer(phoneModel, true);
                     }
 
                 }
@@ -244,40 +247,108 @@ public class HomeRepo {
                         phoneModel.getId(), phoneModel.getPhoneNumber());
     }
 
-    private ResponseEntity addNewNumbeIntoWeTrackServer(PhoneModel phoneModel) throws IOException {
-        HomeModel homeModel = commonUtils.getHomeModel(phoneModel.getId());
-        HttpResponse httpResponse = httpUtils.doPostRequest(
-                0,
-                POST_NUMBER,
-                commonUtils.getHeadersMap(homeModel.getId()),
-                "Create New User for Mobile Creation",
-                commonUtils.writeAsString(objectMapper,
-                        homeModel)
-        );
+    private ResponseEntity addNewNumbeIntoWeTrackServer(PhoneModel phoneModel, boolean isFirstTime) throws IOException {
+        HomeModel homeModel = commonUtils.getHomeModel(phoneModel.getId(), isFirstTime);
 
-        if (httpResponse.getResponseCode() == 200) {
-            int count = addMobileNumberIntoDatabase(phoneModel, homeModel);
+        if (isFirstTime) {
+            HttpResponse httpResponse = httpUtils.doPostRequest(
+                    0,
+                    POST_NUMBER,
+                    commonUtils.getHeadersMap(phoneModel.getId()),
+                    "Adding Number for  Mobile Creation",
+                    commonUtils.writeAsString(objectMapper,
+                            phoneModel)
+            );
+            logger.info("Response in adding number" + httpResponse.getResponse() + "\n" + httpResponse.getResponse());
 
-            if (count == 1) {
-                return responseUtils.constructResponse(200,
+            if (httpResponse.getResponseCode() == 200) {
+                HomeModel innerModel = new HomeModel();
+                innerModel.setId(phoneModel.getId());
+                return addMobileNumbers(phoneModel, innerModel);
+            }
+        } else {
+            HttpResponse httpResponse = httpUtils.doPostRequest(
+                    0,
+                    CREATE_USER,
+                    commonUtils.getHeadersMap(homeModel.getId()),
+                    "Create New User for Mobile Creation",
+                    commonUtils.writeAsString(objectMapper,
+                            homeModel)
+            );
+            logger.info("Response in adding number" + httpResponse.getResponse() + "\n" + httpResponse.getResponse());
+
+            if (httpResponse.getResponseCode() == 200) {
+                HttpResponse innerMobileRequest = httpUtils.doPostRequest(0,
+                        POST_NUMBER,
+                        commonUtils.getHeadersMap(homeModel.getId()),
+                        "Adding Number for  Mobile Creation",
                         commonUtils.writeAsString(objectMapper,
-                                new ApiResponse(true, "Phone Number added Successfully")));
+                                phoneModel
+                        ));
+                if (innerMobileRequest.getResponseCode() == 200) {
+                    return addMobileNumbers(phoneModel, homeModel);
+                }
             }
         }
+
+
         return responseUtils.constructResponse(200,
                 commonUtils.writeAsString(objectMapper,
                         new ApiResponse(false, "Phone Number added UnSuccessfully")));
 
     }
 
+    private ResponseEntity addMobileNumbers(PhoneModel phoneModel, HomeModel homeModel) {
+        int count = addMobileNumberIntoDatabase(phoneModel, homeModel);
+        if (count == 1) {
+            return responseUtils.constructResponse(200,
+                    commonUtils.writeAsString(objectMapper,
+                            new ApiResponse(true, "Phone Number added Successfully")));
+        }
+        return responseUtils.constructResponse(200,
+                commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false, "Phone Number added UnSuccessfully")));
+    }
+
     private int addMobileNumberIntoDatabase(PhoneModel phoneModel, HomeModel homeModel) {
         return jdbcTemplateProvider.getTemplate()
-                .update("insert into NUMBER_FOR_USERS (USER_ID,NUMBER,TOKEN_HEADER,COUNTRY_CODE,CREATED_AT,UPDATED_AT) values " +
-                                "(?,?,?,?,current_timestamp,current_timestamp)",
+                .update("insert into NUMBER_FOR_USERS (USER_ID,NUMBER,TOKEN_HEADER,COUNTRY_CODE,CREATED_AT,UPDATED_AT,NICK_NAME,PUSH_TOKEN,EXPIRY_TIME) values " +
+                                "(?,?,?,?,current_timestamp,current_timestamp,?,?,?)",
                         phoneModel.getId(), phoneModel.getPhoneNumber(),
-                        homeModel.getId(), phoneModel.getCountryCode()
+                        homeModel.getId(), phoneModel.getCountryCode(),
+                        phoneModel.getNickName(), phoneModel.getPushToken(),
+                        LocalDateTime.now().plusHours(3).toString()
                 );
 
+    }
+
+
+    public ResponseEntity getAllMobileNumbers(PhoneModel phoneModel) {
+        try {
+            List<GetMobileResponse> getMobileResponses = new ArrayList<>();
+            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_ALL_MOBILE_NUMBER, phoneModel.getId());
+            while (sqlRowSet.next()) {
+                GetMobileResponse getMobileResponse = new GetMobileResponse();
+                getMobileResponse.setMobileNumber(sqlRowSet.getString("NUMBER"));
+                getMobileResponse.setCountryCode(sqlRowSet.getString("COUNTRY_CODE"));
+                getMobileResponse.setExpiryTime(sqlRowSet.getString("EXPIRY_TIME"));
+                getMobileResponse.setNickName(sqlRowSet.getString("NICK_NAME"));
+                getMobileResponse.setPushToken(sqlRowSet.getString("PUSH_TOKEN"));
+                getMobileResponse.setExpiryToken(sqlRowSet.getString("TOKEN_HEADER"));
+                getMobileResponse.setUserId(sqlRowSet.getString("USER_ID"));
+                getMobileResponses.add(getMobileResponse);
+            }
+
+            return responseUtils.constructResponse(200,
+                    commonUtils.writeAsString(objectMapper,
+                            new ApiResponse(getMobileResponses.isEmpty(), "The Mobile Numbers are", getMobileResponses))
+            );
+
+
+        } catch (Exception exception) {
+            logger.error("Exception in getting MobileNumber due to", exception.getMessage());
+            throw new FailedResponseException("");
+        }
     }
 
 

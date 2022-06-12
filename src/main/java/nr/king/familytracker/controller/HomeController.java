@@ -1,5 +1,6 @@
 package nr.king.familytracker.controller;
 
+import nr.king.familytracker.model.http.PhoneModel;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.service.HomeServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,17 @@ public class HomeController extends  BaseController{
     public ResponseEntity verifyUser(@RequestBody HomeModel homeModel)
     {
         return homeServices.verify_user(homeModel);
+    }
+    @PostMapping("/v{version:[1]}/user/addNumberForUser")
+    public ResponseEntity addMobileNumber(@RequestBody PhoneModel phoneModel)
+    {
+        return homeServices.addMobileNumber(phoneModel);
+    }
+
+   @PostMapping("/v{version:[1]}/user/getAllMobileNumbers")
+    public ResponseEntity getAllMobileNumbers(@RequestBody PhoneModel phoneModel)
+    {
+        return homeServices.getAllMobileNumbers(phoneModel);
     }
 
 

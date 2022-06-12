@@ -206,6 +206,7 @@ public class CommonUtils {
         Map<String, String> headersMap = new LinkedHashMap<>();
         headersMap.put("Content-Type", "application/json");
         headersMap.put("X-Auth-Token", authHeader);
+        headersMap.put("User", authHeader);
         return headersMap;
     }
 
@@ -345,7 +346,7 @@ public class CommonUtils {
         return skewCode == 520 || skewCode == 538 || skewCode == 260;
     }
 
-    public HomeModel getHomeModel(String token_header) {
+    public HomeModel getHomeModel(String token_header,boolean isFirstTime) {
         HomeModel homeModel = new HomeModel();
         RandomString string = new RandomString(12, new Random());
         Map<String, String[]> phoneBrandsMap = new HashMap<>();
@@ -357,15 +358,16 @@ public class CommonUtils {
                 "S22 Ultra",
                 "Z Flip3 5G"
         });
-        if (string.toString().equals(token_header)) {
-            getHomeModel(token_header);
+        if (string.toString().equals(token_header) && !isFirstTime) {
+            getHomeModel(token_header, false);
         }
+
         Pair<String, String> stringPair = getRandomMap(phoneBrandsMap);
-        homeModel.setId(string.toString());
-        homeModel.setMobilePhone(string.toString());
+        homeModel.setId((isFirstTime)? token_header:string.toString());
+        homeModel.setMobilePhone((isFirstTime)? token_header:string.toString());
         homeModel.setPhoneModel(stringPair.getSecond());
         homeModel.setPhoneBrand(stringPair.getFirst());
-        homeModel.setOneSignalExternalUserId(string.toString());
+        homeModel.setOneSignalExternalUserId((isFirstTime)? token_header:string.toString());
         homeModel.setVersion(VERSION_CODE);
         homeModel.setAppId(APP_ID);
         return homeModel;
@@ -376,7 +378,7 @@ public class CommonUtils {
         List<String> keysAsArray = new ArrayList<String>(phoneBrandsMap.keySet());
         Random ran = new Random();
         //int random = ran.nextInt(1);
-        String keyValue = keysAsArray.get(1);
+        String keyValue = keysAsArray.get(0);
         List<String> keyBrands = new ArrayList<>(List.of(phoneBrandsMap.get(keyValue)));
        // random = ran.nextInt(0, keyBrands.size());
         return Pair.of(keyValue, keyBrands.get(2));
