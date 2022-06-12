@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+
 public class HomeController extends  BaseController{
 
     @Autowired
@@ -18,6 +19,12 @@ public class HomeController extends  BaseController{
     public ResponseEntity storeUserData(@RequestBody HomeModel homeModel)
     {
         return homeServices.storeUsers(homeModel);
+    }
+
+ @PostMapping("/v{version:[1]}/user/getUserAbuzer")
+    public ResponseEntity verifyUser(@RequestBody HomeModel homeModel)
+    {
+        return homeServices.verify_user(homeModel);
     }
 
 

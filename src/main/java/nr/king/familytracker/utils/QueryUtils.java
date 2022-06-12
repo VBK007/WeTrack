@@ -1,6 +1,6 @@
 package nr.king.familytracker.utils;
 
-import com.gofrugal.location_tracking.jdbc.JdbcTemplateProvider;
+import nr.king.familytracker.jdbc.JdbcTemplateProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

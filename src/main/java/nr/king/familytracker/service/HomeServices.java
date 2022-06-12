@@ -44,5 +44,20 @@ public class HomeServices {
     }
 
 
+    public ResponseEntity verify_user(HomeModel homeModel)
+    {
+        try
+        {
+           return homeRepo.verify_user(homeModel);
+        }
+        catch (Exception exception)
+        {
+            logger.error("Exception in verify  the User due to"+exception.getMessage(),exception);
+            return responseUtils.constructResponse(406, commonUtils.writeAsString(objectMapper,
+                    new ApiResponse(false, "Unable to verify User")));
+        }
+    }
+
+
 
 }

@@ -11,7 +11,7 @@ public class UserProvisioning {
     @Autowired
     private JdbcTemplateProvider jdbcTemplateProvider;
 
-    public void createSchema(int userId) {
+    public void createSchema(String userId) {
         Flyway flyway = Flyway.configure()
                 .dataSource(jdbcTemplateProvider.getTemplate().getDataSource())
                 .locations("classpath:db/migration")

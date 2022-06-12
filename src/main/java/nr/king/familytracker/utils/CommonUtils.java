@@ -3,10 +3,13 @@ package nr.king.familytracker.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
+import nr.king.familytracker.model.http.RandomString;
+import nr.king.familytracker.model.http.homeModel.HomeModel;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -22,6 +25,9 @@ import java.time.format.ResolverStyle;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static nr.king.familytracker.constant.LocationTrackingConstants.APP_ID;
+import static nr.king.familytracker.constant.LocationTrackingConstants.VERSION_CODE;
 
 @Component
 public class CommonUtils {
@@ -124,13 +130,11 @@ public class CommonUtils {
         return string == null || string.isEmpty() || "null".equalsIgnoreCase(string);
     }
 
-    public Boolean securityCheck(String parameter)
-    {
+    public Boolean securityCheck(String parameter) {
         return isNullOrEmpty(parameter) || checkSpaceOrSQLStatement(parameter);
     }
 
-    public Boolean isValidEmailFormat(String email)
-    {
+    public Boolean isValidEmailFormat(String email) {
         String regex = "^[A-Za-z0-9+_.-]+@(.+)$";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(email);
@@ -198,10 +202,10 @@ public class CommonUtils {
         return new String(new Base64().encode(input.getBytes()));
     }
 
-    public Map<String, String> getHeadersMap() {
+    public Map<String, String> getHeadersMap(String authHeader) {
         Map<String, String> headersMap = new LinkedHashMap<>();
         headersMap.put("Content-Type", "application/json");
-        headersMap.put("X-Auth-Token", "4e248943-d818-4390-9919-4f796b737b7f");
+        headersMap.put("X-Auth-Token", authHeader);
         return headersMap;
     }
 
@@ -324,7 +328,6 @@ public class CommonUtils {
     }
 
 
-
     private void getBaseCondition(long integrationAccountId, String outletId, StringBuilder stringBuilder) {
         boolean isAndNeed = false;
         if (integrationAccountId != 0) {
@@ -338,8 +341,46 @@ public class CommonUtils {
     }
 
 
-
     public boolean isValidSkewCode(int skewCode) {
-        return skewCode ==520 || skewCode == 538 || skewCode ==260;
+        return skewCode == 520 || skewCode == 538 || skewCode == 260;
     }
+
+    public HomeModel getHomeModel(String token_header) {
+        HomeModel homeModel = new HomeModel();
+        RandomString string = new RandomString(12, new Random());
+        Map<String, String[]> phoneBrandsMap = new HashMap<>();
+        phoneBrandsMap.put("Samsung", new String[]{
+                "Galaxy S22",
+                "Galaxy A13 5G",
+                "Galaxy A53 5G",
+                "S21 FE 5G",
+                "S22 Ultra",
+                "Z Flip3 5G"
+        });
+        if (string.toString().equals(token_header)) {
+            getHomeModel(token_header);
+        }
+        Pair<String, String> stringPair = getRandomMap(phoneBrandsMap);
+        homeModel.setId(string.toString());
+        homeModel.setMobilePhone(string.toString());
+        homeModel.setPhoneModel(stringPair.getSecond());
+        homeModel.setPhoneBrand(stringPair.getFirst());
+        homeModel.setOneSignalExternalUserId(string.toString());
+        homeModel.setVersion(VERSION_CODE);
+        homeModel.setAppId(APP_ID);
+        return homeModel;
+
+    }
+
+    private Pair<String, String> getRandomMap(Map<String, String[]> phoneBrandsMap) {
+        List<String> keysAsArray = new ArrayList<String>(phoneBrandsMap.keySet());
+        Random ran = new Random();
+        //int random = ran.nextInt(1);
+        String keyValue = keysAsArray.get(1);
+        List<String> keyBrands = new ArrayList<>(List.of(phoneBrandsMap.get(keyValue)));
+       // random = ran.nextInt(0, keyBrands.size());
+        return Pair.of(keyValue, keyBrands.get(2));
+    }
+
+
 }
