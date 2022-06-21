@@ -13,15 +13,10 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class Followings implements Serializable {
   private Number number;
-
   private String nickName;
-
   private Boolean enablePush;
-
   private Integer numberId;
-
   private Boolean isActive;
-
   private Integer userId;
 
 }

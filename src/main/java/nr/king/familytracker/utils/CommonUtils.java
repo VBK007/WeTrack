@@ -348,7 +348,7 @@ public class CommonUtils {
 
     public HomeModel getHomeModel(String token_header,boolean isFirstTime) {
         HomeModel homeModel = new HomeModel();
-        RandomString string = new RandomString(12, new Random());
+        String string = UUID.randomUUID().toString().substring(0,12).replace("-","f");
         Map<String, String[]> phoneBrandsMap = new HashMap<>();
         phoneBrandsMap.put("Samsung", new String[]{
                 "Galaxy S22",
@@ -358,16 +358,16 @@ public class CommonUtils {
                 "S22 Ultra",
                 "Z Flip3 5G"
         });
-        if (string.toString().equals(token_header) && !isFirstTime) {
+        if (string.equals(token_header) && !isFirstTime) {
             getHomeModel(token_header, false);
         }
 
         Pair<String, String> stringPair = getRandomMap(phoneBrandsMap);
-        homeModel.setId((isFirstTime)? token_header:string.toString());
-        homeModel.setMobilePhone((isFirstTime)? token_header:string.toString());
+        homeModel.setId((isFirstTime)? token_header:string);
+        homeModel.setMobilePhone((isFirstTime)? token_header:string);
         homeModel.setPhoneModel(stringPair.getSecond());
         homeModel.setPhoneBrand(stringPair.getFirst());
-        homeModel.setOneSignalExternalUserId((isFirstTime)? token_header:string.toString());
+        homeModel.setOneSignalExternalUserId((isFirstTime)? token_header:string);
         homeModel.setVersion(VERSION_CODE);
         homeModel.setAppId(APP_ID);
         return homeModel;

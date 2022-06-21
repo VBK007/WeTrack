@@ -4,7 +4,7 @@ spring:
     locations: classpath:db/migration
     url: jdbc:postgresql://localhost:5432/wetracker
     user: postgres
-    password:
+    password: root
     out-of-order: true
 
   datasource:
@@ -12,7 +12,7 @@ spring:
       maximum-pool-size: 10
       minimum-idle: 8
     name: WetrackDevelopment
-    password:
+    password: root
     url: jdbc:postgresql://localhost:5432/wetracker
     username: postgres
 

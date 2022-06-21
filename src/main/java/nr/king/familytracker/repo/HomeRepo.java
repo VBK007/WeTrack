@@ -19,8 +19,6 @@ import org.springframework.stereotype.Component;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -96,42 +94,58 @@ public class HomeRepo {
     public ResponseEntity verify_user(HomeModel homeModel) {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
-                    .queryForRowSet("select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE from WE_TRACK_USERS where USER_ID=?", homeModel.getId());
+                    .queryForRowSet("select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,token_header  from WE_TRACK_USERS where USER_ID=?", homeModel.getId());
+
+
             if (sqlRowSet.next()) {
+                logger.info("outside Event " + homeModel.getId());
                 if (sqlRowSet.getBoolean("IS_USER_CREATED_IN_WETRACK_SERVICE")) {
                     SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
-                            .queryForRowSet("select USER_ID,NUMBER,TOKEN_HEADER,COUNTRY_CODE,CREATED_AT,UPDATED_AT from NUMBER_FOR_USERS where USER_ID=?",
+                            .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT from NUMBER_FOR_USERS where USER_ID=?",
                                     homeModel.getId());
                     if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME"))
                             .atZone(ZoneId.systemDefault())
                             .toInstant()
                             .toEpochMilli()) {
-
+                        if (!numberSet.next()) {
+                            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                                    new ApiResponse(false, "Please add Mobile Number")));
+                        }
                         while (numberSet.next()) {
                             HttpResponse httpResponse = httpUtils.doPostRequest(0, GET_APP_USER,
-                                    commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
+                                    commonUtils.getHeadersMap(numberSet.getString("token_header")),
                                     "create user Expiry time",
                                     commonUtils.writeAsString(objectMapper,
                                             new HomeModel(
                                             )));
-
-                            AppUserModel appUserModel = objectMapper.readValue(httpResponse.getResponse(), AppUserModel.class);
-                            if (!appUserModel.getFollowings().get(0).getIsActive()) {
+                            MainHomeUserModel appUserModel = commonUtils.safeParseJSON(objectMapper,
+                                    httpResponse.getResponse(),
+                                    MainHomeUserModel.class);
+                            if (appUserModel.getData().getFollowings().isEmpty()||!appUserModel.getData().getFollowings().get(0).getIsActive()) {
                                 HomeModel innerHomeModel = commonUtils.getHomeModel(numberSet.getString("TOKEN_HEADER"), false);
                                 HttpResponse innerCreateUser = checkUserFromWeTrackService(
                                         innerHomeModel
                                 );
 
                                 if (innerCreateUser.getResponseCode() == 200) {
-                                    updatePhoneNumberDetails(new PhoneModel(
-                                                    homeModel.getId(),
-                                                    numberSet.getString("NICK_NAME"),
-                                                    numberSet.getString("NUMBER"),
-                                                    numberSet.getString("COUNTRY_CODE"),
-                                                    numberSet.getString("PUSH_TOKEN")
-                                            )
+                                    PhoneModel phoneModel = new PhoneModel(
+                                            homeModel.getId(),
+                                            numberSet.getString("NICK_NAME"),
+                                            numberSet.getString("NUMBER"),
+                                            numberSet.getString("COUNTRY_CODE"),
+                                            numberSet.getString("PUSH_TOKEN")
                                     );
-                                } else {
+                                    updateMobileNumbers(phoneModel, innerHomeModel);
+                                    phoneModel.setId(homeModel.getId());
+                                    int count = updatePhoneNumberWhileGetAppUser(phoneModel, innerHomeModel);
+                                    logger.info("Update count " + count);
+                                    if (count!=1){
+                                        return responseUtils.constructResponse(200, commonUtils.writeAsString(
+                                                objectMapper, new ApiResponse(false, "Unable to Change or Update Phone Number")
+                                        ));
+                                    }
+                                }
+                                else {
                                     logger.info("Response while updating the server call " + httpResponse.getResponseCode(), httpResponse.getResponse());
                                     return responseUtils.constructResponse(200, commonUtils.writeAsString(
                                             objectMapper, new ApiResponse(false, "Unable to Change or Update Phone Number")
@@ -139,26 +153,24 @@ public class HomeRepo {
                                 }
                             }
                         }
-
-
-                        if (!sqlRowSet.next()) {
-                            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
-                                    new ApiResponse(false, "Please add Mobile Number")));
-                        }
-                    } else {
+                    }
+                    else {
                         return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                                 new ApiResponse(false, "Plan is Expired")));
                     }
 
                 } else {
                     HttpResponse httpResponse = checkUserFromWeTrackService(homeModel);
-                    logger.info("Response from inital create" + httpResponse.getResponseCode() + httpResponse.getResponse());
                     if (httpResponse.getResponseCode() == 200) {
                         int count = doUpdateUserCreationinWetrack(homeModel);
+                        logger.info("Count of update is" + count);
                         if (count == 1) {
                             return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper, new
                                     ApiResponse(true,
                                     "User Created Successfully")));
+                        } else {
+                            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                                    new ApiResponse(false, "User Created Unsuccessfully")));
                         }
                     } else {
                         return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper, new
@@ -168,13 +180,41 @@ public class HomeRepo {
                 }
 
             }
+            else{
+                return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false, "No user found ")));
 
+            }
+
+            logger.info("Last Response ");
             return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
-                    new ApiResponse(false, "No user found ")));
+                    new ApiResponse(true, "User number Updated ")));
+
         } catch (Exception exception) {
             logger.error("Exception in  verify user due to is" + exception.getMessage(), exception);
             throw new FailedResponseException("");
         }
+    }
+
+    private void updateMobileNumbers(PhoneModel phoneModel, HomeModel homeModel) {
+        try {
+            phoneModel.setId(homeModel.getId());
+            HttpResponse httpResponse = httpUtils.doPostRequest(0,
+                    POST_NUMBER,
+                    commonUtils.getHeadersMap(phoneModel.getId()),
+                    "Update the Phone Number Exiting",
+                    commonUtils.writeAsString(objectMapper,
+                            phoneModel
+                    )
+            );
+            if (httpResponse.getResponseCode() == 200) {
+                logger.info("Response while updating value is" + httpResponse.getResponse());
+            }
+
+        } catch (Exception exception) {
+            logger.error("Exception in While updating value is" + exception.getMessage());
+        }
+
     }
 
 
@@ -240,9 +280,23 @@ public class HomeRepo {
         }
     }
 
+
+    private int updatePhoneNumberWhileGetAppUser(PhoneModel phoneModel, HomeModel innerHomeModel) {
+        logger.info("Update query is"+commonUtils.writeAsString(objectMapper,phoneModel)+"\n"+
+                commonUtils.writeAsString(objectMapper,innerHomeModel));
+        return jdbcTemplateProvider.getTemplate()
+                .update(UPDATE_TOKEN_HEADER_IN_NUMBER_MOBILE,
+                        phoneModel.getPhoneNumber(),
+                        innerHomeModel.getId(),
+                        phoneModel.getCountryCode(),
+                        phoneModel.getId(),
+                        phoneModel.getPhoneNumber());
+    }
+
     private int updatePhoneNumberDetails(PhoneModel phoneModel) {
         return jdbcTemplateProvider.getTemplate()
-                .update(UPDATE_TOKEN_HEADER_IN_NUMBER_MOBILE, phoneModel.getPhoneNumber(),
+                .update(UPDATE_TOKEN_HEADER_IN_NUMBER_MOBILE,
+                        phoneModel.getPhoneNumber(),
                         phoneModel.getCountryCode(),
                         phoneModel.getId(), phoneModel.getPhoneNumber());
     }
@@ -355,7 +409,7 @@ public class HomeRepo {
     private int doUpdateUserCreationinWetrack(HomeModel homeModel) {
         return jdbcTemplateProvider.getTemplate()
                 .update("update WE_TRACK_USERS set IS_USER_CREATED_IN_WETRACK_SERVICE=?,TOKEN_HEADER=?,Expiry_TIME=? where USER_ID=?",
-                        true, homeModel.getId(), homeModel.getId(), LocalDateTime.now().plusHours(3).toString());
+                        true, homeModel.getId(), LocalDateTime.now().plusHours(3).toString(), homeModel.getId());
     }
 
     private HttpResponse checkUserFromWeTrackService(HomeModel homeModel) throws IOException {
