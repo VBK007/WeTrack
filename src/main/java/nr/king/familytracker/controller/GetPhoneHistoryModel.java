@@ -1,7 +1,6 @@
 package nr.king.familytracker.controller;
 
 import nr.king.familytracker.model.http.GetPageHistoryNumberModel;
-import nr.king.familytracker.repo.GetHistoryRepo;
 import nr.king.familytracker.service.GetHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

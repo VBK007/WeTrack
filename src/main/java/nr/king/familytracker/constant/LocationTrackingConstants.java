@@ -3,7 +3,7 @@ package nr.king.familytracker.constant;
 public class LocationTrackingConstants {
 
  public static final String STATUS = "status";
- public static final String WETRACK = "we_track";
+ public static final String WETRACK = "we_tracker_";
  public static final String EVENT_HISTORY = "eventHistory";
  public static final String VERSION_CODE ="3.1.3";
  public static final String APP_ID ="familyTrack";
@@ -21,6 +21,10 @@ public class LocationTrackingConstants {
  public static final String SUBSCIBE_STATUS = "http://chattrack.apiservicessarl.com/api/user/setSubscriptionStatus";
  public static final String GET_HISTORY = "http://chattrack.apiservicessarl.com/api/history/GetHistoriesByDate";
  public static final String REMOVE_NUMBER = "http://api.wtrackonline.com/api/user/removeNumberForUser";
+
+
+ public static final String[] SUBSCRIBTION_MODEL_ARRAYLIST = {"demo","Standard","Popular","PromoCode","Deluxe"};
+ public static final int[]    MAX_NUMBER_ALLOWED = {1,10,30,4,100};
 
  private LocationTrackingConstants() {
 

@@ -5,6 +5,7 @@ import nr.king.familytracker.controller.GetPhoneHistoryModel;
 import nr.king.familytracker.exceptions.FailedResponseException;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
 import nr.king.familytracker.model.http.*;
+import nr.king.familytracker.model.http.homeModel.CurrentPurchaseModel;
 import nr.king.familytracker.model.http.homeModel.GetPhoneHistoryMainArrayModel;
 import nr.king.familytracker.model.http.homeModel.GetPhoneNumberHistoryModel;
 import nr.king.familytracker.utils.CommonUtils;
@@ -44,17 +45,17 @@ public class GetHistoryRepo {
     @Autowired
     private JdbcTemplateProvider jdbcTemplateProvider;
     private static final Logger logger = LogManager.getLogger(GetHistoryRepo.class);
+
     public ResponseEntity getAllPhonesHistory(GetPageHistoryNumberModel getPhoneHistoryModel) {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
                     .queryForRowSet(SELECT_USER_EXPIRY_TIME, getPhoneHistoryModel.getHomeModel().getId());
-            if (sqlRowSet.next())
-            {
+            if (sqlRowSet.next()) {
                 if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME"))
                         .atZone(ZoneId.systemDefault())
                         .toInstant()
                         .toEpochMilli()) {
-                    SendStatusListToMobileModel  sendStatusListToMobileModels = new SendStatusListToMobileModel();
+                    SendStatusListToMobileModel sendStatusListToMobileModels = new SendStatusListToMobileModel();
                     ArrayList<SendHistorystatusToAppModel> finalList = new ArrayList<>();
 
                     SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
@@ -67,42 +68,47 @@ public class GetHistoryRepo {
                                 commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
                                 "Getting Phone Histories",
                                 commonUtils.writeAsString(objectMapper, getPhoneHistoryModel));
-                        GetPhoneHistoryMainArrayModel getPageHistoryNumberModel = commonUtils.safeParseJSON(objectMapper,httpResponse.getResponse(), GetPhoneHistoryMainArrayModel.class);
+                        GetPhoneHistoryMainArrayModel getPageHistoryNumberModel = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(), GetPhoneHistoryMainArrayModel.class);
                         SendHistorystatusToAppModel sendHistorystatusToAppModel = new SendHistorystatusToAppModel();
-                        if (getPageHistoryNumberModel.getData().isEmpty())
-                        {
+                        if (getPageHistoryNumberModel.getData().isEmpty()) {
                             sendHistorystatusToAppModel.setStatus(false);
                             sendHistorystatusToAppModel.setMessage("The Phone number status unavailable");
-                        }
-                        else{
+                        } else {
                             sendHistorystatusToAppModel.setStatus(true);
                             sendHistorystatusToAppModel.setMessage("The Phone number status available");
                             ArrayList<GetPhoneNumberHistoryModel> localList = new ArrayList<>();
-                            localList.add(getPageHistoryNumberModel.getData().get(0));
+                            GetPhoneNumberHistoryModel localModel = getPageHistoryNumberModel.getData().get(0);
+                            localModel.setNickName(numberSet.getString("NICK_NAME"));
+                            localList.add(localModel);
                             sendHistorystatusToAppModel.setStatusList(localList);
                         }
                         finalList.add(sendHistorystatusToAppModel);
                     }
+
+                    sendStatusListToMobileModels.setCurrentPurchaseModel(
+                            new CurrentPurchaseModel(
+                                    sqlRowSet.getString("Expiry_TIME"),
+                                    sqlRowSet.getString("purchase_mode"),
+                                    sqlRowSet.getInt("MAX_NUMBER")
+                            )
+                    );
                     sendStatusListToMobileModels.setSendHistorystatusToAppModelArrayList(finalList);
                     return responseUtils.constructResponse(200,
-                            commonUtils.writeAsString(objectMapper,new ApiResponse(true,"Got All PhoneHistory",sendStatusListToMobileModels)));
+                            commonUtils.writeAsString(objectMapper, new ApiResponse(true, "Got All PhoneHistory", sendStatusListToMobileModels)));
 
-                }
-                else{
+                } else {
                     return responseUtils.constructResponse(200,
                             commonUtils.writeAsString(objectMapper,
                                     new ApiResponse(false, "Plan is Expired"
                                     )));
                 }
             }
-                return responseUtils.constructResponse(200,
-                        commonUtils.writeAsString(objectMapper,
-                                new ApiResponse(false, "No User found to Get History"
-                                )));
-        }
-        catch (Exception exception)
-        {
-          throw new FailedResponseException(exception.getMessage());
+            return responseUtils.constructResponse(200,
+                    commonUtils.writeAsString(objectMapper,
+                            new ApiResponse(false, "No User found to Get History"
+                            )));
+        } catch (Exception exception) {
+            throw new FailedResponseException(exception.getMessage());
         }
 
     }

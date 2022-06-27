@@ -9,9 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class GetPhoneNumberHistoryModel {
-    public String status;
-    public String phoneNumber;
-    public String timeStamp;
-    public String nickName;
+public class CurrentPurchaseModel {
+    private String Expiry_time;
+    private String purchaseMode;
+    private int maxNumber;
 }

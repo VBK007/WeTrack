@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
 import nr.king.familytracker.model.http.RandomString;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
+import nr.king.familytracker.model.http.purchaseModel.PurchaseRequestModel;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,6 +20,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
@@ -26,8 +28,7 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static nr.king.familytracker.constant.LocationTrackingConstants.APP_ID;
-import static nr.king.familytracker.constant.LocationTrackingConstants.VERSION_CODE;
+import static nr.king.familytracker.constant.LocationTrackingConstants.*;
 
 @Component
 public class CommonUtils {
@@ -208,6 +209,36 @@ public class CommonUtils {
         headersMap.put("X-Auth-Token", authHeader);
         headersMap.put("User", authHeader);
         return headersMap;
+    }
+
+
+
+    public String getExpiryTime(String purchaseMode)
+    {
+
+        String expiryTime="";
+        for (int i=0;i<SUBSCRIBTION_MODEL_ARRAYLIST.length;i++)
+        {
+            if (SUBSCRIBTION_MODEL_ARRAYLIST[i].equals(purchaseMode))
+            {
+              int   maxNumber =  MAX_NUMBER_ALLOWED[i];
+                if (maxNumber==10)
+                {
+                    expiryTime = LocalDateTime.now().plusDays(7).toString();
+                }
+                else if (maxNumber==30)
+                {
+                    expiryTime = LocalDateTime.now().plusMonths(1).toString();
+                }
+                else if (maxNumber==100)
+                {
+                    expiryTime = LocalDateTime.now().plusMonths(3).toString();
+                }
+                break;
+            }
+        }
+
+        return expiryTime;
     }
 
     public boolean isNotNumeric(String userId) {
