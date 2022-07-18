@@ -5,6 +5,7 @@ import nr.king.familytracker.controller.GetPhoneHistoryModel;
 import nr.king.familytracker.model.http.ApiResponse;
 import nr.king.familytracker.model.http.GetPageHistoryNumberModel;
 import nr.king.familytracker.repo.GetHistoryRepo;
+import nr.king.familytracker.repo.NotificationModel;
 import nr.king.familytracker.utils.CommonUtils;
 import nr.king.familytracker.utils.ResponseUtils;
 import org.apache.logging.log4j.LogManager;
@@ -36,6 +37,20 @@ public class GetHistoryService {
             logger.error("Exception in getting all mobile Numbers "+exception.getMessage(),exception);
             return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
                     new ApiResponse(false,"Unable to Get All User History")));
+        }
+
+    }
+
+    public ResponseEntity enableNotification(NotificationModel notificationModel) {
+        try
+        {
+            return historyRepo.enableNotification(notificationModel);
+        }
+        catch (Exception exception)
+        {
+            logger.error("Exception in enabling Notification"+exception.getMessage(),exception);
+            return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
+                    new ApiResponse(false,"Unable to make Push Notification")));
         }
 
     }

@@ -95,8 +95,6 @@ public class HomeRepo {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
                     .queryForRowSet("select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,token_header  from WE_TRACK_USERS where USER_ID=?", homeModel.getId());
-
-
             if (sqlRowSet.next()) {
                 logger.info("outside Event " + homeModel.getId());
                 if (sqlRowSet.getBoolean("IS_USER_CREATED_IN_WETRACK_SERVICE")) {
@@ -121,6 +119,7 @@ public class HomeRepo {
                             MainHomeUserModel appUserModel = commonUtils.safeParseJSON(objectMapper,
                                     httpResponse.getResponse(),
                                     MainHomeUserModel.class);
+                            logger.info("AppUser Model response is "+commonUtils.writeAsString(objectMapper,appUserModel));
                             if (appUserModel.getData().getFollowings().isEmpty()||!appUserModel.getData().getFollowings().get(0).getIsActive()) {
                                 HomeModel innerHomeModel = commonUtils.getHomeModel(numberSet.getString("TOKEN_HEADER"), false);
                                 HttpResponse innerCreateUser = checkUserFromWeTrackService(
@@ -146,7 +145,7 @@ public class HomeRepo {
                                     }
                                 }
                                 else {
-                                    logger.info("Response while updating the server call " + httpResponse.getResponseCode(), httpResponse.getResponse());
+                                    logger.info("Response while updating the server call " + httpResponse.getResponseCode()+ httpResponse.getResponse());
                                     return responseUtils.constructResponse(200, commonUtils.writeAsString(
                                             objectMapper, new ApiResponse(false, "Unable to Change or Update Phone Number")
                                     ));

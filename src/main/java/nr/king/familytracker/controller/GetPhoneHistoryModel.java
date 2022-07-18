@@ -1,6 +1,7 @@
 package nr.king.familytracker.controller;
 
 import nr.king.familytracker.model.http.GetPageHistoryNumberModel;
+import nr.king.familytracker.repo.NotificationModel;
 import nr.king.familytracker.service.GetHistoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,5 +19,12 @@ public class GetPhoneHistoryModel extends BaseController{
     {
         return  getHistoryRepo.getAllPhonesHistory(getPhoneHistoryModel);
     }
+
+    @PostMapping("/v{version:[1]}/enable-notify")
+    public ResponseEntity enableNotification(@RequestBody NotificationModel notificationModel)
+    {
+         return  getHistoryRepo.enableNotification(notificationModel);
+    }
+
 
 }

@@ -1,4 +1,4 @@
-package nr.king.familytracker.model.http;
+package nr.king.familytracker.repo;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,6 +9,8 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class CommonResponse {
-    private boolean data;
+public class NotificationModel {
+    boolean isEnable =false;
+    Long numberId;
+    String userId;
 }

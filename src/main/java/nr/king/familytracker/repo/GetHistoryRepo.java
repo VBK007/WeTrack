@@ -24,8 +24,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import static nr.king.familytracker.constant.LocationTrackingConstants.ENABLE_PUSH_NOTIFICATION;
 import static nr.king.familytracker.constant.LocationTrackingConstants.GET_LAST_HISTORY;
 import static nr.king.familytracker.constant.QueryConstants.SELECT_USER_EXPIRY_TIME;
+import static nr.king.familytracker.constant.QueryConstants.UPDATE_PUSH_NOTIFICATION;
 
 @Component
 public class GetHistoryRepo {
@@ -110,6 +112,68 @@ public class GetHistoryRepo {
         } catch (Exception exception) {
             throw new FailedResponseException(exception.getMessage());
         }
+
+    }
+
+    public ResponseEntity enableNotification(NotificationModel notificationModel) {
+        try {
+            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
+                    .queryForRowSet(SELECT_USER_EXPIRY_TIME, notificationModel.getUserId());
+            if (sqlRowSet.next()) {
+                if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME"))
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli()) {
+
+                    SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
+                            .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT from NUMBER_FOR_USERS " +
+                                            "where USER_ID=? and NUMBER=?",
+                                    notificationModel.getUserId(), String.valueOf(notificationModel.getNumberId()));
+
+                  if (numberSet.next())
+                  {
+                      notificationModel.setUserId(numberSet.getString("TOKEN_HEADER"));
+                      HttpResponse httpResponse = httpUtils.doPostRequest(0, ENABLE_PUSH_NOTIFICATION,
+                              commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
+                              "Push Notification for number" + notificationModel.numberId,
+                              commonUtils.writeAsString(objectMapper, notificationModel)
+                      );
+                      CommonResponse commonResponse = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(), CommonResponse.class);
+                      logger.info("Resppionse code and response data"+httpResponse.getResponse()+commonUtils.writeAsString(objectMapper,commonResponse));
+                      //int count = updateNumberValue(notificationModel);
+                      return responseUtils.constructResponse(200,
+                              commonUtils.writeAsString(objectMapper,
+                                      new ApiResponse(
+                                              (commonResponse.isData())?true:false,
+                                              (commonResponse.isData())?"Push Notification Enabled":"Unable to do Push Notification"
+                                      )
+                              )
+                      );
+                  }
+
+                } else {
+                    return responseUtils.constructResponse(200,
+                            commonUtils.writeAsString(objectMapper,
+                                    new ApiResponse(false, "Plan is Expired"
+                                    )));
+                }
+
+            }
+
+            return responseUtils.constructResponse(200,
+                    commonUtils.writeAsString(objectMapper,
+                            new ApiResponse(false, "No User found!"
+                            )));
+
+        } catch (Exception exception) {
+            throw new FailedResponseException(exception.getMessage());
+        }
+    }
+
+    private int updateNumberValue(NotificationModel notificationModel) {
+
+        return jdbcTemplateProvider.getTemplate().update(UPDATE_PUSH_NOTIFICATION,notificationModel.getUserId(),
+                notificationModel.isEnable,notificationModel.getUserId(),notificationModel.getNumberId().toString());
 
     }
 }

@@ -10,6 +10,9 @@ public class QueryConstants {
     public static final String UPDATE_TOKEN_HEADER_IN_NUMBER_MOBILE ="update NUMBER_FOR_USERS set NUMBER=?,TOKEN_HEADER=?," +
             "COUNTRY_CODE=?,UPDATED_AT=current_timestamp,NICK_NAME=? where USER_ID=? and NUMBER=?";
 
+    public  static  final  String  ISNUMBER_HAVING_USER="select USER_ID,NUMBER from NUMBER_FOR_USERS where USER_ID=? and NUMBER=?";
+
+
     public static final String UPDATE_DETAILS_IN_NUMBER_MOBILE ="update NUMBER_FOR_USERS set NUMBER=?," +
             "COUNTRY_CODE=?,UPDATED_AT=current_timestamp,NICK_NAME=? where USER_ID=? and NUMBER=?";
 
@@ -39,6 +42,8 @@ public class QueryConstants {
 
     public static  final String GET_UPI_VALUES = "select UPI_ID,PURCHASE_TYPE,PURCHASE_DESCRIBITION,MONEY_IN_INR,MONEY_IN_USD,COLOR_CODE,COLOR_BAR,CREATED_AT,UPDATED_AT from UPI_DETAILS";
 
+    public static  final  String UPDATE_PUSH_NOTIFICATION =
+            "update NUMBER_FOR_USERS set is_noti_enabled=? where USER_ID=? and NUMBER=?";
 
 
 }
