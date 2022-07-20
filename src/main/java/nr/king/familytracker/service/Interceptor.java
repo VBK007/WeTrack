@@ -36,7 +36,7 @@ public class Interceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        if (isValidToken(request.getHeader("X-Auth-Token")))
+        if (isValidToken(request.getHeader("X-MOBI_TOKEN")))
         {
             return true;
         }

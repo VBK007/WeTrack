@@ -1,7 +1,6 @@
 package nr.king.familytracker.repo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import nr.king.familytracker.controller.GetPhoneHistoryModel;
 import nr.king.familytracker.exceptions.FailedResponseException;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
 import nr.king.familytracker.model.http.*;
@@ -21,11 +20,8 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 
-import static nr.king.familytracker.constant.LocationTrackingConstants.ENABLE_PUSH_NOTIFICATION;
-import static nr.king.familytracker.constant.LocationTrackingConstants.GET_LAST_HISTORY;
+import static nr.king.familytracker.constant.LocationTrackingConstants.*;
 import static nr.king.familytracker.constant.QueryConstants.SELECT_USER_EXPIRY_TIME;
 import static nr.king.familytracker.constant.QueryConstants.UPDATE_PUSH_NOTIFICATION;
 
@@ -124,7 +120,6 @@ public class GetHistoryRepo {
                         .atZone(ZoneId.systemDefault())
                         .toInstant()
                         .toEpochMilli()) {
-
                     SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
                             .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT from NUMBER_FOR_USERS " +
                                             "where USER_ID=? and NUMBER=?",
@@ -132,23 +127,62 @@ public class GetHistoryRepo {
 
                   if (numberSet.next())
                   {
-                      notificationModel.setUserId(numberSet.getString("TOKEN_HEADER"));
-                      HttpResponse httpResponse = httpUtils.doPostRequest(0, ENABLE_PUSH_NOTIFICATION,
-                              commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
-                              "Push Notification for number" + notificationModel.numberId,
-                              commonUtils.writeAsString(objectMapper, notificationModel)
-                      );
-                      CommonResponse commonResponse = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(), CommonResponse.class);
-                      logger.info("Resppionse code and response data"+httpResponse.getResponse()+commonUtils.writeAsString(objectMapper,commonResponse));
-                      //int count = updateNumberValue(notificationModel);
+
+                   /*   HttpResponse httpResponse = httpUtils.doPostRequest(0, GET_APP_USER,
+                              commonUtils.getHeadersMap(numberSet.getString("token_header")),
+                              "create user Expiry time",
+                              commonUtils.writeAsString(objectMapper,
+                                      new HomeModel(
+                                      )));
+
+                      MainHomeUserModel appUserModel = commonUtils.safeParseJSON(objectMapper,
+                              httpResponse.getResponse(),
+                              MainHomeUserModel.class);
+                      if (appUserModel!=null) {
+                          notificationModel.setUserId(appUserModel.getData().getFollowings().get(0).getUserId().toString());
+                          notificationModel.setNumberId(appUserModel.getData().getFollowings().get(0).getNumberId().longValue());
+                          HttpResponse enableNotifyRequest = httpUtils.doPostRequest(0, ENABLE_PUSH_NOTIFICATION,
+                                  commonUtils.getHeadersMapForSpecific(numberSet.getString("TOKEN_HEADER")),
+                                  "Push Notification for number" + notificationModel.numberId,
+                                  commonUtils.writeAsString(objectMapper, notificationModel)
+                          );
+                              HttpResponse setNotification = httpUtils.doPostRequest(0, SET_PUSH_NOTIFATION,
+                                      commonUtils.getHeadersMapForSpecific(numberSet.getString("TOKEN_HEADER")),
+                                      "Push Notification for number" + notificationModel.numberId,
+                                      commonUtils.writeAsString(objectMapper, new PushNotificationModel(
+                                              numberSet.getString("PUSH_TOKEN")
+                                      ))
+                              );
+
+                              logger.info("Notification Response"+setNotification.getResponseCode()+commonUtils.writeAsString(objectMapper, appUserModel));
+                          CommonResponse commonResponse = commonUtils.safeParseJSON(objectMapper, enableNotifyRequest.getResponse(), CommonResponse.class);
+
+                      }*/
+
+                      int count = updateNumberValue(notificationModel);
+
+                      if (count==1)
+                      {
+                          notificationModel.setPushToken(numberSet.getString("PUSH_TOKEN"));
+                          HttpResponse httpResponse = httpUtils.doPostRequest(0,
+                                  LOCAL_HOST_NUMBER,
+                                  commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
+                                  "",
+                                  commonUtils.writeAsString(objectMapper,notificationModel)
+                                  );
+
+                          logger.info("httpResponse "+commonUtils.writeAsString(objectMapper,httpResponse.getResponse()));
+                      }
+
                       return responseUtils.constructResponse(200,
                               commonUtils.writeAsString(objectMapper,
                                       new ApiResponse(
-                                              (commonResponse.isData())?true:false,
-                                              (commonResponse.isData())?"Push Notification Enabled":"Unable to do Push Notification"
+                                              (count==1) ? true : false,
+                                              (count==1) ? "Push Notification Enabled" : "Unable to do Push Notification"
                                       )
                               )
                       );
+
                   }
 
                 } else {
@@ -166,14 +200,15 @@ public class GetHistoryRepo {
                             )));
 
         } catch (Exception exception) {
+            logger.error("Exception in enabling Notification"+exception.getMessage(),exception);
             throw new FailedResponseException(exception.getMessage());
         }
     }
 
     private int updateNumberValue(NotificationModel notificationModel) {
 
-        return jdbcTemplateProvider.getTemplate().update(UPDATE_PUSH_NOTIFICATION,notificationModel.getUserId(),
-                notificationModel.isEnable,notificationModel.getUserId(),notificationModel.getNumberId().toString());
+        return jdbcTemplateProvider.getTemplate().update(UPDATE_PUSH_NOTIFICATION,
+                notificationModel.isEnable(),notificationModel.getUserId(),notificationModel.getNumberId().toString());
 
     }
 }

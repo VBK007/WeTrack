@@ -1,4 +1,4 @@
-package nr.king.familytracker.repo;
+package nr.king.familytracker.model.http;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,9 +9,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class NotificationModel {
-    boolean enable =false;
-    Long numberId;
-    String userId;
-    String pushToken="";
+public class PushNotificationModel {
+    private String token;
 }
