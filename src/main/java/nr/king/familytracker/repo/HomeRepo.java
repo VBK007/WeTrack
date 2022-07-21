@@ -149,7 +149,7 @@ public class HomeRepo {
                                         notificationModel.setUserId(numberSet.getString("USER_ID"));
                                         notificationModel.setHeaderToken(numberSet.getString("TOKEN_HEADER"));
                                         notificationModel.setPushToken(numberSet.getString("PUSH_TOKEN"));
-                                        notificationModel.setNickName(sqlRowSet.getString("NICK_NAME"));
+                                        notificationModel.setNickName(numberSet.getString("NICK_NAME"));
                                         notificationModel.setEnable(numberSet.getBoolean("is_noti_enabled"));
                                         notificationModel.setNumberId(Long.valueOf(numberSet.getString("NUMBER")));
                                         HttpResponse enableSchedularPush =
@@ -337,6 +337,7 @@ public class HomeRepo {
                         phoneModel.getPhoneNumber(),
                         innerHomeModel.getId(),
                         phoneModel.getCountryCode(),
+                        phoneModel.getNickName(),
                         phoneModel.getId(),
                         phoneModel.getPhoneNumber());
     }
