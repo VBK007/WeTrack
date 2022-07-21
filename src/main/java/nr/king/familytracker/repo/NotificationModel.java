@@ -14,4 +14,6 @@ public class NotificationModel {
     Long numberId;
     String userId;
     String pushToken="";
+    String headerToken="";
+    String nickName="";
 }

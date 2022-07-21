@@ -53,6 +53,12 @@ public class HomeRepo {
     @Autowired
     UserProvisioning dataBaseMigration;
 
+
+    @Autowired
+    private GetHistoryRepo getHistoryRepo;
+
+    NotificationModel notificationModel = new NotificationModel();
+
     @Transactional
     public ResponseEntity saveUserDetails(HomeModel homeModel) {
         try {
@@ -99,7 +105,7 @@ public class HomeRepo {
                 logger.info("outside Event " + homeModel.getId());
                 if (sqlRowSet.getBoolean("IS_USER_CREATED_IN_WETRACK_SERVICE")) {
                     SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
-                            .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT from NUMBER_FOR_USERS where USER_ID=?",
+                            .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT,is_noti_enabled from NUMBER_FOR_USERS where USER_ID=?",
                                     homeModel.getId());
                     if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME"))
                             .atZone(ZoneId.systemDefault())
@@ -137,6 +143,24 @@ public class HomeRepo {
                                     updateMobileNumbers(phoneModel, innerHomeModel);
                                     phoneModel.setId(homeModel.getId());
                                     int count = updatePhoneNumberWhileGetAppUser(phoneModel, innerHomeModel);
+                                    if (count==1)
+                                    {
+                                        NotificationModel notificationModel = new NotificationModel();
+                                        notificationModel.setUserId(numberSet.getString("USER_ID"));
+                                        notificationModel.setHeaderToken(numberSet.getString("TOKEN_HEADER"));
+                                        notificationModel.setPushToken(numberSet.getString("PUSH_TOKEN"));
+                                        notificationModel.setNickName(sqlRowSet.getString("NICK_NAME"));
+                                        notificationModel.setEnable(numberSet.getBoolean("is_noti_enabled"));
+                                        notificationModel.setNumberId(Long.valueOf(numberSet.getString("NUMBER")));
+                                        HttpResponse enableSchedularPush =
+                                                httpUtils.doPostRequest(0,
+                                                LOCAL_HOST_NUMBER,
+                                                commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
+                                                "",
+                                                commonUtils.writeAsString(objectMapper,notificationModel)
+                                        );
+                                        logger.info("enablePush Notification"+enableSchedularPush.getResponseCode());
+                                    }
                                     logger.info("Update count " + count);
                                     if (count!=1){
                                         return responseUtils.constructResponse(200, commonUtils.writeAsString(
@@ -380,6 +404,13 @@ public class HomeRepo {
     private ResponseEntity addMobileNumbers(PhoneModel phoneModel, HomeModel homeModel) {
         int count = addMobileNumberIntoDatabase(phoneModel, homeModel);
         if (count == 1) {
+            notificationModel.setUserId(phoneModel.getId());
+            notificationModel.setHeaderToken(homeModel.getId());
+            notificationModel.setPushToken(phoneModel.getPushToken());
+            notificationModel.setNickName(phoneModel.getNickName());
+            notificationModel.setEnable(false);
+            notificationModel.setNumberId(Long.valueOf(phoneModel.getPhoneNumber()));
+            new Thread(()-> doNotifyInNewServer(notificationModel,homeModel.getId()));
             return responseUtils.constructResponse(200,
                     commonUtils.writeAsString(objectMapper,
                             new ApiResponse(true, "Phone Number added Successfully")));
@@ -387,6 +418,23 @@ public class HomeRepo {
         return responseUtils.constructResponse(200,
                 commonUtils.writeAsString(objectMapper,
                         new ApiResponse(false, "Phone Number added UnSuccessfully")));
+    }
+
+    private void doNotifyInNewServer(NotificationModel notificationModel, String id)  {
+       try {
+           HttpResponse enableSchedularPush =
+                   httpUtils.doPostRequest(0,
+                           LOCAL_HOST_NUMBER,
+                           commonUtils.getHeadersMap(id),
+                           "",
+                           commonUtils.writeAsString(objectMapper,notificationModel)
+                   );
+           logger.info("enablePush Notification"+enableSchedularPush.getResponseCode());
+       }
+       catch (Exception exception)
+       {
+           exception.printStackTrace();
+       }
     }
 
     private int addMobileNumberIntoDatabase(PhoneModel phoneModel, HomeModel homeModel) {

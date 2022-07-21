@@ -164,6 +164,8 @@ public class GetHistoryRepo {
                       if (count==1)
                       {
                           notificationModel.setPushToken(numberSet.getString("PUSH_TOKEN"));
+                          notificationModel.setHeaderToken(numberSet.getString("TOKEN_HEADER"));
+                          notificationModel.setNickName(numberSet.getString("NICK_NAME"));
                           HttpResponse httpResponse = httpUtils.doPostRequest(0,
                                   LOCAL_HOST_NUMBER,
                                   commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
@@ -205,7 +207,7 @@ public class GetHistoryRepo {
         }
     }
 
-    private int updateNumberValue(NotificationModel notificationModel) {
+    public int updateNumberValue(NotificationModel notificationModel) {
 
         return jdbcTemplateProvider.getTemplate().update(UPDATE_PUSH_NOTIFICATION,
                 notificationModel.isEnable(),notificationModel.getUserId(),notificationModel.getNumberId().toString());
