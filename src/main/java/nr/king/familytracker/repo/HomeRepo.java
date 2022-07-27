@@ -182,7 +182,8 @@ public class HomeRepo {
                                 new ApiResponse(false, "Plan is Expired")));
                     }
 
-                } else {
+                }
+                else {
                     HttpResponse httpResponse = checkUserFromWeTrackService(homeModel);
                     if (httpResponse.getResponseCode() == 200) {
                         int count = doUpdateUserCreationinWetrack(homeModel);
@@ -461,17 +462,17 @@ public class HomeRepo {
                 GetMobileResponse getMobileResponse = new GetMobileResponse();
                 getMobileResponse.setMobileNumber(sqlRowSet.getString("NUMBER"));
                 getMobileResponse.setCountryCode(sqlRowSet.getString("COUNTRY_CODE"));
-                getMobileResponse.setExpiryTime(sqlRowSet.getString("EXPIRY_TIME"));
+                //getMobileResponse.setExpiryTime(sqlRowSet.getString("EXPIRY_TIME"));
                 getMobileResponse.setNickName(sqlRowSet.getString("NICK_NAME"));
-                getMobileResponse.setPushToken(sqlRowSet.getString("PUSH_TOKEN"));
-                getMobileResponse.setExpiryToken(sqlRowSet.getString("TOKEN_HEADER"));
+                //getMobileResponse.setPushToken(sqlRowSet.getString("PUSH_TOKEN"));
+                //getMobileResponse.setExpiryToken(sqlRowSet.getString("TOKEN_HEADER"));
                 getMobileResponse.setUserId(sqlRowSet.getString("USER_ID"));
                 getMobileResponses.add(getMobileResponse);
             }
 
             return responseUtils.constructResponse(200,
                     commonUtils.writeAsString(objectMapper,
-                            new ApiResponse(getMobileResponses.isEmpty(), "The Mobile Numbers are", getMobileResponses))
+                            new ApiResponse(!getMobileResponses.isEmpty(), "The Mobile Numbers are", getMobileResponses))
             );
 
 

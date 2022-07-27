@@ -60,6 +60,7 @@ public class GetHistoryRepo {
                             .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT from NUMBER_FOR_USERS " +
                                             "where USER_ID=?",
                                     getPhoneHistoryModel.getHomeModel().getId());
+
                     while (numberSet.next()) {
                         getPhoneHistoryModel.setPhoneNumber(numberSet.getString("NUMBER"));
                         HttpResponse httpResponse = httpUtils.doPostRequest(0, GET_LAST_HISTORY,
