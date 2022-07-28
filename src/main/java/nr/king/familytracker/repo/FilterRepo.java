@@ -5,6 +5,7 @@ import nr.king.familytracker.exceptions.FailedResponseException;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
 import nr.king.familytracker.model.http.*;
 import nr.king.familytracker.model.http.filterModel.FilterHistoryModel;
+import nr.king.familytracker.model.http.homeModel.GetPhoneHistoryMainArrayModel;
 import nr.king.familytracker.utils.CommonUtils;
 import nr.king.familytracker.utils.HttpUtils;
 import nr.king.familytracker.utils.ResponseUtils;
@@ -73,14 +74,14 @@ public class FilterRepo {
                                 "Getting Filter Data",
                                 commonUtils.writeAsString(objectMapper, localFilterModel)
                         );
-                        CommonResponse commonResponse = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(), CommonResponse.class);
-
+                        GetPhoneHistoryMainArrayModel getPageHistoryNumberModel = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(), GetPhoneHistoryMainArrayModel.class);
+                        logger.info("Http responses is"+httpResponse.getResponse());
                         return responseUtils.constructResponse(200,
                                 commonUtils.writeAsString(objectMapper,
                                         new ApiResponse(
                                                 httpResponse.getResponseCode() == 200,
                                                 (httpResponse.getResponseCode() == 200) ? "The Repose for Filter" : "No Data Available",
-                                                commonResponse
+                                                getPageHistoryNumberModel
                                         )
                                 )
                         );

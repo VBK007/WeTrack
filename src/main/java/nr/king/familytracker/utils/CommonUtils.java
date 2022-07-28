@@ -214,6 +214,7 @@ public class CommonUtils {
     public Map<String, String> getHeadersMapForSpecific(String authHeader) {
         Map<String, String> headersMap = new LinkedHashMap<>();
         headersMap.put("Accept:","application/json");
+        headersMap.put("Content-Type", "application/json");
         headersMap.put("X-Auth-Token", authHeader);
         headersMap.put("User", authHeader);
         return headersMap;

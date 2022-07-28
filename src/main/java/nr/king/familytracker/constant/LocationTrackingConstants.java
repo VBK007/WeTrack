@@ -38,7 +38,8 @@ public class LocationTrackingConstants {
 
     public static final String SUBSCIBE_STATUS = "http://chattrack.apiservicessarl.com/api/user/setSubscriptionStatus";
 
-    public static final String GET_HISTORY = "http://chattrack.apiservicessarl.com/api/history/GetHistoriesByDate";
+   // public static final String GET_HISTORY = "http://chattrack.apiservicessarl.com/api/history/GetHistoriesByDate";
+    public static final String GET_HISTORY = "http://api.wtrackonline.com/api/history/GetHistoriesByDate";
 
     public static final String REMOVE_NUMBER = "http://api.wtrackonline.com/api/user/removeNumberForUser";
 
