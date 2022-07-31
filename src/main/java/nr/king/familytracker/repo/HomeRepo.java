@@ -101,87 +101,28 @@ public class HomeRepo {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
                     .queryForRowSet("select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,token_header  from WE_TRACK_USERS where USER_ID=?", homeModel.getId());
+
             if (sqlRowSet.next()) {
-                logger.info("outside Event " + homeModel.getId());
-                if (sqlRowSet.getBoolean("IS_USER_CREATED_IN_WETRACK_SERVICE")) {
+                logger.info("outside Event " + homeModel.getId() + sqlRowSet.getBoolean("is_user_created_in_wetrack_service"));
+                if (sqlRowSet.getBoolean("is_user_created_in_wetrack_service")) {
                     SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
                             .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT,is_noti_enabled from NUMBER_FOR_USERS where USER_ID=?",
                                     homeModel.getId());
                     if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME"))
                             .atZone(ZoneId.systemDefault())
                             .toInstant()
-                            .toEpochMilli()) {
+                            .toEpochMilli())
+                    {
                         if (!numberSet.next()) {
                             return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                                     new ApiResponse(false, "Please add Mobile Number")));
                         }
-                        while (numberSet.next()) {
-                            HttpResponse httpResponse = httpUtils.doPostRequest(0, GET_APP_USER,
-                                    commonUtils.getHeadersMap(numberSet.getString("token_header")),
-                                    "create user Expiry time",
-                                    commonUtils.writeAsString(objectMapper,
-                                            new HomeModel(
-                                            )));
-                            MainHomeUserModel appUserModel = commonUtils.safeParseJSON(objectMapper,
-                                    httpResponse.getResponse(),
-                                    MainHomeUserModel.class);
-                            logger.info("AppUser Model response is "+commonUtils.writeAsString(objectMapper,appUserModel));
-                            if (appUserModel.getData().getFollowings().isEmpty()||!appUserModel.getData().getFollowings().get(0).getIsActive()) {
-                                HomeModel innerHomeModel = commonUtils.getHomeModel(numberSet.getString("TOKEN_HEADER"), false);
-                                HttpResponse innerCreateUser = checkUserFromWeTrackService(
-                                        innerHomeModel
-                                );
-
-                                if (innerCreateUser.getResponseCode() == 200) {
-                                    PhoneModel phoneModel = new PhoneModel(
-                                            homeModel.getId(),
-                                            numberSet.getString("NICK_NAME"),
-                                            numberSet.getString("NUMBER"),
-                                            numberSet.getString("COUNTRY_CODE"),
-                                            numberSet.getString("PUSH_TOKEN")
-                                    );
-                                    updateMobileNumbers(phoneModel, innerHomeModel);
-                                    phoneModel.setId(homeModel.getId());
-                                    int count = updatePhoneNumberWhileGetAppUser(phoneModel, innerHomeModel);
-                                    if (count==1)
-                                    {
-                                        NotificationModel notificationModel = new NotificationModel();
-                                        notificationModel.setUserId(numberSet.getString("USER_ID"));
-                                        notificationModel.setHeaderToken(numberSet.getString("TOKEN_HEADER"));
-                                        notificationModel.setPushToken(numberSet.getString("PUSH_TOKEN"));
-                                        notificationModel.setNickName(numberSet.getString("NICK_NAME"));
-                                        notificationModel.setEnable(numberSet.getBoolean("is_noti_enabled"));
-                                        notificationModel.setNumberId(Long.valueOf(numberSet.getString("NUMBER")));
-                                        HttpResponse enableSchedularPush =
-                                                httpUtils.doPostRequest(0,
-                                                LOCAL_HOST_NUMBER,
-                                                commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
-                                                "",
-                                                commonUtils.writeAsString(objectMapper,notificationModel)
-                                        );
-                                        logger.info("enablePush Notification"+enableSchedularPush.getResponseCode());
-                                    }
-                                    logger.info("Update count " + count);
-                                    if (count!=1){
-                                        return responseUtils.constructResponse(200, commonUtils.writeAsString(
-                                                objectMapper, new ApiResponse(false, "Unable to Change or Update Phone Number")
-                                        ));
-                                    }
-                                }
-                                else {
-                                    logger.info("Response while updating the server call " + httpResponse.getResponseCode()+ httpResponse.getResponse());
-                                    return responseUtils.constructResponse(200, commonUtils.writeAsString(
-                                            objectMapper, new ApiResponse(false, "Unable to Change or Update Phone Number")
-                                    ));
-                                }
-                            }
-                        }
+                        new Thread(()->doInBakground(homeModel,numberSet)).start();
                     }
                     else {
                         return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                                 new ApiResponse(false, "Plan is Expired")));
                     }
-
                 }
                 else {
                     HttpResponse httpResponse = checkUserFromWeTrackService(homeModel);
@@ -202,7 +143,6 @@ public class HomeRepo {
                                 "User Created UnSuccessfully")));
                     }
                 }
-
             }
             else{
                 return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
@@ -217,6 +157,89 @@ public class HomeRepo {
         } catch (Exception exception) {
             logger.error("Exception in  verify user due to is" + exception.getMessage(), exception);
             throw new FailedResponseException("");
+        }
+    }
+
+    private void doInBakground(HomeModel homeModel, SqlRowSet numberSet) {
+      try {
+
+          if (numberSet.isLast())
+          {
+                new Thread(()-> makeApiCallFOrUpdatePhoneState(homeModel,numberSet)).start();
+          }
+          else{
+              while (numberSet.next())
+              {
+                  new Thread(()-> makeApiCallFOrUpdatePhoneState(homeModel,numberSet)).start();
+                  Thread.sleep(500,50);
+              }
+          }
+      }
+      catch (Exception exception)
+      {
+          logger.error("Exception while updating number for User"+homeModel.getId()+"||"+exception.getMessage(),exception);
+      }
+    }
+
+    private void makeApiCallFOrUpdatePhoneState(HomeModel homeModel, SqlRowSet numberSet) {
+        try{
+            HttpResponse httpResponse = httpUtils.doPostRequest(0, GET_APP_USER,
+                    commonUtils.getHeadersMap(numberSet.getString("token_header")),
+                    "create user Expiry time",
+                    commonUtils.writeAsString(objectMapper,
+                            new HomeModel(
+                            )));
+
+            MainHomeUserModel appUserModel = commonUtils.safeParseJSON(objectMapper,
+                    httpResponse.getResponse(),
+                    MainHomeUserModel.class);
+            if (appUserModel.getData().getFollowings().isEmpty() || !appUserModel.getData().getFollowings().get(0).getIsActive()) {
+                HomeModel innerHomeModel = commonUtils.getHomeModel(numberSet.getString("TOKEN_HEADER"), false);
+                HttpResponse innerCreateUser = checkUserFromWeTrackService(
+                        innerHomeModel
+                );
+
+                if (innerCreateUser.getResponseCode() == 200) {
+                    PhoneModel phoneModel = new PhoneModel(
+                            homeModel.getId(),
+                            numberSet.getString("NICK_NAME"),
+                            numberSet.getString("NUMBER"),
+                            numberSet.getString("COUNTRY_CODE"),
+                            numberSet.getString("PUSH_TOKEN")
+                    );
+                    updateMobileNumbers(phoneModel, innerHomeModel);
+                    phoneModel.setId(homeModel.getId());
+                    int count = updatePhoneNumberWhileGetAppUser(phoneModel, innerHomeModel);
+                    if (count==1)
+                    {
+                        NotificationModel notificationModel = new NotificationModel();
+                        notificationModel.setUserId(numberSet.getString("USER_ID"));
+                        notificationModel.setHeaderToken(numberSet.getString("TOKEN_HEADER"));
+                        notificationModel.setPushToken(numberSet.getString("PUSH_TOKEN"));
+                        notificationModel.setNickName(numberSet.getString("NICK_NAME"));
+                        notificationModel.setEnable(numberSet.getBoolean("is_noti_enabled"));
+                        notificationModel.setNumberId(Long.valueOf(numberSet.getString("NUMBER")));
+                        HttpResponse enableSchedularPush =
+                                httpUtils.doPostRequest(0,
+                                        LOCAL_HOST_NUMBER,
+                                        commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
+                                        "",
+                                        commonUtils.writeAsString(objectMapper,notificationModel)
+                                );
+                        logger.info("enablePush Notification"+enableSchedularPush.getResponseCode());
+                    }
+                    if (count!=1){
+                        logger.info("Unable to update number for user "+phoneModel.getPhoneNumber());
+                    }
+                }
+                else {
+                    logger.info("Response while updating the server call " + httpResponse.getResponseCode()+ httpResponse.getResponse());
+                }
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.error("Exception on APi calling"+exception.getMessage(),exception);
         }
     }
 
@@ -410,7 +433,7 @@ public class HomeRepo {
             notificationModel.setHeaderToken(homeModel.getId());
             notificationModel.setPushToken(phoneModel.getPushToken());
             notificationModel.setNickName(phoneModel.getNickName());
-            notificationModel.setEnable(false);
+            notificationModel.setEnable(true);
             notificationModel.setNumberId(Long.valueOf(phoneModel.getPhoneNumber()));
             new Thread(()-> doNotifyInNewServer(notificationModel,homeModel.getId()));
             return responseUtils.constructResponse(200,
@@ -443,12 +466,13 @@ public class HomeRepo {
         //"+String.format("%s%s",WETRACK,phoneModel.getId())+".
         return jdbcTemplateProvider.getTemplate()
                 .update("insert into NUMBER_FOR_USERS (USER_ID,NUMBER,TOKEN_HEADER,COUNTRY_CODE," +
-                                "CREATED_AT,UPDATED_AT,NICK_NAME,PUSH_TOKEN,EXPIRY_TIME) values " +
-                                "(?,?,?,?,current_timestamp,current_timestamp,?,?,?)",
+                                "CREATED_AT,UPDATED_AT,NICK_NAME,PUSH_TOKEN,EXPIRY_TIME,is_noti_enabled) values " +
+                                "(?,?,?,?,current_timestamp,current_timestamp,?,?,?,?)",
                         phoneModel.getId(), phoneModel.getPhoneNumber(),
                         homeModel.getId(), phoneModel.getCountryCode(),
                         phoneModel.getNickName(), phoneModel.getPushToken(),
-                        LocalDateTime.now().plusHours(3).toString()
+                        LocalDateTime.now().plusHours(3).toString(),
+                        true
                 );
 
     }

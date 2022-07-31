@@ -75,7 +75,6 @@ public class FilterRepo {
                                 commonUtils.writeAsString(objectMapper, localFilterModel)
                         );
                         GetPhoneHistoryMainArrayModel getPageHistoryNumberModel = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(), GetPhoneHistoryMainArrayModel.class);
-                        logger.info("Http responses is"+httpResponse.getResponse());
                         return responseUtils.constructResponse(200,
                                 commonUtils.writeAsString(objectMapper,
                                         new ApiResponse(

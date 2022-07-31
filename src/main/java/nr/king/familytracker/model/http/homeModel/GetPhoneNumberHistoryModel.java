@@ -14,4 +14,5 @@ public class GetPhoneNumberHistoryModel {
     public String phoneNumber;
     public String timeStamp;
     public String nickName;
+    public boolean notifyEnabled;
 }

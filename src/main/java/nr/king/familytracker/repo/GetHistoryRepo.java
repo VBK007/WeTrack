@@ -55,10 +55,9 @@ public class GetHistoryRepo {
                         .toEpochMilli()) {
                     SendStatusListToMobileModel sendStatusListToMobileModels = new SendStatusListToMobileModel();
                     ArrayList<SendHistorystatusToAppModel> finalList = new ArrayList<>();
-
                     SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
-                            .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT from NUMBER_FOR_USERS " +
-                                            "where USER_ID=?",
+                            .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT,is_noti_enabled from NUMBER_FOR_USERS " +
+                                            "where USER_ID=? order by CREATED_AT desc",
                                     getPhoneHistoryModel.getHomeModel().getId());
 
                     while (numberSet.next()) {
@@ -70,15 +69,34 @@ public class GetHistoryRepo {
                         GetPhoneHistoryMainArrayModel getPageHistoryNumberModel = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(), GetPhoneHistoryMainArrayModel.class);
                         SendHistorystatusToAppModel sendHistorystatusToAppModel = new SendHistorystatusToAppModel();
                         if (getPageHistoryNumberModel.getData().isEmpty()) {
-                            sendHistorystatusToAppModel.setStatus(false);
+                            sendHistorystatusToAppModel.setStatus(true);
                             sendHistorystatusToAppModel.setMessage("The Phone number status unavailable");
+                            ArrayList<GetPhoneNumberHistoryModel> localList = new ArrayList<>();
+                            GetPhoneNumberHistoryModel localModel = new GetPhoneNumberHistoryModel();
+                            localModel.setNickName(numberSet.getString("NICK_NAME"));
+                            localModel.setStatus("unavailable");
+                            localModel.setPhoneNumber(numberSet.getString("NUMBER"));
+                            localModel.setNotifyEnabled(numberSet.getBoolean("is_noti_enabled"));
+                            localList.add(localModel);
+                            sendHistorystatusToAppModel.setStatusList(localList);
                         } else {
                             sendHistorystatusToAppModel.setStatus(true);
                             sendHistorystatusToAppModel.setMessage("The Phone number status available");
                             ArrayList<GetPhoneNumberHistoryModel> localList = new ArrayList<>();
-                            GetPhoneNumberHistoryModel localModel = getPageHistoryNumberModel.getData().get(0);
-                            localModel.setNickName(numberSet.getString("NICK_NAME"));
-                            localList.add(localModel);
+                            for (int i=0;i<getPageHistoryNumberModel.getData().size();i++)
+                            {
+                                if (i<5)
+                                {
+                                    GetPhoneNumberHistoryModel localModel = getPageHistoryNumberModel.getData().get(i);
+                                    localModel.setNotifyEnabled(numberSet.getBoolean("is_noti_enabled"));
+                                    localModel.setNickName(numberSet.getString("NICK_NAME"));
+                                    localList.add(localModel);
+                                }
+                                else{
+                                    break;
+                                }
+
+                            }
                             sendHistorystatusToAppModel.setStatusList(localList);
                         }
                         finalList.add(sendHistorystatusToAppModel);
