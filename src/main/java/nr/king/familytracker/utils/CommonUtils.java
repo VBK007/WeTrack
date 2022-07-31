@@ -425,4 +425,7 @@ public class CommonUtils {
     }
 
 
+    public String isNullOrEmty(String string) {
+        return string == null || string.isEmpty() || "null".equalsIgnoreCase(string)?"":string;
+    }
 }

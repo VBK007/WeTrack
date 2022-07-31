@@ -21,4 +21,5 @@ public class FilterHistoryModel {
     private Integer startHour;
     private Float timeZone;
     private HomeModel homeModel;
+    private String secoundNumber="";
 }
