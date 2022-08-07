@@ -369,6 +369,13 @@ public class CommonUtils {
     }
 
 
+    public Map<String, String> getHeadersMaps(String authHeader) {
+        Map<String, String> headersMap = new LinkedHashMap<>();
+        headersMap.put("Content-Type", "application/json");
+        headersMap.put("X-Auth-Token", authHeader);
+        headersMap.put("User", authHeader);
+        return headersMap;
+    }
     private void getBaseCondition(long integrationAccountId, String outletId, StringBuilder stringBuilder) {
         boolean isAndNeed = false;
         if (integrationAccountId != 0) {

@@ -1,7 +1,6 @@
 package nr.king.familytracker.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import nr.king.familytracker.controller.GetPhoneHistoryModel;
 import nr.king.familytracker.model.http.ApiResponse;
 import nr.king.familytracker.model.http.GetPageHistoryNumberModel;
 import nr.king.familytracker.repo.GetHistoryRepo;

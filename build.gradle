@@ -41,6 +41,9 @@ dependencies {
 	implementation 'com.amazonaws:aws-java-sdk-s3'
 	implementation 'org.springframework.kafka:spring-kafka'
 	implementation("javax.websocket:javax.websocket-api:1.1")
+	implementation group: 'org.quartz-scheduler', name: 'quartz', version: '2.2.1'
+	implementation group: 'org.quartz-scheduler', name: 'quartz-jobs', version: '2.2.1'
+	implementation group: 'com.typesafe.akka', name: 'akka-actor_2.12', version: '2.5.19'
 
 }
 

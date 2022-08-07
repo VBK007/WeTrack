@@ -101,7 +101,7 @@ public class HttpUtils {
     private HttpResponse GetReponse(String url, OkHttpClient client, Request.Builder request, String requestBody) throws IOException {
         Response response = client.newCall(request.build()).execute();
         HttpResponse httpResponse = new HttpResponse(response.code(), response.body().string(), response.headers());
-        logger.info(String.format("\nRequested Url is - %s - Response Code is - %s -Request Body is -%s " , url, httpResponse.getResponseCode(),requestBody));
+        // logger.info(String.format("\nRequested Url is - %s - Response Code is - %s -Request Body is -%s " , url, httpResponse.getResponseCode(),requestBody));
         return httpResponse;
     }
 }

@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class GetPhoneHistoryModel extends BaseController{
+public class GetPhoneHistoryController extends BaseController{
     @Autowired
     private GetHistoryService getHistoryRepo;
 

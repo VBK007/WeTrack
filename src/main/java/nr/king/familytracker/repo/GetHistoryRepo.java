@@ -77,22 +77,20 @@ public class GetHistoryRepo {
                             localModel.setStatus("unavailable");
                             localModel.setPhoneNumber(numberSet.getString("NUMBER"));
                             localModel.setNotifyEnabled(numberSet.getBoolean("is_noti_enabled"));
+                            localModel.setTimeStamp(getTimeStamp(numberSet.getString("CREATED_AT")) + "Z");
                             localList.add(localModel);
                             sendHistorystatusToAppModel.setStatusList(localList);
                         } else {
                             sendHistorystatusToAppModel.setStatus(true);
                             sendHistorystatusToAppModel.setMessage("The Phone number status available");
                             ArrayList<GetPhoneNumberHistoryModel> localList = new ArrayList<>();
-                            for (int i=0;i<getPageHistoryNumberModel.getData().size();i++)
-                            {
-                                if (i<5)
-                                {
+                            for (int i = 0; i < getPageHistoryNumberModel.getData().size(); i++) {
+                                if (i < 5) {
                                     GetPhoneNumberHistoryModel localModel = getPageHistoryNumberModel.getData().get(i);
                                     localModel.setNotifyEnabled(numberSet.getBoolean("is_noti_enabled"));
                                     localModel.setNickName(numberSet.getString("NICK_NAME"));
                                     localList.add(localModel);
-                                }
-                                else{
+                                } else {
                                     break;
                                 }
 
@@ -130,6 +128,12 @@ public class GetHistoryRepo {
 
     }
 
+    private String getTimeStamp(String created_at) {
+
+        String[] arraylist = created_at.split("");
+        return arraylist[0] + "T" + arraylist[1];
+    }
+
     public ResponseEntity enableNotification(NotificationModel notificationModel) {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
@@ -144,8 +148,7 @@ public class GetHistoryRepo {
                                             "where USER_ID=? and NUMBER=?",
                                     notificationModel.getUserId(), String.valueOf(notificationModel.getNumberId()));
 
-                  if (numberSet.next())
-                  {
+                    if (numberSet.next()) {
 
                    /*   HttpResponse httpResponse = httpUtils.doPostRequest(0, GET_APP_USER,
                               commonUtils.getHeadersMap(numberSet.getString("token_header")),
@@ -178,33 +181,32 @@ public class GetHistoryRepo {
 
                       }*/
 
-                      int count = updateNumberValue(notificationModel);
+                        int count = updateNumberValue(notificationModel);
 
-                      if (count==1)
-                      {
-                          notificationModel.setPushToken(numberSet.getString("PUSH_TOKEN"));
-                          notificationModel.setHeaderToken(numberSet.getString("TOKEN_HEADER"));
-                          notificationModel.setNickName(numberSet.getString("NICK_NAME"));
-                          HttpResponse httpResponse = httpUtils.doPostRequest(0,
-                                  LOCAL_HOST_NUMBER,
-                                  commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
-                                  "",
-                                  commonUtils.writeAsString(objectMapper,notificationModel)
-                                  );
+                        if (count == 1) {
+                            notificationModel.setPushToken(numberSet.getString("PUSH_TOKEN"));
+                            notificationModel.setHeaderToken(numberSet.getString("TOKEN_HEADER"));
+                            notificationModel.setNickName(numberSet.getString("NICK_NAME"));
+                            HttpResponse httpResponse = httpUtils.doPostRequest(0,
+                                    LOCAL_HOST_NUMBER,
+                                    commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
+                                    "",
+                                    commonUtils.writeAsString(objectMapper, notificationModel)
+                            );
 
-                          logger.info("httpResponse "+commonUtils.writeAsString(objectMapper,httpResponse.getResponse()));
-                      }
+                            logger.info("httpResponse " + commonUtils.writeAsString(objectMapper, httpResponse.getResponse()));
+                        }
 
-                      return responseUtils.constructResponse(200,
-                              commonUtils.writeAsString(objectMapper,
-                                      new ApiResponse(
-                                              (count==1) ? true : false,
-                                              (count==1) ? "Push Notification Enabled" : "Unable to do Push Notification"
-                                      )
-                              )
-                      );
+                        return responseUtils.constructResponse(200,
+                                commonUtils.writeAsString(objectMapper,
+                                        new ApiResponse(
+                                                (count == 1) ? true : false,
+                                                (count == 1) ? "Push Notification Enabled" : "Unable to do Push Notification"
+                                        )
+                                )
+                        );
 
-                  }
+                    }
 
                 } else {
                     return responseUtils.constructResponse(200,
@@ -221,7 +223,7 @@ public class GetHistoryRepo {
                             )));
 
         } catch (Exception exception) {
-            logger.error("Exception in enabling Notification"+exception.getMessage(),exception);
+            logger.error("Exception in enabling Notification" + exception.getMessage(), exception);
             throw new FailedResponseException(exception.getMessage());
         }
     }
@@ -229,7 +231,7 @@ public class GetHistoryRepo {
     public int updateNumberValue(NotificationModel notificationModel) {
 
         return jdbcTemplateProvider.getTemplate().update(UPDATE_PUSH_NOTIFICATION,
-                notificationModel.isEnable(),notificationModel.getUserId(),notificationModel.getNumberId().toString());
+                notificationModel.isEnable(), notificationModel.getUserId(), notificationModel.getNumberId().toString());
 
     }
 }

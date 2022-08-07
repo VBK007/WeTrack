@@ -54,7 +54,7 @@ public class PurchaseRepo {
                     new Thread(()->updatePurchaseHistoryForUser(purchaseRequestModel)).start();
                 }
                 return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper, new ApiResponse(count == 1, count == 1 ? "Payment Successfully" : "Payment " +
-                        "Unsuccessfully Contact FamilTracker If any Issue")));
+                        "Unsuccessfully Contact FamilyTracker If any Issue")));
             }
 
             return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
@@ -73,15 +73,15 @@ public class PurchaseRepo {
            if (SUBSCRIBTION_MODEL_ARRAYLIST[i].equals(purchaseRequestModel.getPurchaseMode()))
            {
               maxNumber =  MAX_NUMBER_ALLOWED[i];
-              if (maxNumber==10)
+              if (maxNumber==2)
               {
                   expiryTime = LocalDateTime.now().plusDays(7).toString();
               }
-              else if (maxNumber==30)
+              else if (maxNumber==3)
               {
                   expiryTime = LocalDateTime.now().plusMonths(1).toString();
               }
-              else if (maxNumber==100)
+              else if (maxNumber==5)
               {
                   expiryTime = LocalDateTime.now().plusMonths(3).toString();
               }

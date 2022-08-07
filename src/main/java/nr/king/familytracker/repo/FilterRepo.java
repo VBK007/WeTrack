@@ -74,7 +74,9 @@ public class FilterRepo {
                         localFilterModel.setPhoneNumber(filterHistoryModel.getPhoneNumber());
                         HomeModel homeModel = new HomeModel();
                         homeModel.setId(homeModel.getId());
+
                         new Thread(()-> makeApiCallFOrUpdatePhoneState(homeModel,numberSet) ).start();
+
                         HttpResponse httpResponse = httpUtils.doPostRequest(0,
                                 GET_HISTORY,
                                 commonUtils.getHeadersMapForSpecific(numberSet.getString("TOKEN_HEADER")),
@@ -139,6 +141,7 @@ public class FilterRepo {
                     httpResponse.getResponse(),
                     MainHomeUserModel.class);
             if (appUserModel.getData().getFollowings().isEmpty() || !appUserModel.getData().getFollowings().get(0).getIsActive()) {
+                logger.info("Update User Profile While getting filter"+commonUtils.writeAsString(objectMapper,appUserModel.getData()));
                 HomeModel innerHomeModel = commonUtils.getHomeModel(numberSet.getString("TOKEN_HEADER"), false);
                 HttpResponse innerCreateUser = checkUserFromWeTrackService(
                         innerHomeModel
@@ -253,6 +256,7 @@ public class FilterRepo {
                                 commonUtils.writeAsString(objectMapper, localFilterModel)
                         );
                         GetPhoneHistoryMainArrayModel commonResponse = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(), GetPhoneHistoryMainArrayModel.class);
+                        logger.info("compare data "+commonUtils.writeAsString(objectMapper,commonResponse));
                         commonResponseList.add(new CommonResponse(commonResponse.getData()));
 
                     }

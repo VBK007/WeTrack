@@ -397,7 +397,8 @@ public class HomeRepo {
                 innerModel.setId(phoneModel.getId());
                 return addMobileNumbers(phoneModel, innerModel);
             }
-        } else {
+        }
+        else {
             HttpResponse httpResponse = httpUtils.doPostRequest(
                     0,
                     CREATE_USER,

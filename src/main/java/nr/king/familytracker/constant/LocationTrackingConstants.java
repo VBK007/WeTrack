@@ -43,11 +43,12 @@ public class LocationTrackingConstants {
 
     public static final String REMOVE_NUMBER = "http://api.wtrackonline.com/api/user/removeNumberForUser";
 
-    public static final String LOCAL_HOST_NUMBER = "http://localhost:8082/v1/update-status";
+   // public static final String LOCAL_HOST_NUMBER = "http://localhost:8082/v1/update-status";
+    public static final String LOCAL_HOST_NUMBER = "http://3.92.177.250:8082/v1/update-status";
 
 
     public static final String[] SUBSCRIBTION_MODEL_ARRAYLIST = {"demo", "Standard", "Popular", "PromoCode", "Deluxe"};
-    public static final int[] MAX_NUMBER_ALLOWED = {1, 3, 4, 5, 8};
+    public static final int[] MAX_NUMBER_ALLOWED = {1, 2, 3, 5, 5};
 
     private LocationTrackingConstants() {
 
