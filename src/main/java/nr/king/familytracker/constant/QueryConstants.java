@@ -17,7 +17,7 @@ public class QueryConstants {
     public static final String UPDATE_DETAILS_IN_NUMBER_MOBILE ="update NUMBER_FOR_USERS set NUMBER=?," +
             "COUNTRY_CODE=?,UPDATED_AT=current_timestamp,NICK_NAME=? where USER_ID=? and NUMBER=?";
 
-    public static final String UPDATE_HEADER_FOR_MOBILE ="update NUMBER_FOR_USERS set TOKEN_HEADER=?," +
+    public static final String UPDATE_HEADER_FOR_MOBILE ="update NUMBER_FOR_USERS set TOKEN_HEADER=? " +
             " where USER_ID=? and NUMBER=?";
 
 

@@ -35,7 +35,7 @@ public class SchedularServices {
         demoServiceMethod();
     }
 
-    @Scheduled(cron = "0 */3 * * *")
+    @Scheduled(cron = "0 0 */3 * * *")
     public void demoServiceMethod() {
         try {
             new Thread(()->updateNotificationRepo.doPushNotifcation()).start();

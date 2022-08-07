@@ -2,6 +2,7 @@ package nr.king.familytracker.scheduler.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.repo.NotificationModel;
+import nr.king.familytracker.repo.UpdateNotificationRepo;
 import nr.king.familytracker.utils.CommonUtils;
 import nr.king.familytracker.utils.ResponseUtils;
 import org.apache.logging.log4j.LogManager;
@@ -32,7 +33,7 @@ public class UpdateNotificationServices {
     private  static  final Logger logger  = LogManager.getLogger(UpdateNotificationServices.class);
 
 
-    public ResponseEntity updateNotifcationService(NotificationModel notificationModel)
+  /*  public ResponseEntity updateNotifcationService(NotificationModel notificationModel)
     {
         try
         {
@@ -45,6 +46,6 @@ public class UpdateNotificationServices {
             return  responseUtils.constructResponse(406,
                     commonUtils.writeAsString(objectMapper,new ApiResponse(false,"Unable to update notify")));
         }
-    }
+    }*/
 
 }
