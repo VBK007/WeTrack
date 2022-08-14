@@ -16,6 +16,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
+
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -24,7 +26,7 @@ import static nr.king.familytracker.constant.LocationTrackingConstants.MAX_NUMBE
 import static nr.king.familytracker.constant.LocationTrackingConstants.SUBSCRIBTION_MODEL_ARRAYLIST;
 import static nr.king.familytracker.constant.QueryConstants.*;
 
-@Component
+@Repository
 public class PurchaseRepo {
 
     @Autowired

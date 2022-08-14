@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -29,7 +29,7 @@ import java.util.UUID;
 import static nr.king.familytracker.constant.LocationTrackingConstants.*;
 import static nr.king.familytracker.constant.QueryConstants.*;
 
-@Component
+@Repository
 @EnableAutoConfiguration
 public class HomeRepo {
 

@@ -11,17 +11,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
 import static nr.king.familytracker.constant.LocationTrackingConstants.*;
-import static nr.king.familytracker.constant.LocationTrackingConstants.POST_NUMBER;
 import static nr.king.familytracker.constant.QueryConstants.*;
 
-@Component
+@Repository
 public class UpdateNotificationRepo {
 
     @Autowired
