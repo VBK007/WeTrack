@@ -42,39 +42,6 @@ private static final Logger logger  = LogManager.getLogger(UpdateNotificationRep
 
             SqlRowSet sqlRowSet = jdbcTemplate.getTemplate().queryForRowSet(GET_NOT_DEMO_USERS);
             while (sqlRowSet.next()) {
-             /*   HttpResponse httpResponse = httpUtils.doPostRequest(0,
-                        GET_LAST_HISTORY,
-                        commonUtils.getHeadersMaps(sqlRowSet.getString("USER_ID")),
-                        "Checking the Do Push Notification",
-                        commonUtils.writeAsString(objectMapper,
-                                new GetPageHistoryNumberModel(
-                                        500,
-                                        sqlRowSet.getString("number"),
-                                        0,
-                                        new HomeModel()
-                                ))
-                );
-                GetPhoneHistoryMainArrayModel getPageHistoryNumberModel = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(), GetPhoneHistoryMainArrayModel.class);
-                if (getPageHistoryNumberModel != null && getPageHistoryNumberModel.getData() != null && "available".equalsIgnoreCase(getPageHistoryNumberModel.getData().get(0).status)) {
-
-                    if (sqlRowSet.getString("PREVIOUS_TIME").isEmpty() ||
-                            !getPageHistoryNumberModel.getData().get(0).getTimeStamp().equals(sqlRowSet.getString("PREVIOUS_TIME"))) {
-                        logger.info("Response data  zero postion" + commonUtils.writeAsString(objectMapper, getPageHistoryNumberModel.getData().get(0)));
-                        logger.info("Response data  first postion" + commonUtils.writeAsString(objectMapper, getPageHistoryNumberModel.getData().get(1)));
-                        int updateLastUpdateTime = doUpdatePreviousTime(
-                                getPageHistoryNumberModel.getData().get(0).phoneNumber,
-                                getPageHistoryNumberModel.getData().get(0).timeStamp,
-                                sqlRowSet.getString("USER_ID")
-                        );
-                        logger.info("Updated the Prebvious time stamp for Number " +
-                                getPageHistoryNumberModel.getData().get(0).phoneNumber +
-                                "\n"
-                                + updateLastUpdateTime);
-                    }
-
-                }
-*/
-
                 SqlRowSet numberset = jdbcTemplate.getTemplate().queryForRowSet(selectNumberWithToken,sqlRowSet.getString("user_id"));
                 if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME") )
                         .atZone(ZoneId.systemDefault())

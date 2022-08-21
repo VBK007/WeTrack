@@ -15,4 +15,5 @@ public class PhoneModel {
     private  String phoneNumber;
     private String countryCode;
     private String pushToken;
+    private String packageName;
 }

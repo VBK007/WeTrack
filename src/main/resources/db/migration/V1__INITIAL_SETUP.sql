@@ -1,38 +1,39 @@
 CREATE TABLE WE_TRACK_USERS
 (
-    ID                               BIGSERIAL,
-    USER_ID                          TEXT,
-    MOBILE_MODEL                     TEXT,
-    IP_ADDRESS                       TEXT,
-    COUNTRY                          TEXT,
-    ONE_SIGNAL_EXTERNAL_USERID       TEXT,
-    MOBILE_VERSION                   TEXT,
-    Expiry_TIME                      TEXT,
+    ID                                 BIGSERIAL,
+    USER_ID                            TEXT      NOT NULL,
+    MOBILE_MODEL                       TEXT      NOT NULL,
+    IP_ADDRESS                         TEXT      NOT NULL,
+    COUNTRY                            TEXT      NOT NULL,
+    ONE_SIGNAL_EXTERNAL_USERID         TEXT      NOT NULL,
+    MOBILE_VERSION                     TEXT      NOT NULL,
+    Expiry_TIME                        TEXT,
     IS_USER_CREATED_IN_WETRACK_SERVICE BOOLEAN,
-    IS_PURCHASED                      BOOLEAN,
-    TOKEN_HEADER                      TEXT,
-    SCHEMA_NAME                      TEXT,
-    IS_NUMBER_ADDER                  BOOLEAN,
-    CREATED_AT    TIMESTAMP NOT NULL,
-    UPDATED_AT    TIMESTAMP NOT NULL,
-    PRIMARY KEY (ID,USER_ID)
+    IS_PURCHASED                       BOOLEAN,
+    TOKEN_HEADER                       TEXT,
+    SCHEMA_NAME                        TEXT,
+    IS_NUMBER_ADDER                    BOOLEAN,
+    PACKAGE_NAME                       TEXT,
+    CREDIT_LIMIT                       INTEGER NOT NULL default = 100,
+    CREATED_AT                         TIMESTAMP NOT NULL,
+    UPDATED_AT                         TIMESTAMP NOT NULL,
+    PRIMARY KEY (ID, USER_ID, PACKAGE_NAME)
 );
 
 
 CREATE INDEX WE_TRACK_USERS_INDEX
-    ON WE_TRACK_USERS (USER_ID, IS_NUMBER_ADDER,Expiry_TIME);
-
+    ON WE_TRACK_USERS (USER_ID, IS_NUMBER_ADDER, Expiry_TIME, PACKAGE_NAME,CREDIT_LIMIT);
 
 
 
 CREATE TABLE AUTH_TOKEN
 (
-    ID            BIGSERIAL,
-    USER_ID       TEXT,
-    AUTH_TOKEN     TEXT,
-    CREATED_AT    TIMESTAMP NOT NULL,
-    UPDATED_AT    TIMESTAMP NOT NULL,
-    PRIMARY KEY (ID,USER_ID,AUTH_TOKEN)
+    ID         BIGSERIAL,
+    USER_ID    TEXT,
+    AUTH_TOKEN TEXT,
+    CREATED_AT TIMESTAMP NOT NULL,
+    UPDATED_AT TIMESTAMP NOT NULL,
+    PRIMARY KEY (ID, USER_ID, AUTH_TOKEN)
 );
 
 CREATE INDEX AUTH_TOKEN_INDEX
@@ -40,50 +41,49 @@ CREATE INDEX AUTH_TOKEN_INDEX
 
 
 
-
-
 CREATE TABLE PURCHASED_DETAILS
 (
-    ID                               BIGSERIAL,
-    USER_ID                          TEXT,
-    PURCHASE_MODE                    TEXT,
-    PURCHASE_PLATFORM                TEXT,
-    COUNTRY                          TEXT,
-    AMOUNT                           TEXT,
-    TRANSATION_ID                    TEXT,
-    TRANSACTION_REMARK               TEXT,
-    EXPIRY_DATE                      TEXT,
-    CREATED_AT    TIMESTAMP NOT NULL,
-    UPDATED_AT    TIMESTAMP NOT NULL,
-    PRIMARY KEY (ID,USER_ID)
+    ID                 BIGSERIAL,
+    USER_ID            TEXT,
+    PURCHASE_MODE      TEXT,
+    PURCHASE_PLATFORM  TEXT,
+    COUNTRY            TEXT,
+    AMOUNT             TEXT,
+    TRANSATION_ID      TEXT,
+    TRANSACTION_REMARK TEXT,
+    EXPIRY_DATE        TEXT,
+    CREATED_AT         TIMESTAMP NOT NULL,
+    UPDATED_AT         TIMESTAMP NOT NULL,
+    PRIMARY KEY (ID, USER_ID)
 );
 
 
 CREATE TABLE NUMBER_FOR_USERS
 (
-    ID                BIGSERIAL,
-    USER_ID           TEXT,
-    NUMBER            TEXT,
-    TOKEN_HEADER      TEXT,
-    COUNTRY_CODE      TEXT,
-    CREATED_AT       TIMESTAMP NOT NULL,
-    UPDATED_AT       TIMESTAMP NOT NULL,
-    PRIMARY KEY (ID,USER_ID,TOKEN_HEADER)
+    ID           BIGSERIAL,
+    USER_ID      TEXT NOT NULL,
+    NUMBER       TEXT NOT NULL,
+    TOKEN_HEADER TEXT NOT NULL,
+    COUNTRY_CODE TEXT NOT NULL,
+    PACKAGE_NAME TEXT NOT NULL,
+    CREATED_AT   TIMESTAMP NOT NULL,
+    UPDATED_AT   TIMESTAMP NOT NULL,
+    PRIMARY KEY (ID, USER_ID, TOKEN_HEADER,PACKAGE_NAME)
 );
 
 CREATE INDEX NUMBER_FOR_USERS_INDEX
-    ON NUMBER_FOR_USERS (USER_ID, NUMBER,TOKEN_HEADER,COUNTRY_CODE);
+    ON NUMBER_FOR_USERS (USER_ID, NUMBER, TOKEN_HEADER, COUNTRY_CODE,PACKAGE_NAME);
 
 
 
 CREATE TABLE MODEL_COMBINATION
 (
-    ID                BIGSERIAL,
-    MODEL_ID           TEXT,
-    MODEL_NUMBER       TEXT,
-    CREATED_AT       TIMESTAMP NOT NULL,
-    UPDATED_AT       TIMESTAMP NOT NULL,
-    PRIMARY KEY (ID,MODEL_ID)
+    ID           BIGSERIAL,
+    MODEL_ID     TEXT,
+    MODEL_NUMBER TEXT,
+    CREATED_AT   TIMESTAMP NOT NULL,
+    UPDATED_AT   TIMESTAMP NOT NULL,
+    PRIMARY KEY (ID, MODEL_ID)
 );
 
 

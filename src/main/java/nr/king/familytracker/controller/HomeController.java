@@ -11,36 +11,31 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 
-public class HomeController extends  BaseController{
+public class HomeController extends BaseController {
 
     @Autowired
     private HomeServices homeServices;
 
     @PostMapping("/v{version:[1]}/create-deviceUser")
-    public ResponseEntity storeUserData(@RequestBody HomeModel homeModel)
-    {
+    public ResponseEntity storeUserData(@RequestBody HomeModel homeModel) {
         return homeServices.storeUsers(homeModel);
     }
 
- @PostMapping("/v{version:[1]}/user/getUserAbuzer")
-    public ResponseEntity verifyUser(@RequestBody HomeModel homeModel)
-    {
+    @PostMapping("/v{version:[1]}/user/getUserAbuzer")
+    public ResponseEntity verifyUser(@RequestBody HomeModel homeModel) {
         return homeServices.verify_user(homeModel);
     }
+
+
     @PostMapping("/v{version:[1]}/user/addNumberForUser")
-    public ResponseEntity addMobileNumber(@RequestBody PhoneModel phoneModel)
-    {
+    public ResponseEntity addMobileNumber(@RequestBody PhoneModel phoneModel) {
         return homeServices.addMobileNumber(phoneModel);
     }
 
-   @PostMapping("/v{version:[1]}/user/getAllMobileNumbers")
-    public ResponseEntity getAllMobileNumbers(@RequestBody PhoneModel phoneModel)
-    {
+    @PostMapping("/v{version:[1]}/user/getAllMobileNumbers")
+    public ResponseEntity getAllMobileNumbers(@RequestBody PhoneModel phoneModel) {
         return homeServices.getAllMobileNumbers(phoneModel);
     }
-
-
-
 
 
 }

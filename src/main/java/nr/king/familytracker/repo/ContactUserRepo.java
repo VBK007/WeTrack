@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.exceptions.FailedResponseException;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
 import nr.king.familytracker.model.http.ApiResponse;
-import nr.king.familytracker.model.http.GetPageHistoryNumberModel;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.utils.CommonUtils;
 import nr.king.familytracker.utils.HttpUtils;

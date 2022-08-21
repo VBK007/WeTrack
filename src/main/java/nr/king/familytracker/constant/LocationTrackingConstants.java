@@ -45,6 +45,7 @@ public class LocationTrackingConstants {
 
    // public static final String LOCAL_HOST_NUMBER = "http://localhost:8082/v1/update-status";
     public static final String LOCAL_HOST_NUMBER = "http://3.92.177.250:8082/v1/update-status";
+    public static final String LOCAL_HOST_ADD_USER = "http://3.92.177.250:8082/v1/create-deviceUser";
 
 
     public static final String[] SUBSCRIBTION_MODEL_ARRAYLIST = {"demo", "Standard", "Popular", "PromoCode", "Deluxe"};

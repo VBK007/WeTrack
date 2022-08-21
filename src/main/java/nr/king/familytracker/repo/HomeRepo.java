@@ -65,13 +65,16 @@ public class HomeRepo {
             int count = doUpdateUser(homeModel);
             if (count == 0) {
                 count = createUser(homeModel);
-                if (count == 1) dataBaseMigration.createSchema(homeModel.getId());
+                if (count == 1) {
+                    dataBaseMigration.createSchema(homeModel.getId());
+                    doUploadtoSchedularFunction(homeModel);
+                }
             }
             String authToken = "";
-
             if (count == 1) {
                 authToken = UUID.randomUUID().toString();
                 doUpdateTokenforUser(authToken, homeModel);
+                doandCreateLoginNumberOfTime(homeModel);
             }
             return responseUtils.constructResponse(200,
                     commonUtils.writeAsString(objectMapper,
@@ -81,6 +84,23 @@ public class HomeRepo {
             logger.error("Exception in saveuser Details" + exception.getMessage(),
                     exception);
             throw new FailedResponseException(exception.getMessage());
+        }
+    }
+
+    private void doUploadtoSchedularFunction(HomeModel homeModel) {
+        try{
+            HttpResponse sendNewUsertoSchedular =
+                    httpUtils.doPostRequest(
+                    0,LOCAL_HOST_ADD_USER,
+                    new HashMap<>(),"",
+                    commonUtils.writeAsString(objectMapper,homeModel)
+                    );
+
+          logger.info("Creating new User in Schedular server "+sendNewUsertoSchedular.getResponseCode());
+        }
+        catch (Exception exception)
+        {
+            logger.error("Exception in sending new user to scheduler server"+exception.getMessage(),exception);
         }
     }
 
@@ -208,7 +228,8 @@ public class HomeRepo {
                             numberSet.getString("NICK_NAME"),
                             numberSet.getString("NUMBER"),
                             numberSet.getString("COUNTRY_CODE"),
-                            numberSet.getString("PUSH_TOKEN")
+                            numberSet.getString("PUSH_TOKEN"),
+                            homeModel.getPackageName()
                     );
                     updateMobileNumbers(phoneModel, innerHomeModel);
                     phoneModel.setId(homeModel.getId());
@@ -530,11 +551,23 @@ public class HomeRepo {
     private int createUser(HomeModel homeModel) {
         return jdbcTemplateProvider.getTemplate().update("insert into WE_TRACK_USERS " +
                         "(USER_ID,MOBILE_MODEL,IP_ADDRESS,COUNTRY,ONE_SIGNAL_EXTERNAL_USERID,MOBILE_VERSION,Expiry_TIME,IS_PURCHASED," +
-                        "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,purchase_mode,MAX_NUMBER) " +
-                        "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?)",
+                        "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,purchase_mode,MAX_NUMBER,PACKAGE_NAME) " +
+                        "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?)",
                 homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(), homeModel.getCountryName(),
                 homeModel.getOneSignalExternalUserId(), homeModel.getAppId(), LocalDateTime.now().plusHours(3).toString(), false, false,
-                "", false, WETRACK + homeModel.getId(),"demo",1
+                "", false, WETRACK + homeModel.getId(),"demo",1,homeModel.getPackageName()
+        );
+    }
+
+
+    private int doandCreateLoginNumberOfTime(HomeModel homeModel) {
+        return jdbcTemplateProvider.getTemplate().update("insert into WE_TRACK_USERS_NO_OF_LOGIN " +
+                        "(USER_ID,MOBILE_MODEL,IP_ADDRESS,COUNTRY,ONE_SIGNAL_EXTERNAL_USERID,MOBILE_VERSION,Expiry_TIME,IS_PURCHASED," +
+                        "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,purchase_mode,MAX_NUMBER,PACKAGE_NAME) " +
+                        "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?)",
+                homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(), homeModel.getCountryName(),
+                homeModel.getOneSignalExternalUserId(), homeModel.getAppId(), LocalDateTime.now().plusHours(3).toString(), false, false,
+                "", false, WETRACK + homeModel.getId(),"demo",1,homeModel.getPackageName()
         );
     }
 
