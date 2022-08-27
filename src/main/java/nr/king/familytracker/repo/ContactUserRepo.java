@@ -15,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Arrays;
 
 import static nr.king.familytracker.constant.LocationTrackingConstants.PACKAGE_ARRAY_WITHOUT_ADD;

@@ -16,7 +16,7 @@ public class ContactUsController extends  BaseController {
     @Autowired
     private ContactUsService contactUsService;
 
-    @PostMapping("/v{version:[1]}/user/getfilterUser")
+    @PostMapping("/v{version:[1]}/user/contact_us")
     public ResponseEntity getFilterData(@RequestBody HomeModel getPhoneHistoryModel)
     {
         return contactUsService.getContactUser(getPhoneHistoryModel);

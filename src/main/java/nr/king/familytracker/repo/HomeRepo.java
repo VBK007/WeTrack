@@ -343,7 +343,7 @@ public class HomeRepo {
     public ResponseEntity addMobileNumber(PhoneModel phoneModel) {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
-                    .queryForRowSet(SELECT_USER_EXPIRY_TIME_WITH_ACCOUNT_DETAILS, phoneModel.getId());
+                    .queryForRowSet(SELECT_USER_EXPIRY_TIME_WITH_ACCOUNT_DETAILS, phoneModel.getId(),phoneModel.getPackageName());
             SqlRowSet countSet = jdbcTemplateProvider.getTemplate().queryForRowSet("select count(*) from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?",
                     phoneModel.getId(), phoneModel.getPackageName());
 
@@ -594,11 +594,11 @@ public class HomeRepo {
     private int doandCreateLoginNumberOfTime(HomeModel homeModel) {
         return jdbcTemplateProvider.getTemplate().update("insert into WE_TRACK_USERS_NO_OF_LOGIN " +
                         "(USER_ID,MOBILE_MODEL,IP_ADDRESS,COUNTRY,ONE_SIGNAL_EXTERNAL_USERID,MOBILE_VERSION,Expiry_TIME,IS_PURCHASED," +
-                        "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,purchase_mode,MAX_NUMBER,PACKAGE_NAME,CREDIT_LIMIT) " +
-                        "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?,?)",
+                        "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,PACKAGE_NAME,CREDIT_LIMIT) " +
+                        "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?)",
                 homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(), homeModel.getCountryName(),
                 homeModel.getOneSignalExternalUserId(), homeModel.getAppId(), LocalDateTime.now().plusHours(3).toString(), false, false,
-                "", false, WETRACK + homeModel.getId(), commonUtils.getModel(homeModel.getPackageName()), 1, homeModel.getPackageName(),
+                "", false, WETRACK + homeModel.getId(), homeModel.getPackageName(),
                 100
         );
     }
