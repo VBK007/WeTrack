@@ -52,18 +52,18 @@ public class FilterRepo {
 
     public ResponseEntity getFilterData(FilterHistoryModel filterHistoryModel) {
         try {
-            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_USER_EXPIRY_TIME, filterHistoryModel.getHomeModel().getId());
+            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_USER_EXPIRY_TIME,
+                    filterHistoryModel.getHomeModel().getId(),filterHistoryModel.getHomeModel().getPackageName());
             if (sqlRowSet.next()) {
                 logger.info("Sql has next ");
-                if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME"))
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli()) {
+                if (commonUtils.checkAddOrWithoutAdd(sqlRowSet.getString("Expiry_TIME"),
+                        filterHistoryModel.getHomeModel().getPackageName(),
+                        sqlRowSet.getInt("credit_limit"))) {
                     SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
                             .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT from NUMBER_FOR_USERS " +
-                                            "where USER_ID=? and number=?",
+                                            "where USER_ID=? and number=? and PACKAGE_NAME=?",
                                     filterHistoryModel.getHomeModel().getId(),
-                                    filterHistoryModel.getPhoneNumber());
+                                    filterHistoryModel.getPhoneNumber(),filterHistoryModel.getHomeModel().getPackageName());
                     if (numberSet.next()) {
                         localFilterModel = new FilterHistoryModel();
                         localFilterModel.setStartDate(filterHistoryModel.getStartDate());
@@ -152,7 +152,8 @@ public class FilterRepo {
                             numberSet.getString("NICK_NAME"),
                             numberSet.getString("NUMBER"),
                             numberSet.getString("COUNTRY_CODE"),
-                            numberSet.getString("PUSH_TOKEN")
+                            numberSet.getString("PUSH_TOKEN"),
+                            homeModel.getPackageName()
                     );
                     updateMobileNumbers(phoneModel, innerHomeModel);
                     phoneModel.setId(homeModel.getId());
@@ -221,25 +222,30 @@ public class FilterRepo {
                         phoneModel.getCountryCode(),
                         phoneModel.getNickName(),
                         phoneModel.getId(),
-                        phoneModel.getPhoneNumber());
+                        phoneModel.getPhoneNumber(),
+                        phoneModel.getPackageName()
+                );
     }
 
 
     public ResponseEntity getCompareData(FilterHistoryModel filterHistoryModel) {
         try {
-            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_USER_EXPIRY_TIME, filterHistoryModel.getHomeModel().getId());
+            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_USER_EXPIRY_TIME, filterHistoryModel.getHomeModel().getId(),
+                    filterHistoryModel.getHomeModel().getPackageName());
             if (sqlRowSet.next()) {
                 List<CommonResponse> commonResponseList =new ArrayList<>();
-                if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME"))
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli()) {
+                if (
+                  commonUtils.checkAddOrWithoutAdd(sqlRowSet.getString("Expiry_TIME"),
+                          filterHistoryModel.getHomeModel().getPackageName(),sqlRowSet.getInt("credit_limit"))
+
+                ) {
                     SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
                             .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT from NUMBER_FOR_USERS " +
-                                            "where USER_ID=? and number in (? , ?)",
+                                            "where USER_ID=? and number in (? , ?) and package_name=?",
                                     filterHistoryModel.getHomeModel().getId(),
                                     filterHistoryModel.getPhoneNumber(),
-                                    commonUtils.isNullOrEmty(filterHistoryModel.getSecoundNumber())
+                                    commonUtils.isNullOrEmty(filterHistoryModel.getSecoundNumber()),
+                                    filterHistoryModel.getHomeModel().getPackageName()
                             );
                     while (numberSet.next()) {
                          localFilterModel = new FilterHistoryModel();

@@ -27,10 +27,21 @@ public class HomeController extends BaseController {
     }
 
 
+
+    @PostMapping("/v{version:[1]}/user/getUserAbuzerForAdd")
+    public ResponseEntity verifyAddUser(@RequestBody HomeModel homeModel) {
+        return homeServices.verifyAddUser(homeModel);
+    }
+
+
+
     @PostMapping("/v{version:[1]}/user/addNumberForUser")
     public ResponseEntity addMobileNumber(@RequestBody PhoneModel phoneModel) {
         return homeServices.addMobileNumber(phoneModel);
     }
+
+
+
 
     @PostMapping("/v{version:[1]}/user/getAllMobileNumbers")
     public ResponseEntity getAllMobileNumbers(@RequestBody PhoneModel phoneModel) {

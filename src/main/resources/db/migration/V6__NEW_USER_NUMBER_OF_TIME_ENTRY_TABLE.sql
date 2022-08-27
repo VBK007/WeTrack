@@ -13,7 +13,7 @@ CREATE TABLE WE_TRACK_USERS_NO_OF_LOGIN
     TOKEN_HEADER                       TEXT,
     SCHEMA_NAME                        TEXT,
     IS_NUMBER_ADDER                    BOOLEAN,
-    CREDIT_LIMIT                       INTEGER,
+    CREDIT_LIMIT                       INTEGER NOT NULL,
     PACKAGE_NAME                       TEXT      NOT NULL,
     CREATED_AT                         TIMESTAMP NOT NULL,
     UPDATED_AT                         TIMESTAMP NOT NULL,

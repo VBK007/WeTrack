@@ -88,65 +88,64 @@ public class HomeRepo {
     }
 
     private void doUploadtoSchedularFunction(HomeModel homeModel) {
-        try{
+        try {
             HttpResponse sendNewUsertoSchedular =
                     httpUtils.doPostRequest(
-                    0,LOCAL_HOST_ADD_USER,
-                    new HashMap<>(),"",
-                    commonUtils.writeAsString(objectMapper,homeModel)
+                            0, LOCAL_HOST_ADD_USER,
+                            new HashMap<>(), "",
+                            commonUtils.writeAsString(objectMapper, homeModel)
                     );
 
-          logger.info("Creating new User in Schedular server "+sendNewUsertoSchedular.getResponseCode());
-        }
-        catch (Exception exception)
-        {
-            logger.error("Exception in sending new user to scheduler server"+exception.getMessage(),exception);
+            logger.info("Creating new User in Schedular server " + sendNewUsertoSchedular.getResponseCode());
+        } catch (Exception exception) {
+            logger.error("Exception in sending new user to scheduler server" + exception.getMessage(), exception);
         }
     }
 
     private void doUpdateTokenforUser(String authToken, HomeModel homeModel) {
         int count = jdbcTemplateProvider.getTemplate()
-                .update("update AUTH_TOKEN set AUTH_TOKEN=?,UPDATED_AT=current_timestamp   where USER_ID=?", authToken, homeModel.getId());
+                .update("update AUTH_TOKEN set AUTH_TOKEN=?,UPDATED_AT=current_timestamp   where USER_ID=? and package_name=?",
+                        authToken, homeModel.getId(),
+                        homeModel.getPackageName());
         if (count == 0) {
             count = jdbcTemplateProvider.getTemplate()
-                    .update("insert into AUTH_TOKEN (USER_ID,AUTH_TOKEN,CREATED_AT,UPDATED_AT) values (?,?,current_timestamp,current_timestamp)",
-                            homeModel.getId(), authToken);
+                    .update("insert into AUTH_TOKEN (USER_ID,AUTH_TOKEN,CREATED_AT,UPDATED_AT,PACKAGE_NAME) values (?,?,current_timestamp,current_timestamp,?)",
+                            homeModel.getId(), authToken,homeModel.getPackageName());
         }
         logger.info("count for auth token" + count);
 
     }
 
-    @Transactional
-    public ResponseEntity verify_user(HomeModel homeModel) {
+
+    public ResponseEntity verifyAddUser(HomeModel homeModel) {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
-                    .queryForRowSet("select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,token_header  from WE_TRACK_USERS where USER_ID=?", homeModel.getId());
-
+                    .queryForRowSet("select Expiry_TIME,CREDIT_LIMIT,IS_USER_CREATED_IN_WETRACK_SERVICE,token_header  from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?", homeModel.getId(), homeModel.getPackageName());
             if (sqlRowSet.next()) {
-                logger.info("outside Event " + homeModel.getId() + sqlRowSet.getBoolean("is_user_created_in_wetrack_service"));
+                logger.info("inside Event " + homeModel.getId() + sqlRowSet.getBoolean("is_user_created_in_wetrack_service"));
                 if (sqlRowSet.getBoolean("is_user_created_in_wetrack_service")) {
                     SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
-                            .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT,is_noti_enabled from NUMBER_FOR_USERS where USER_ID=?",
-                                    homeModel.getId());
-                    if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME"))
+                            .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT,is_noti_enabled from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?",
+                                    homeModel.getId(), homeModel.getPackageName());
+                    if (40 <= LocalDateTime.parse(sqlRowSet.getString("CREDIT_LIMIT"))
                             .atZone(ZoneId.systemDefault())
                             .toInstant()
-                            .toEpochMilli())
-                    {
+                            .toEpochMilli()) {
                         if (!numberSet.next()) {
                             return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                                     new ApiResponse(false, "Please add Mobile Number")));
                         }
-                        new Thread(()->doInBakground(homeModel,numberSet)).start();
-                    }
-                    else {
+                        new Thread(() -> doInBakground(homeModel, numberSet)).start();
+                    } else {
                         return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                                 new ApiResponse(false, "Plan is Expired")));
                     }
-                }
-                else {
+                } else {
+                    String normalUserId = homeModel.getId();
+                    homeModel.setId(commonUtils.getRandomString());
                     HttpResponse httpResponse = checkUserFromWeTrackService(homeModel);
                     if (httpResponse.getResponseCode() == 200) {
+                        homeModel.setId(normalUserId);
                         int count = doUpdateUserCreationinWetrack(homeModel);
                         logger.info("Count of update is" + count);
                         if (count == 1) {
@@ -163,8 +162,70 @@ public class HomeRepo {
                                 "User Created UnSuccessfully")));
                     }
                 }
+            } else {
+                return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false, "No user found ")));
+
             }
-            else{
+
+            logger.info("Last Response ");
+            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                    new ApiResponse(true, "User number Updated ")));
+
+        } catch (Exception exception) {
+            logger.error("Exception in  verify  Add user due to is" + exception.getMessage(), exception);
+            throw new FailedResponseException("");
+        }
+    }
+
+
+    @Transactional
+    public ResponseEntity verify_user(HomeModel homeModel) {
+        try {
+            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
+                    .queryForRowSet("select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,token_header,CREDIT_LIMIT  " +
+                            "from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?", homeModel.getId(), homeModel.getPackageName());
+
+            if (sqlRowSet.next()) {
+                logger.info("outside Event " + homeModel.getId() + sqlRowSet.getBoolean("is_user_created_in_wetrack_service"));
+                if (sqlRowSet.getBoolean("is_user_created_in_wetrack_service")) {
+                    SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
+                            .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT,is_noti_enabled from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?",
+                                    homeModel.getId(), homeModel.getPackageName());
+                    if (commonUtils.checkAddOrWithoutAdd(sqlRowSet.getString("Expiry_TIME"), homeModel.getPackageName(),
+                            sqlRowSet.getInt("CREDIT_LIMIT"))) {
+                        if (!numberSet.next()) {
+                            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                                    new ApiResponse(false, "Please add Mobile Number")));
+                        }
+                        new Thread(() -> doInBakground(homeModel, numberSet)).start();
+                    } else {
+                        return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                                new ApiResponse(false, "Plan is Expired")));
+                    }
+                } else {
+                    String normalUserId = homeModel.getId();
+                    homeModel.setId(commonUtils.getRandomString());
+                    HttpResponse httpResponse = checkUserFromWeTrackService(homeModel);
+                    if (httpResponse.getResponseCode() == 200) {
+                        homeModel.setId(normalUserId);
+                        int count = doUpdateUserCreationinWetrack(homeModel);
+                        logger.info("Count of update is" + count);
+                        if (count == 1) {
+                            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper, new
+                                    ApiResponse(true,
+                                    "User Created Successfully")));
+                        } else {
+                            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                                    new ApiResponse(false, "User Created Unsuccessfully")));
+                        }
+                    } else {
+                        return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper, new
+                                ApiResponse(false,
+                                "User Created UnSuccessfully")));
+                    }
+                }
+            } else {
                 return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                         new ApiResponse(false, "No user found ")));
 
@@ -181,31 +242,24 @@ public class HomeRepo {
     }
 
     private void doInBakground(HomeModel homeModel, SqlRowSet numberSet) {
-      try {
+        try {
 
-          if (numberSet.isLast())
-          {
-                new Thread(()-> makeApiCallFOrUpdatePhoneState(homeModel,numberSet)).start();
-          }
-          else{
-              while (numberSet.next())
-              {
-                  new Thread(()-> makeApiCallFOrUpdatePhoneState(homeModel,numberSet)).start();
-                  Thread.sleep(500,50);
-              }
-          }
-      }
-      catch (Exception exception)
-      {
-          logger.error("Exception while updating number for User"+homeModel.getId()+"||"+exception.getMessage(),exception);
-      }
+            if (numberSet.isLast()) {
+                new Thread(() -> makeApiCallFOrUpdatePhoneState(homeModel, numberSet)).start();
+            } else {
+                while (numberSet.next()) {
+                    new Thread(() -> makeApiCallFOrUpdatePhoneState(homeModel, numberSet)).start();
+                    Thread.sleep(500, 50);
+                }
+            }
+        } catch (Exception exception) {
+            logger.error("Exception while updating number for User" + homeModel.getId() + "||" + exception.getMessage(), exception);
+        }
     }
 
 
-
-
     private void makeApiCallFOrUpdatePhoneState(HomeModel homeModel, SqlRowSet numberSet) {
-        try{
+        try {
             HttpResponse httpResponse = httpUtils.doPostRequest(0, GET_APP_USER,
                     commonUtils.getHeadersMap(numberSet.getString("token_header")),
                     "create user Expiry time",
@@ -234,8 +288,7 @@ public class HomeRepo {
                     updateMobileNumbers(phoneModel, innerHomeModel);
                     phoneModel.setId(homeModel.getId());
                     int count = updatePhoneNumberWhileGetAppUser(phoneModel, innerHomeModel);
-                    if (count==1)
-                    {
+                    if (count == 1) {
                         NotificationModel notificationModel = new NotificationModel();
                         notificationModel.setUserId(numberSet.getString("USER_ID"));
                         notificationModel.setHeaderToken(numberSet.getString("TOKEN_HEADER"));
@@ -248,22 +301,19 @@ public class HomeRepo {
                                         LOCAL_HOST_NUMBER,
                                         commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
                                         "",
-                                        commonUtils.writeAsString(objectMapper,notificationModel)
+                                        commonUtils.writeAsString(objectMapper, notificationModel)
                                 );
-                        logger.info("enablePush Notification"+enableSchedularPush.getResponseCode());
+                        logger.info("enablePush Notification" + enableSchedularPush.getResponseCode());
                     }
-                    if (count!=1){
-                        logger.info("Unable to update number for user "+phoneModel.getPhoneNumber());
+                    if (count != 1) {
+                        logger.info("Unable to update number for user " + phoneModel.getPhoneNumber());
                     }
-                }
-                else {
-                    logger.info("Response while updating the server call " + httpResponse.getResponseCode()+ httpResponse.getResponse());
+                } else {
+                    logger.info("Response while updating the server call " + httpResponse.getResponseCode() + httpResponse.getResponse());
                 }
             }
-        }
-        catch (Exception exception)
-        {
-            logger.error("Exception on APi calling"+exception.getMessage(),exception);
+        } catch (Exception exception) {
+            logger.error("Exception on APi calling" + exception.getMessage(), exception);
         }
     }
 
@@ -294,37 +344,22 @@ public class HomeRepo {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
                     .queryForRowSet(SELECT_USER_EXPIRY_TIME_WITH_ACCOUNT_DETAILS, phoneModel.getId());
-            SqlRowSet  countSet =jdbcTemplateProvider.getTemplate().queryForRowSet("select count(*) from NUMBER_FOR_USERS where USER_ID=?",phoneModel.getId());
+            SqlRowSet countSet = jdbcTemplateProvider.getTemplate().queryForRowSet("select count(*) from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?",
+                    phoneModel.getId(), phoneModel.getPackageName());
 
             if (sqlRowSet.next()) {
-                if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME") )
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli()
+                if (
+                        commonUtils.checkAddOrWithoutAdd(sqlRowSet.getString("Expiry_TIME"), phoneModel.getPackageName(),
+                                sqlRowSet.getInt("CREDIT_LIMIT"))
                 ) {
 
-                    SqlRowSet innerMobileRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(selectNumberWithToken,phoneModel.getId());
+                    SqlRowSet innerMobileRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(selectNumberWithToken, phoneModel.getId(), phoneModel.getPackageName());
                     if (innerMobileRowSet.next()) {
                         boolean isNumberFound = false;
                         while (innerMobileRowSet.next()) {
                             if (phoneModel.getPhoneNumber().equals(innerMobileRowSet.getString("NUMBER"))) {
-                                /*HttpResponse httpResponse = httpUtils.doPostRequest(0,
-                                        POST_NUMBER,
-                                        commonUtils.getHeadersMap(innerMobileRowSet.getString("TOKEN_HEADER")),
-                                        "Update the Phone Number Exiting",
-                                        commonUtils.writeAsString(objectMapper,
-                                                phoneModel
-                                        )
-                                );
-                                if (httpResponse.getResponseCode() == 200) {
-
-                                    logger.info("Updated phoneNumber count" + count);
-                                    isNumberFound = true;
-                                } else {
-                                    return addNewNumbeIntoWeTrackServer(phoneModel, false);
-                                }*/
                                 int count = updatePhoneNumberDetails(phoneModel);
-                                isNumberFound=true;
+                                isNumberFound = true;
                             }
                         }
                         if (isNumberFound) {
@@ -332,28 +367,22 @@ public class HomeRepo {
                                     commonUtils.writeAsString(objectMapper,
                                             new ApiResponse(true,
                                                     "Mobile Number Updated Successfully")));
-                        }
-                        else {
-                            if (countSet.next() && countSet.getInt("Count")<sqlRowSet.getInt("max_number"))
-                            {
+                        } else {
+                            if (countSet.next() && countSet.getInt("Count") < sqlRowSet.getInt("max_number")) {
                                 return addNewNumbeIntoWeTrackServer(phoneModel, false);
-                            }
-                            else{
-                                return responseUtils.constructResponse(200,commonUtils.writeAsString(
-                                        objectMapper,new ApiResponse(false,"Unable to add New Number Recharge the Plan!!")
+                            } else {
+                                return responseUtils.constructResponse(200, commonUtils.writeAsString(
+                                        objectMapper, new ApiResponse(false, "Unable to add New Number Recharge the Plan!!")
                                 ));
                             }
                         }
 
-                    }
-                    else {
-                        if (countSet.next() && countSet.getInt("Count") < sqlRowSet.getInt("max_number"))
-                        {
+                    } else {
+                        if (countSet.next() && countSet.getInt("Count") < sqlRowSet.getInt("max_number")) {
                             return addNewNumbeIntoWeTrackServer(phoneModel, false);
-                        }
-                        else{
-                            return responseUtils.constructResponse(200,commonUtils.writeAsString(
-                                    objectMapper,new ApiResponse(false,"Unable to add New Number Recharge the Plan!!")
+                        } else {
+                            return responseUtils.constructResponse(200, commonUtils.writeAsString(
+                                    objectMapper, new ApiResponse(false, "Unable to add New Number Recharge the Plan!!")
                             ));
                         }
                     }
@@ -362,7 +391,7 @@ public class HomeRepo {
 
 
                 return responseUtils.constructResponse(200,
-                        commonUtils.writeAsString(objectMapper,new ApiResponse(false,"Unable to add Number Please Recharge the Plan")));
+                        commonUtils.writeAsString(objectMapper, new ApiResponse(false, "Unable to add Number Please Recharge the Plan")));
 
             }
             return responseUtils.constructResponse(200,
@@ -378,8 +407,8 @@ public class HomeRepo {
 
 
     private int updatePhoneNumberWhileGetAppUser(PhoneModel phoneModel, HomeModel innerHomeModel) {
-        logger.info("Update query is"+commonUtils.writeAsString(objectMapper,phoneModel)+"\n"+
-                commonUtils.writeAsString(objectMapper,innerHomeModel));
+        logger.info("Update query is" + commonUtils.writeAsString(objectMapper, phoneModel) + "\n" +
+                commonUtils.writeAsString(objectMapper, innerHomeModel));
         return jdbcTemplateProvider.getTemplate()
                 .update(UPDATE_TOKEN_HEADER_IN_NUMBER_MOBILE,
                         phoneModel.getPhoneNumber(),
@@ -387,7 +416,8 @@ public class HomeRepo {
                         phoneModel.getCountryCode(),
                         phoneModel.getNickName(),
                         phoneModel.getId(),
-                        phoneModel.getPhoneNumber());
+                        phoneModel.getPhoneNumber(),
+                        phoneModel.getPackageName());
     }
 
     private int updatePhoneNumberDetails(PhoneModel phoneModel) {
@@ -396,7 +426,9 @@ public class HomeRepo {
                         phoneModel.getPhoneNumber(),
                         phoneModel.getCountryCode(),
                         phoneModel.getNickName(),
-                        phoneModel.getId(), phoneModel.getPhoneNumber());
+                        phoneModel.getId(), phoneModel.getPhoneNumber(),
+                        phoneModel.getPackageName()
+                );
     }
 
     private ResponseEntity addNewNumbeIntoWeTrackServer(PhoneModel phoneModel, boolean isFirstTime) throws IOException {
@@ -418,8 +450,7 @@ public class HomeRepo {
                 innerModel.setId(phoneModel.getId());
                 return addMobileNumbers(phoneModel, innerModel);
             }
-        }
-        else {
+        } else {
             HttpResponse httpResponse = httpUtils.doPostRequest(
                     0,
                     CREATE_USER,
@@ -460,7 +491,7 @@ public class HomeRepo {
             notificationModel.setNickName(phoneModel.getNickName());
             notificationModel.setEnable(true);
             notificationModel.setNumberId(Long.valueOf(phoneModel.getPhoneNumber()));
-            new Thread(()-> doNotifyInNewServer(notificationModel,homeModel.getId()));
+            new Thread(() -> doNotifyInNewServer(notificationModel, homeModel.getId()));
             return responseUtils.constructResponse(200,
                     commonUtils.writeAsString(objectMapper,
                             new ApiResponse(true, "Phone Number added Successfully")));
@@ -470,34 +501,33 @@ public class HomeRepo {
                         new ApiResponse(false, "Phone Number added UnSuccessfully")));
     }
 
-    private void doNotifyInNewServer(NotificationModel notificationModel, String id)  {
-       try {
-           HttpResponse enableSchedularPush =
-                   httpUtils.doPostRequest(0,
-                           LOCAL_HOST_NUMBER,
-                           commonUtils.getHeadersMap(id),
-                           "",
-                           commonUtils.writeAsString(objectMapper,notificationModel)
-                   );
-           logger.info("enablePush Notification"+enableSchedularPush.getResponseCode());
-       }
-       catch (Exception exception)
-       {
-           exception.printStackTrace();
-       }
+    private void doNotifyInNewServer(NotificationModel notificationModel, String id) {
+        try {
+            HttpResponse enableSchedularPush =
+                    httpUtils.doPostRequest(0,
+                            LOCAL_HOST_NUMBER,
+                            commonUtils.getHeadersMap(id),
+                            "",
+                            commonUtils.writeAsString(objectMapper, notificationModel)
+                    );
+            logger.info("enablePush Notification" + enableSchedularPush.getResponseCode());
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
     }
 
     private int addMobileNumberIntoDatabase(PhoneModel phoneModel, HomeModel homeModel) {
         //"+String.format("%s%s",WETRACK,phoneModel.getId())+".
         return jdbcTemplateProvider.getTemplate()
                 .update("insert into NUMBER_FOR_USERS (USER_ID,NUMBER,TOKEN_HEADER,COUNTRY_CODE," +
-                                "CREATED_AT,UPDATED_AT,NICK_NAME,PUSH_TOKEN,EXPIRY_TIME,is_noti_enabled) values " +
-                                "(?,?,?,?,current_timestamp,current_timestamp,?,?,?,?)",
+                                "CREATED_AT,UPDATED_AT,NICK_NAME,PUSH_TOKEN,EXPIRY_TIME,is_noti_enabled,PACKAGE_NAME) values " +
+                                "(?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?)",
                         phoneModel.getId(), phoneModel.getPhoneNumber(),
                         homeModel.getId(), phoneModel.getCountryCode(),
                         phoneModel.getNickName(), phoneModel.getPushToken(),
                         LocalDateTime.now().plusHours(3).toString(),
-                        true
+                        true,
+                        phoneModel.getPackageName()
                 );
 
     }
@@ -506,7 +536,7 @@ public class HomeRepo {
     public ResponseEntity getAllMobileNumbers(PhoneModel phoneModel) {
         try {
             List<GetMobileResponse> getMobileResponses = new ArrayList<>();
-            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_ALL_MOBILE_NUMBER, phoneModel.getId());
+            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_ALL_MOBILE_NUMBER, phoneModel.getId(),phoneModel.getPackageName());
             while (sqlRowSet.next()) {
                 GetMobileResponse getMobileResponse = new GetMobileResponse();
                 getMobileResponse.setMobileNumber(sqlRowSet.getString("NUMBER"));
@@ -534,8 +564,8 @@ public class HomeRepo {
 
     private int doUpdateUserCreationinWetrack(HomeModel homeModel) {
         return jdbcTemplateProvider.getTemplate()
-                .update("update WE_TRACK_USERS set IS_USER_CREATED_IN_WETRACK_SERVICE=?,TOKEN_HEADER=?,Expiry_TIME=? where USER_ID=?",
-                        true, homeModel.getId(), LocalDateTime.now().plusHours(3).toString(), homeModel.getId());
+                .update("update WE_TRACK_USERS set IS_USER_CREATED_IN_WETRACK_SERVICE=?,TOKEN_HEADER=?,Expiry_TIME=? where USER_ID=? and PACKAGE_NAME=?",
+                        true, homeModel.getId(), LocalDateTime.now().plusHours(3).toString(), homeModel.getId(), homeModel.getPackageName());
     }
 
     private HttpResponse checkUserFromWeTrackService(HomeModel homeModel) throws IOException {
@@ -551,11 +581,12 @@ public class HomeRepo {
     private int createUser(HomeModel homeModel) {
         return jdbcTemplateProvider.getTemplate().update("insert into WE_TRACK_USERS " +
                         "(USER_ID,MOBILE_MODEL,IP_ADDRESS,COUNTRY,ONE_SIGNAL_EXTERNAL_USERID,MOBILE_VERSION,Expiry_TIME,IS_PURCHASED," +
-                        "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,purchase_mode,MAX_NUMBER,PACKAGE_NAME) " +
-                        "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?)",
+                        "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,purchase_mode,MAX_NUMBER,PACKAGE_NAME,CREDIT_LIMIT) " +
+                        "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?,?)",
                 homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(), homeModel.getCountryName(),
                 homeModel.getOneSignalExternalUserId(), homeModel.getAppId(), LocalDateTime.now().plusHours(3).toString(), false, false,
-                "", false, WETRACK + homeModel.getId(),"demo",1,homeModel.getPackageName()
+                "", false, WETRACK + homeModel.getId(), commonUtils.getModel(homeModel.getPackageName()), 1, homeModel.getPackageName(),
+                100
         );
     }
 
@@ -563,11 +594,12 @@ public class HomeRepo {
     private int doandCreateLoginNumberOfTime(HomeModel homeModel) {
         return jdbcTemplateProvider.getTemplate().update("insert into WE_TRACK_USERS_NO_OF_LOGIN " +
                         "(USER_ID,MOBILE_MODEL,IP_ADDRESS,COUNTRY,ONE_SIGNAL_EXTERNAL_USERID,MOBILE_VERSION,Expiry_TIME,IS_PURCHASED," +
-                        "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,purchase_mode,MAX_NUMBER,PACKAGE_NAME) " +
-                        "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?)",
+                        "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,purchase_mode,MAX_NUMBER,PACKAGE_NAME,CREDIT_LIMIT) " +
+                        "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?,?)",
                 homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(), homeModel.getCountryName(),
                 homeModel.getOneSignalExternalUserId(), homeModel.getAppId(), LocalDateTime.now().plusHours(3).toString(), false, false,
-                "", false, WETRACK + homeModel.getId(),"demo",1,homeModel.getPackageName()
+                "", false, WETRACK + homeModel.getId(), commonUtils.getModel(homeModel.getPackageName()), 1, homeModel.getPackageName(),
+                100
         );
     }
 
@@ -575,9 +607,9 @@ public class HomeRepo {
         return jdbcTemplateProvider.getTemplate()
                 .update("update WE_TRACK_USERS set USER_ID=?,MOBILE_MODEL=?,IP_ADDRESS=?,COUNTRY=?," +
                                 "ONE_SIGNAL_EXTERNAL_USERID=?,MOBILE_VERSION=?,UPDATED_AT = current_timestamp" +
-                                " where USER_ID=?", homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(),
+                                " where USER_ID=? and package_name=?", homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(),
                         homeModel.getCountryName(), homeModel.getOneSignalExternalUserId(), homeModel.getAppId(),
-                        homeModel.getId()
+                        homeModel.getId(),homeModel.getPackageName()
                 );
     }
 

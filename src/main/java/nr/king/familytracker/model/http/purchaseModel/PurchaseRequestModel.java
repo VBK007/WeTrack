@@ -20,4 +20,5 @@ public class PurchaseRequestModel {
     private String expiryDate;
     private String createdAt;
     private String expiryAt;
+    private String packageName;
 }

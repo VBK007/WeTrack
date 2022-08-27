@@ -16,4 +16,5 @@ public class NotificationModel {
     String pushToken="";
     String headerToken="";
     String nickName="";
+    String packageName;
 }

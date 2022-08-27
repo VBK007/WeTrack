@@ -33,6 +33,11 @@ public class PurchaseService {
 
     public ResponseEntity makeOrder(PurchaseRequestModel purchaseRequestModel) {
         try {
+            if (commonUtils.checkPurchaseRequestModelSecurity(purchaseRequestModel))
+            {
+                return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false,"Invalid Characters")));
+            }
             return purchaseRepo.makeOrder(purchaseRequestModel);
         } catch (Exception exception) {
             logger.error("Exception in purchase service due to" + exception.getMessage(), exception);
@@ -44,6 +49,11 @@ public class PurchaseService {
 
     public ResponseEntity getUserAPI(HomeModel homeModel) {
         try {
+            if (commonUtils.checkHomeModelSecurityCheck(homeModel))
+            {
+                return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false,"Invalid Characters")));
+            }
                 return  purchaseRepo.getUserAPI(homeModel);
         } catch (Exception exception) {
             logger.error("Exception in GetUserAPI service due to" + exception.getMessage(), exception);
@@ -57,6 +67,11 @@ public class PurchaseService {
 
     public ResponseEntity updateTimingForTesting(HomeModel homeModel) {
         try {
+            if (commonUtils.checkHomeModelSecurityCheck(homeModel))
+            {
+                return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false,"Invalid Characters")));
+            }
             return  purchaseRepo.updateTiming(homeModel);
         } catch (Exception exception) {
             logger.error("Exception in UpdateTimning service due to" + exception.getMessage(), exception);

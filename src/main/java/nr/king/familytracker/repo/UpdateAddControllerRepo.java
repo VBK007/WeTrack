@@ -28,8 +28,7 @@ public class UpdateAddControllerRepo {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @Autowired
-    private UpdateAddControllerRepo homeRepo;
+
 
     @Autowired
     private JdbcTemplateProvider jdbcTemplateProvider;
@@ -56,10 +55,11 @@ public class UpdateAddControllerRepo {
         return jdbcTemplateProvider.getTemplate()
                 .update("update WE_TRACK_USERS set USER_ID=?,MOBILE_MODEL=?,IP_ADDRESS=?,COUNTRY=?," +
                                 "ONE_SIGNAL_EXTERNAL_USERID=?,MOBILE_VERSION=?,UPDATED_AT = current_timestamp,PACKAGE_NAME=?,CREDIT_LIMIT=? " +
-                                " where USER_ID=?", homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(),
+                                " where USER_ID=? and PACKAGE_NAME=?", homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(),
                         homeModel.getCountryName(), homeModel.getOneSignalExternalUserId(), homeModel.getAppId(),
                         homeModel.getPackageName(), getNumberValues(homeModel.getId(), homeModel.getPackageName(), homeModel.isAdding()),
-                        homeModel.getId()
+                        homeModel.getId(),
+                        homeModel.getPackageName()
                 );
     }
 

@@ -2,38 +2,38 @@ package nr.king.familytracker.constant;
 
 public class QueryConstants {
     public static final String selectNumberWithToken ="select USER_ID,NUMBER,TOKEN_HEADER,COUNTRY_CODE,CREATED_AT,UPDATED_AT from " +
-            "NUMBER_FOR_USERS where USER_ID=?";
+            "NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?";
 
-    public static  final String GET_NOT_DEMO_USERS ="select user_id,Expiry_TIME from WE_TRACK_USERS";
+    public static  final String GET_NOT_DEMO_USERS ="select user_id,Expiry_TIME,PACKAGE_NAME from WE_TRACK_USERS where purchase_mode!='demo'";
 
-    public static final String SELECT_USER_DETAILS_COUNT ="select count(*) from WE_TRACK_USERS where USER_ID=?";
-    public static final String SELECT_NUMBER_DETAILS_COUNT ="select count(*) from NUMBER_FOR_USERS where USER_ID=?";
+    public static final String SELECT_USER_DETAILS_COUNT ="select count(*) from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?";
+    public static final String SELECT_NUMBER_DETAILS_COUNT ="select count(*) from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?";
     public static final String UPDATE_TOKEN_HEADER_IN_NUMBER_MOBILE ="update NUMBER_FOR_USERS set NUMBER=?,TOKEN_HEADER=?," +
-            "COUNTRY_CODE=?,UPDATED_AT=current_timestamp,NICK_NAME=? where USER_ID=? and NUMBER=?";
+            "COUNTRY_CODE=?,UPDATED_AT=current_timestamp,NICK_NAME=? where USER_ID=? and NUMBER=? and PACKAGE_NAME=?";
 
-    public  static  final  String  ISNUMBER_HAVING_USER="select USER_ID,NUMBER from NUMBER_FOR_USERS where USER_ID=? and NUMBER=?";
+    public  static  final  String  ISNUMBER_HAVING_USER="select USER_ID,NUMBER from NUMBER_FOR_USERS where USER_ID=? and NUMBER=? and PACKAGE_NAME=?";
 
 
     public static final String UPDATE_DETAILS_IN_NUMBER_MOBILE ="update NUMBER_FOR_USERS set NUMBER=?," +
-            "COUNTRY_CODE=?,UPDATED_AT=current_timestamp,NICK_NAME=? where USER_ID=? and NUMBER=?";
+            "COUNTRY_CODE=?,UPDATED_AT=current_timestamp,NICK_NAME=? where USER_ID=? and NUMBER=? and PACKAGE_NAME=?";
 
     public static final String UPDATE_HEADER_FOR_MOBILE ="update NUMBER_FOR_USERS set TOKEN_HEADER=? " +
-            " where USER_ID=? and NUMBER=?";
+            " where USER_ID=? and NUMBER=? and PACKAGE_NAME=?";
 
 
-    public static final String SELECT_USER_EXPIRY_TIME ="select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,purchase_mode,MAX_NUMBER from WE_TRACK_USERS where USER_ID=?";
+    public static final String SELECT_USER_EXPIRY_TIME ="select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,purchase_mode,MAX_NUMBER,CREDIT_LIMIT,PACKAGE_NAME from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?";
 
     public static final String SELECT_USER_EXPIRY_TIME_WITH_ACCOUNT_DETAILS ="select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,MAX_NUMBER," +
-            "purchase_mode from WE_TRACK_USERS where USER_ID=?";
+            "purchase_mode,CREDIT_LIMIT,PACKAGE_NAME from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?";
 
-    public static final String GET_ALL_MOBILE_NUMBER ="select USER_ID,NUMBER,TOKEN_HEADER,COUNTRY_CODE,NICK_NAME,PUSH_TOKEN,EXPIRY_TIME from NUMBER_FOR_USERS where USER_ID=?";
+    public static final String GET_ALL_MOBILE_NUMBER ="select USER_ID,NUMBER,TOKEN_HEADER,COUNTRY_CODE,NICK_NAME,PUSH_TOKEN,EXPIRY_TIME,PACKAGE_NAME from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?";
 
-    public static final String UPDATE_TOKEN_HEADER = "update WE_TRACK_USERS  set TOKEN_HEADER=? where USER_ID=?";
+    public static final String UPDATE_TOKEN_HEADER = "update WE_TRACK_USERS  set TOKEN_HEADER=? where USER_ID=? and PACKAGE_NAME=?";
 
-    public static final String UPDATE_TIMING_USER_DATA = "update WE_TRACK_USERS  set Expiry_TIME=? where USER_ID=?";
+    public static final String UPDATE_TIMING_USER_DATA = "update WE_TRACK_USERS  set Expiry_TIME=? where USER_ID=? and PACKAGE_NAME=?";
 
     public static final String UPDATE_PURCHASE_USER_TIME_ZONE = "update WE_TRACK_USERS  set purchase_mode=?,MAX_NUMBER=?,IS_PURCHASED=?,Expiry_TIME=?" +
-            " where USER_ID=?";
+            " where USER_ID=? and PACKAGE_NAME=?";
 
 
     public static final String UPDATE_PURCHASE_DETAILS = "UPDATE PURCHASED_DETAILS set PURCHASE_MODE=?,PURCHASE_PLATFORM=?,COUNTRY=?,AMOUNT=?,TRANSATION_ID=?,TRANSACTION_REMARK=?," +
@@ -48,7 +48,7 @@ public class QueryConstants {
     public static  final String GET_UPI_VALUES = "select UPI_ID,PURCHASE_TYPE,PURCHASE_DESCRIBITION,MONEY_IN_INR,MONEY_IN_USD,COLOR_CODE,COLOR_BAR,CREATED_AT,UPDATED_AT from UPI_DETAILS";
 
     public static  final  String UPDATE_PUSH_NOTIFICATION =
-            "update NUMBER_FOR_USERS set is_noti_enabled=? where USER_ID=? and NUMBER=?";
+            "update NUMBER_FOR_USERS set is_noti_enabled=? where USER_ID=? and NUMBER=? and PACKAGE_NAME=?";
 
 
 }

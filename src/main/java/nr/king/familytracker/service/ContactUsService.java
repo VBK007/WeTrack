@@ -31,6 +31,11 @@ public class ContactUsService {
     public ResponseEntity getContactUser(HomeModel homeModel)
     {
         try {
+            if (commonUtils.checkHomeModelSecurityCheck(homeModel))
+            {
+                return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false,"Invalid Characters Not Allowed")));
+            }
             return filterRepo.getInstaPackageName(homeModel);
         }
         catch (Exception exception)

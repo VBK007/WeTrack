@@ -42,7 +42,7 @@ private static final Logger logger  = LogManager.getLogger(UpdateNotificationRep
 
             SqlRowSet sqlRowSet = jdbcTemplate.getTemplate().queryForRowSet(GET_NOT_DEMO_USERS);
             while (sqlRowSet.next()) {
-                SqlRowSet numberset = jdbcTemplate.getTemplate().queryForRowSet(selectNumberWithToken,sqlRowSet.getString("user_id"));
+                SqlRowSet numberset = jdbcTemplate.getTemplate().queryForRowSet(selectNumberWithToken,sqlRowSet.getString("user_id"),sqlRowSet.getString("PACKAGE_NAME"));
                 if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME") )
                         .atZone(ZoneId.systemDefault())
                         .toInstant()
@@ -120,7 +120,9 @@ private static final Logger logger  = LogManager.getLogger(UpdateNotificationRep
                 .update(UPDATE_HEADER_FOR_MOBILE,
                         homeModel.getId(),
                         phoneModel.getId(),
-                        phoneModel.getPhoneNumber());
+                        phoneModel.getPhoneNumber(),
+                        phoneModel.getPackageName()
+                );
     }
 
 

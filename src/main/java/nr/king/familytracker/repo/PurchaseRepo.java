@@ -45,7 +45,7 @@ public class PurchaseRepo {
     @Transactional
     public ResponseEntity makeOrder(PurchaseRequestModel purchaseRequestModel) {
         try {
-            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(selectNumberWithToken, purchaseRequestModel.getUserId());
+            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(selectNumberWithToken, purchaseRequestModel.getUserId(),purchaseRequestModel.getPackageName());
             if (sqlRowSet.next()) {
                 int count = updatePuchaseDetails(purchaseRequestModel);
                 if (count == 0) {
@@ -96,7 +96,8 @@ public class PurchaseRepo {
                 maxNumber,
                 true,
                 expiryTime,
-                purchaseRequestModel.getUserId()
+                purchaseRequestModel.getUserId(),
+                purchaseRequestModel.getPackageName()
                 );
        logger.info("Information in count while updating user"+count);
     }
@@ -131,7 +132,7 @@ public class PurchaseRepo {
 
     public ResponseEntity getUserAPI(HomeModel homeModel) {
         try {
-            SqlRowSet mobileRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(selectNumberWithToken, homeModel.getId());
+            SqlRowSet mobileRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(selectNumberWithToken, homeModel.getId(),homeModel.getPackageName());
             if (mobileRowSet.next()) {
                 SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_UPI_VALUES);
                 UpiTransactionValue upiTransactionValue = new UpiTransactionValue();
@@ -166,7 +167,7 @@ public class PurchaseRepo {
 
     public ResponseEntity updateTiming(HomeModel homeModel) {
         try {
-            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(selectNumberWithToken,homeModel.getId());
+            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(selectNumberWithToken,homeModel.getId(),homeModel.getPackageName());
             if (sqlRowSet.next())
             {
                 int count =jdbcTemplateProvider.getTemplate().update(UPDATE_TIMING_USER_DATA,LocalDateTime.now().plusHours(3),homeModel.getId());

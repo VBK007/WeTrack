@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+
 @Service
 public class HomeServices {
     @Autowired
@@ -33,6 +35,12 @@ public class HomeServices {
 
     public ResponseEntity storeUsers(HomeModel homeModel) {
         try {
+            if (commonUtils.checkHomeModelSecurityCheck(homeModel))
+            {
+                return responseUtils.constructResponse(406,
+                        commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false,"Invalid Characters Not allowed")));
+            }
             return homeRepo.saveUserDetails(homeModel);
         } catch (Exception exception) {
             logger.error("Exception in Storing the User due to" + exception.getMessage(), exception);
@@ -42,6 +50,12 @@ public class HomeServices {
     }
     public ResponseEntity getAllMobileNumbers(PhoneModel phoneModel) {
         try {
+            if (commonUtils.checkPhoneModelSecurityCheck(phoneModel))
+            {
+                return responseUtils.constructResponse(406,
+                        commonUtils.writeAsString(objectMapper,
+                                new ApiResponse(false,"Invalid Characters Not allowed")));
+            }
             return homeRepo.getAllMobileNumbers(phoneModel);
         } catch (Exception exception) {
             logger.error("Exception in Storing the User due to" + exception.getMessage(), exception);
@@ -53,6 +67,12 @@ public class HomeServices {
 
     public ResponseEntity verify_user(HomeModel homeModel) {
         try {
+            if (commonUtils.checkHomeModelSecurityCheck(homeModel))
+            {
+                return responseUtils.constructResponse(406,
+                        commonUtils.writeAsString(objectMapper,
+                                new ApiResponse(false,"Invalid Characters Not allowed")));
+            }
             return homeRepo.verify_user(homeModel);
         } catch (Exception exception) {
             logger.error("Exception in verify  the User due to" + exception.getMessage(), exception);
@@ -60,16 +80,38 @@ public class HomeServices {
                     new ApiResponse(false, "Unable to verify User")));
         }
     }
+    public ResponseEntity verifyAddUser(HomeModel homeModel) {
+        try {
+            if (commonUtils.checkHomeModelSecurityCheck(homeModel))
+            {
+                return responseUtils.constructResponse(406,
+                        commonUtils.writeAsString(objectMapper,
+                                new ApiResponse(false,"Invalid Characters Not allowed")));
+            }
+            return homeRepo.verifyAddUser(homeModel);
+        } catch (Exception exception) {
+            logger.error("Exception in verify  the Add  User due to" + exception.getMessage(), exception);
+            return responseUtils.constructResponse(406, commonUtils.writeAsString(objectMapper,
+                    new ApiResponse(false, "Unable to verify User Add")));
+        }
+    }
 
     public ResponseEntity addMobileNumber(PhoneModel phoneModel) {
         try {
+            if (commonUtils.checkPhoneModelSecurityCheck(phoneModel))
+            {
+                return responseUtils.constructResponse(406,
+                        commonUtils.writeAsString(objectMapper,
+                                "Invalid Characters Not allowed "));
+            }
             return homeRepo.addMobileNumber(phoneModel);
         } catch (Exception exception) {
-            logger.error("Exception in addMobile Number  due to" + exception.getMessage(), exception);
+            logger.error("Exception in addMobile Number   due to" + exception.getMessage(), exception);
             return responseUtils.constructResponse(406, commonUtils.writeAsString(objectMapper,
                     new ApiResponse(false, "Unable to add Number")));
         }
     }
+
 
 
 }

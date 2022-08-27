@@ -3,9 +3,11 @@ package nr.king.familytracker.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
-import nr.king.familytracker.model.http.RandomString;
+import nr.king.familytracker.model.http.PhoneModel;
+import nr.king.familytracker.model.http.filterModel.FilterHistoryModel;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.model.http.purchaseModel.PurchaseRequestModel;
+import nr.king.familytracker.repo.NotificationModel;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -21,6 +23,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
@@ -213,7 +216,7 @@ public class CommonUtils {
 
     public Map<String, String> getHeadersMapForSpecific(String authHeader) {
         Map<String, String> headersMap = new LinkedHashMap<>();
-        headersMap.put("Accept:","application/json");
+        headersMap.put("Accept:", "application/json");
         headersMap.put("Content-Type", "application/json");
         headersMap.put("X-Auth-Token", authHeader);
         headersMap.put("User", authHeader);
@@ -221,26 +224,17 @@ public class CommonUtils {
     }
 
 
+    public String getExpiryTime(String purchaseMode) {
 
-    public String getExpiryTime(String purchaseMode)
-    {
-
-        String expiryTime="";
-        for (int i=0;i<SUBSCRIBTION_MODEL_ARRAYLIST.length;i++)
-        {
-            if (SUBSCRIBTION_MODEL_ARRAYLIST[i].equals(purchaseMode))
-            {
-              int   maxNumber =  MAX_NUMBER_ALLOWED[i];
-                if (maxNumber==10)
-                {
+        String expiryTime = "";
+        for (int i = 0; i < SUBSCRIBTION_MODEL_ARRAYLIST.length; i++) {
+            if (SUBSCRIBTION_MODEL_ARRAYLIST[i].equals(purchaseMode)) {
+                int maxNumber = MAX_NUMBER_ALLOWED[i];
+                if (maxNumber == 10) {
                     expiryTime = LocalDateTime.now().plusDays(7).toString();
-                }
-                else if (maxNumber==30)
-                {
+                } else if (maxNumber == 30) {
                     expiryTime = LocalDateTime.now().plusMonths(1).toString();
-                }
-                else if (maxNumber==100)
-                {
+                } else if (maxNumber == 100) {
                     expiryTime = LocalDateTime.now().plusMonths(3).toString();
                 }
                 break;
@@ -376,6 +370,7 @@ public class CommonUtils {
         headersMap.put("User", authHeader);
         return headersMap;
     }
+
     private void getBaseCondition(long integrationAccountId, String outletId, StringBuilder stringBuilder) {
         boolean isAndNeed = false;
         if (integrationAccountId != 0) {
@@ -393,9 +388,13 @@ public class CommonUtils {
         return skewCode == 520 || skewCode == 538 || skewCode == 260;
     }
 
-    public HomeModel getHomeModel(String token_header,boolean isFirstTime) {
+    public String getRandomString() {
+        return UUID.randomUUID().toString().substring(0, 12).replace("-", "f");
+    }
+
+    public HomeModel getHomeModel(String token_header, boolean isFirstTime) {
         HomeModel homeModel = new HomeModel();
-        String string = UUID.randomUUID().toString().substring(0,12).replace("-","f");
+        String string = UUID.randomUUID().toString().substring(0, 12).replace("-", "f");
         Map<String, String[]> phoneBrandsMap = new HashMap<>();
         phoneBrandsMap.put("Samsung", new String[]{
                 "Galaxy S22",
@@ -410,11 +409,11 @@ public class CommonUtils {
         }
 
         Pair<String, String> stringPair = getRandomMap(phoneBrandsMap);
-        homeModel.setId((isFirstTime)? token_header:string);
-        homeModel.setMobilePhone((isFirstTime)? token_header:string);
+        homeModel.setId((isFirstTime) ? token_header : string);
+        homeModel.setMobilePhone((isFirstTime) ? token_header : string);
         homeModel.setPhoneModel(stringPair.getSecond());
         homeModel.setPhoneBrand(stringPair.getFirst());
-        homeModel.setOneSignalExternalUserId((isFirstTime)? token_header:string);
+        homeModel.setOneSignalExternalUserId((isFirstTime) ? token_header : string);
         homeModel.setVersion(VERSION_CODE);
         homeModel.setAppId(APP_ID);
         return homeModel;
@@ -427,12 +426,73 @@ public class CommonUtils {
         //int random = ran.nextInt(1);
         String keyValue = keysAsArray.get(0);
         List<String> keyBrands = new ArrayList<>(List.of(phoneBrandsMap.get(keyValue)));
-       // random = ran.nextInt(0, keyBrands.size());
+        // random = ran.nextInt(0, keyBrands.size());
         return Pair.of(keyValue, keyBrands.get(2));
     }
 
 
     public String isNullOrEmty(String string) {
-        return string == null || string.isEmpty() || "null".equalsIgnoreCase(string)?"":string;
+        return string == null || string.isEmpty() || "null".equalsIgnoreCase(string) ? "" : string;
+    }
+
+    public static boolean validation(List<String> inputValueList) {
+        return inputValueList.stream().anyMatch(input -> (input.contains("<") || input.contains(">")));
+    }
+
+    public boolean checkAddOrWithoutAdd(String expiry_timr, String packageName, int credit_limit) {
+        return (
+                (System.currentTimeMillis() <= LocalDateTime.parse(expiry_timr)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli() && Arrays.asList(PACKAGE_ARRAY_WITHOUT_ADD).contains(packageName))
+                        ||
+                        40 <= credit_limit && Arrays.asList(PACKAGE_ARRAY_WITH_ADD).contains(packageName)
+        );
+    }
+
+    public boolean checkHomeModelSecurityCheck(HomeModel homeModel) {
+        return validate(Arrays.asList(isNullOrEmty(homeModel.getId()),
+                isNullOrEmty(homeModel.getPackageName()),
+                isNullOrEmty(homeModel.getCountryName()),
+                isNullOrEmty(homeModel.getAppId()),
+                isNullOrEmty(homeModel.getPhoneModel()), isNullOrEmty(homeModel.getMobilePhone()), isNullOrEmty(homeModel.getIpAddress()),
+                isNullOrEmty(homeModel.getOneSignalExternalUserId()), isNullOrEmty(homeModel.getPhoneBrand()), isNullOrEmty(homeModel.getVersion()))
+        );
+    }
+
+    public boolean checkPhoneModelSecurityCheck(PhoneModel phoneModel) {
+        return validate(Arrays.asList(
+                isNullOrEmty(phoneModel.getId()),
+                isNullOrEmty(phoneModel.getPhoneNumber()), isNullOrEmty(phoneModel.getPackageName()), isNullOrEmty(phoneModel.getNickName()),
+                isNullOrEmty(phoneModel.getPushToken()), isNullOrEmty(phoneModel.getCountryCode())));
+    }
+
+
+    public boolean checkFilterHistoryModel(FilterHistoryModel filterHistoryModel) {
+        return validate(Arrays.asList(isNullOrEmty(filterHistoryModel.getSecoundNumber()), isNullOrEmty(filterHistoryModel.getStartDate()),
+                isNullOrEmty(filterHistoryModel.getEndDate()), isNullOrEmty(filterHistoryModel.getPhoneNumber())));
+    }
+
+    public boolean checkNotificationModelSecurity(NotificationModel notificationModel) {
+        return validate(Arrays.asList(isNullOrEmty(notificationModel.getUserId()), isNullOrEmty(notificationModel.getPushToken()),
+                isNullOrEmty(notificationModel.getNickName())));
+    }
+
+    public boolean checkPurchaseRequestModelSecurity(PurchaseRequestModel purchaseRequestModel) {
+        return validate(Arrays.asList(isNullOrEmty(purchaseRequestModel.getAmount()),
+                isNullOrEmty(purchaseRequestModel.getPurchaseMode()), isNullOrEmty(purchaseRequestModel.getCountry()),
+                isNullOrEmty(purchaseRequestModel.getCountry()), isNullOrEmty(purchaseRequestModel.getPackageName()),
+                isNullOrEmty(purchaseRequestModel.getExpiryAt()), isNullOrEmty(purchaseRequestModel.getPurcasePlatform()),
+                isNullOrEmty(purchaseRequestModel.getTransactionId()), isNullOrEmty(purchaseRequestModel.getTransactionRemarks()),
+                isNullOrEmty(purchaseRequestModel.getAmount()), isNullOrEmty(purchaseRequestModel.getCreatedAt()),
+                isNullOrEmty(purchaseRequestModel.getUserId()), isNullOrEmty(purchaseRequestModel.getExpiryDate())
+        ));
+    }
+
+    public String getModel(String packageName) {
+        if (Arrays.asList(PACKAGE_ARRAY_WITH_ADD).contains(packageName)) {
+            return "demo";
+        }
+        return "Add";
     }
 }

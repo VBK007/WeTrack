@@ -48,18 +48,22 @@ public class GetHistoryRepo {
     public ResponseEntity getAllPhonesHistory(GetPageHistoryNumberModel getPhoneHistoryModel) {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
-                    .queryForRowSet(SELECT_USER_EXPIRY_TIME, getPhoneHistoryModel.getHomeModel().getId());
+                    .queryForRowSet(SELECT_USER_EXPIRY_TIME, getPhoneHistoryModel.getHomeModel().getId(),
+                            getPhoneHistoryModel.getHomeModel().getPackageName());
             if (sqlRowSet.next()) {
-                if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME"))
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli()) {
+                if (
+                        commonUtils.checkAddOrWithoutAdd(sqlRowSet.getString("Expiry_TIME"),
+                                getPhoneHistoryModel.getHomeModel().getPackageName(),
+                                sqlRowSet.getInt("credit_limit")
+                        )
+                ) {
                     SendStatusListToMobileModel sendStatusListToMobileModels = new SendStatusListToMobileModel();
                     ArrayList<SendHistorystatusToAppModel> finalList = new ArrayList<>();
                     SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
-                            .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT,is_noti_enabled from NUMBER_FOR_USERS " +
-                                            "where USER_ID=? order by CREATED_AT desc",
-                                    getPhoneHistoryModel.getHomeModel().getId());
+                            .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN," +
+                                            "CREATED_AT,UPDATED_AT,is_noti_enabled from NUMBER_FOR_USERS " +
+                                            "where USER_ID=? and PACKAGE_NAME=? order by CREATED_AT desc",
+                                    getPhoneHistoryModel.getHomeModel().getId(), getPhoneHistoryModel.getHomeModel().getPackageName());
 
                     while (numberSet.next()) {
                         getPhoneHistoryModel.setPhoneNumber(numberSet.getString("NUMBER"));
@@ -130,7 +134,6 @@ public class GetHistoryRepo {
     }
 
     private String getTimeStamp(String created_at) {
-
         String[] arraylist = created_at.split("");
         return arraylist[0] + "T" + arraylist[1];
     }
@@ -138,52 +141,19 @@ public class GetHistoryRepo {
     public ResponseEntity enableNotification(NotificationModel notificationModel) {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
-                    .queryForRowSet(SELECT_USER_EXPIRY_TIME, notificationModel.getUserId());
+                    .queryForRowSet(SELECT_USER_EXPIRY_TIME, notificationModel.getUserId(),notificationModel.getPackageName());
             if (sqlRowSet.next()) {
-                if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME"))
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli()) {
+                if (commonUtils.checkAddOrWithoutAdd(sqlRowSet.getString("Expiry_TIME"),
+                        notificationModel.packageName,
+                        sqlRowSet.getInt("CREDIT_LIMIT"))) {
                     SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
-                            .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT from NUMBER_FOR_USERS " +
-                                            "where USER_ID=? and NUMBER=?",
-                                    notificationModel.getUserId(), String.valueOf(notificationModel.getNumberId()));
+                            .queryForRowSet(
+                                    "select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT from NUMBER_FOR_USERS " +
+                                            "where USER_ID=? and NUMBER=? and PACKAGE_NAME=?",
+                                    notificationModel.getUserId(), String.valueOf(notificationModel.getNumberId()),notificationModel.getPackageName());
 
                     if (numberSet.next()) {
-
-                   /*   HttpResponse httpResponse = httpUtils.doPostRequest(0, GET_APP_USER,
-                              commonUtils.getHeadersMap(numberSet.getString("token_header")),
-                              "create user Expiry time",
-                              commonUtils.writeAsString(objectMapper,
-                                      new HomeModel(
-                                      )));
-
-                      MainHomeUserModel appUserModel = commonUtils.safeParseJSON(objectMapper,
-                              httpResponse.getResponse(),
-                              MainHomeUserModel.class);
-                      if (appUserModel!=null) {
-                          notificationModel.setUserId(appUserModel.getData().getFollowings().get(0).getUserId().toString());
-                          notificationModel.setNumberId(appUserModel.getData().getFollowings().get(0).getNumberId().longValue());
-                          HttpResponse enableNotifyRequest = httpUtils.doPostRequest(0, ENABLE_PUSH_NOTIFICATION,
-                                  commonUtils.getHeadersMapForSpecific(numberSet.getString("TOKEN_HEADER")),
-                                  "Push Notification for number" + notificationModel.numberId,
-                                  commonUtils.writeAsString(objectMapper, notificationModel)
-                          );
-                              HttpResponse setNotification = httpUtils.doPostRequest(0, SET_PUSH_NOTIFATION,
-                                      commonUtils.getHeadersMapForSpecific(numberSet.getString("TOKEN_HEADER")),
-                                      "Push Notification for number" + notificationModel.numberId,
-                                      commonUtils.writeAsString(objectMapper, new PushNotificationModel(
-                                              numberSet.getString("PUSH_TOKEN")
-                                      ))
-                              );
-
-                              logger.info("Notification Response"+setNotification.getResponseCode()+commonUtils.writeAsString(objectMapper, appUserModel));
-                          CommonResponse commonResponse = commonUtils.safeParseJSON(objectMapper, enableNotifyRequest.getResponse(), CommonResponse.class);
-
-                      }*/
-
                         int count = updateNumberValue(notificationModel);
-
                         if (count == 1) {
                             notificationModel.setPushToken(numberSet.getString("PUSH_TOKEN"));
                             notificationModel.setHeaderToken(numberSet.getString("TOKEN_HEADER"));
@@ -232,7 +202,8 @@ public class GetHistoryRepo {
     public int updateNumberValue(NotificationModel notificationModel) {
 
         return jdbcTemplateProvider.getTemplate().update(UPDATE_PUSH_NOTIFICATION,
-                notificationModel.isEnable(), notificationModel.getUserId(), notificationModel.getNumberId().toString());
+                notificationModel.isEnable(), notificationModel.getUserId(), notificationModel.getNumberId().toString(),
+                notificationModel.getPackageName());
 
     }
 }

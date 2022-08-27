@@ -29,6 +29,13 @@ public class FilterService {
     public ResponseEntity getFilterForUser(FilterHistoryModel filterHistoryModel)
     {
         try {
+            if (commonUtils.checkHomeModelSecurityCheck(filterHistoryModel.getHomeModel())||
+                    commonUtils.checkFilterHistoryModel(filterHistoryModel))
+            {
+                return responseUtils.constructResponse(406,
+                        commonUtils.writeAsString(objectMapper,
+                                "Invalid Characters Not allowed "));
+            }
             return filterRepo.getFilterData(filterHistoryModel);
         }
         catch (Exception exception)
@@ -41,6 +48,13 @@ public class FilterService {
 
     public ResponseEntity getCompareData(FilterHistoryModel getPhoneHistoryModel) {
         try {
+            if (commonUtils.checkHomeModelSecurityCheck(getPhoneHistoryModel.getHomeModel())||
+                    commonUtils.checkFilterHistoryModel(getPhoneHistoryModel))
+            {
+                return responseUtils.constructResponse(406,
+                        commonUtils.writeAsString(objectMapper,
+                                "Invalid Characters Not allowed "));
+            }
             return filterRepo.getCompareData(getPhoneHistoryModel);
         }
         catch (Exception exception)

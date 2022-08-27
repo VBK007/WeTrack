@@ -17,7 +17,9 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 
+import static nr.king.familytracker.constant.LocationTrackingConstants.PACKAGE_ARRAY_WITHOUT_ADD;
 import static nr.king.familytracker.constant.QueryConstants.SELECT_USER_EXPIRY_TIME;
 
 @Repository
@@ -43,14 +45,13 @@ public class ContactUserRepo {
     public ResponseEntity getInstaPackageName(HomeModel getPhoneHistoryModel) {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
-                    .queryForRowSet(SELECT_USER_EXPIRY_TIME,getPhoneHistoryModel.getId());
+                    .queryForRowSet(SELECT_USER_EXPIRY_TIME,getPhoneHistoryModel.getId(),getPhoneHistoryModel.getPackageName());
             if (sqlRowSet.next()) {
-                if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME"))
-                        .atZone(ZoneId.systemDefault())
-                        .toInstant()
-                        .toEpochMilli())
+                if (commonUtils.checkAddOrWithoutAdd(sqlRowSet.getString("Expiry_TIME"),
+                        getPhoneHistoryModel.getPackageName(),
+                        sqlRowSet.getInt("credit_limit")))
                 {
-                  if (getPhoneHistoryModel.getIpAddress().equals("com.withcodeplays.familytracker"))
+                  if (Arrays.asList(PACKAGE_ARRAY_WITHOUT_ADD).contains(getPhoneHistoryModel.getIpAddress()))
                   {
                       return responseUtils.constructResponse(200,commonUtils.writeAsString(objectMapper,
                               new ApiResponse(true,"Getting User","familytracking/")));

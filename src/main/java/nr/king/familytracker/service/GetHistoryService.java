@@ -13,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
+
 @Service
 public class GetHistoryService {
     @Autowired
@@ -29,6 +31,12 @@ public class GetHistoryService {
     private static final Logger logger = LogManager.getLogger(GetHistoryService.class);
     public ResponseEntity getAllPhonesHistory(GetPageHistoryNumberModel getPhoneHistoryModel) {
         try {
+            if (commonUtils.checkHomeModelSecurityCheck(getPhoneHistoryModel.getHomeModel())
+            ||commonUtils.validate(Arrays.asList(commonUtils.isNullOrEmty(getPhoneHistoryModel.getPhoneNumber()))))
+            {
+                return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
+                        "Inavlid character Not Allowed"));
+            }
             return  historyRepo.getAllPhonesHistory(getPhoneHistoryModel);
         }
         catch (Exception exception)
@@ -43,6 +51,11 @@ public class GetHistoryService {
     public ResponseEntity enableNotification(NotificationModel notificationModel) {
         try
         {
+            if (commonUtils.checkNotificationModelSecurity(notificationModel))
+            {
+                return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
+                        "Inavlid character Not Allowed"));
+            }
             return historyRepo.enableNotification(notificationModel);
         }
         catch (Exception exception)

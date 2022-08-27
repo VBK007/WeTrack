@@ -1,5 +1,7 @@
 package nr.king.familytracker.constant;
 
+import java.lang.reflect.Array;
+
 public class LocationTrackingConstants {
 
     public static final String STATUS = "status";
@@ -12,7 +14,7 @@ public class LocationTrackingConstants {
     public static final String MESSAGE = "message";
     public static final String EVENT_MASTER = "eventMaster";
 
-   /* public static final String POST_NUMBER = "http://chattrack.apiservicessarl.com/api/user/addNumberForUser";*/
+    /* public static final String POST_NUMBER = "http://chattrack.apiservicessarl.com/api/user/addNumberForUser";*/
     public static final String POST_NUMBER = "http://api.wtrackonline.com/api/user/addNumberForUser";
 
     // public static final String CREATE_USER = "http://chattrack.apiservicessarl.com/api/user/newUser";
@@ -38,15 +40,21 @@ public class LocationTrackingConstants {
 
     public static final String SUBSCIBE_STATUS = "http://chattrack.apiservicessarl.com/api/user/setSubscriptionStatus";
 
-   // public static final String GET_HISTORY = "http://chattrack.apiservicessarl.com/api/history/GetHistoriesByDate";
+    // public static final String GET_HISTORY = "http://chattrack.apiservicessarl.com/api/history/GetHistoriesByDate";
     public static final String GET_HISTORY = "http://api.wtrackonline.com/api/history/GetHistoriesByDate";
 
     public static final String REMOVE_NUMBER = "http://api.wtrackonline.com/api/user/removeNumberForUser";
 
-   // public static final String LOCAL_HOST_NUMBER = "http://localhost:8082/v1/update-status";
-    public static final String LOCAL_HOST_NUMBER = "http://3.92.177.250:8082/v1/update-status";
-    public static final String LOCAL_HOST_ADD_USER = "http://3.92.177.250:8082/v1/create-deviceUser";
+     public static final String LOCAL_HOST_NUMBER = "http://localhost:8082/v1/update-status";
+    //public static final String LOCAL_HOST_NUMBER = "http://3.92.177.250:8082/v1/update-status";
+    //public static final String LOCAL_HOST_ADD_USER = "http://3.92.177.250:8082/v1/create-deviceUser";
+    public static final String LOCAL_HOST_ADD_USER = "http://localhost:8082/v1/create-deviceUser";
 
+    public static final String[] PACKAGE_ARRAY_WITHOUT_ADD = {"com.withcodeplays.familytracker","com.withcodeplays.socialmediatracker"};
+    public static final String[] PACKAGE_ARRAY_WITH_ADD = {"com.withcodeplays.wetracker",
+            "com.withcodeplays.whattracker",
+            "com.withcodeplays.crushtracker",
+            "com.withcodeplays.onlinetracker"};
 
     public static final String[] SUBSCRIBTION_MODEL_ARRAYLIST = {"demo", "Standard", "Popular", "PromoCode", "Deluxe"};
     public static final int[] MAX_NUMBER_ALLOWED = {1, 2, 3, 5, 5};

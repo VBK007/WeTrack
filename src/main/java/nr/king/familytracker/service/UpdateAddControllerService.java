@@ -32,6 +32,11 @@ public class UpdateAddControllerService {
 
     public ResponseEntity storeUsers(HomeModel homeModel) {
         try {
+            if (commonUtils.checkHomeModelSecurityCheck(homeModel))
+            {
+                return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false,"Invalid Characters")));
+            }
             return homeRepo.saveUserDetails(homeModel);
         } catch (Exception exception) {
             logger.error("Exception in Storing the User due to" + exception.getMessage(), exception);
