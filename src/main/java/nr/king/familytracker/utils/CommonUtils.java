@@ -490,7 +490,7 @@ public class CommonUtils {
     }
 
     public String getModel(String packageName) {
-        if (Arrays.asList(PACKAGE_ARRAY_WITH_ADD).contains(packageName)) {
+        if (Arrays.asList(PACKAGE_ARRAY_WITHOUT_ADD).contains(packageName)) {
             return "demo";
         }
         return "Add";

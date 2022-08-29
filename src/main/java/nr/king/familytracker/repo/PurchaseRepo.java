@@ -45,6 +45,7 @@ public class PurchaseRepo {
     @Transactional
     public ResponseEntity makeOrder(PurchaseRequestModel purchaseRequestModel) {
         try {
+            logger.info("purchaseRequestModel "+commonUtils.writeAsString(objectMapper,purchaseRequestModel));
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(selectNumberWithToken, purchaseRequestModel.getUserId(),purchaseRequestModel.getPackageName());
             if (sqlRowSet.next()) {
                 int count = updatePuchaseDetails(purchaseRequestModel);

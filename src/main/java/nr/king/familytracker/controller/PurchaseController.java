@@ -23,7 +23,7 @@ public class PurchaseController  extends BaseController{
     }
 
     @PostMapping("/v{version:[1]}/get-apiTransction")
-    public ResponseEntity makeOrder(@RequestBody HomeModel homeModel)
+    public ResponseEntity makeOrders(@RequestBody HomeModel homeModel)
     {
         return purchaseService.getUserAPI(homeModel);
     }

@@ -594,12 +594,13 @@ public class HomeRepo {
     private int doandCreateLoginNumberOfTime(HomeModel homeModel) {
         return jdbcTemplateProvider.getTemplate().update("insert into WE_TRACK_USERS_NO_OF_LOGIN " +
                         "(USER_ID,MOBILE_MODEL,IP_ADDRESS,COUNTRY,ONE_SIGNAL_EXTERNAL_USERID,MOBILE_VERSION,Expiry_TIME,IS_PURCHASED," +
-                        "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,PACKAGE_NAME,CREDIT_LIMIT) " +
-                        "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?)",
+                        "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,PACKAGE_NAME,CREDIT_LIMIT,DAY) " +
+                        "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?)",
                 homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(), homeModel.getCountryName(),
                 homeModel.getOneSignalExternalUserId(), homeModel.getAppId(), LocalDateTime.now().plusHours(3).toString(), false, false,
                 "", false, WETRACK + homeModel.getId(), homeModel.getPackageName(),
-                100
+                100,
+                LocalDateTime.now().toLocalDate().toString()
         );
     }
 
