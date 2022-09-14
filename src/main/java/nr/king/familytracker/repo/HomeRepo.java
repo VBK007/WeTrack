@@ -491,7 +491,7 @@ public class HomeRepo {
             notificationModel.setNickName(phoneModel.getNickName());
             notificationModel.setEnable(true);
             notificationModel.setNumberId(Long.valueOf(phoneModel.getPhoneNumber()));
-            new Thread(() -> doNotifyInNewServer(notificationModel, homeModel.getId()));
+            new Thread(() -> doNotifyInNewServer(notificationModel, homeModel.getId())).start();
             return responseUtils.constructResponse(200,
                     commonUtils.writeAsString(objectMapper,
                             new ApiResponse(true, "Phone Number added Successfully")));
@@ -512,7 +512,7 @@ public class HomeRepo {
                     );
             logger.info("enablePush Notification" + enableSchedularPush.getResponseCode());
         } catch (Exception exception) {
-            exception.printStackTrace();
+            logger.info("Exception error while sending user number "+exception.getMessage(),exception);
         }
     }
 

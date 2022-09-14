@@ -179,6 +179,7 @@ public class GetHistoryRepo {
 
                     }
 
+
                 } else {
                     return responseUtils.constructResponse(200,
                             commonUtils.writeAsString(objectMapper,

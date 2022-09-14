@@ -5,6 +5,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import scala.math.Ordering;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +27,7 @@ public class BaseController {
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put(STATUS, FALSE);
         responseMap.put(MESSAGE, ex.getMessage());
+
         return responseMap;
     }
 
