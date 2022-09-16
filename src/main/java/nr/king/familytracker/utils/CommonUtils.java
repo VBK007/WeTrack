@@ -4,9 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
 import nr.king.familytracker.model.http.PhoneModel;
+import nr.king.familytracker.model.http.currency.CurrecyModel;
 import nr.king.familytracker.model.http.filterModel.FilterHistoryModel;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
+import nr.king.familytracker.model.http.purchaseModel.PremiumModels;
 import nr.king.familytracker.model.http.purchaseModel.PurchaseRequestModel;
+import nr.king.familytracker.model.http.purchaseModel.UpdateUpiDetails;
 import nr.king.familytracker.repo.NotificationModel;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
@@ -384,6 +387,9 @@ public class CommonUtils {
     }
 
 
+
+
+
     public boolean isValidSkewCode(int skewCode) {
         return skewCode == 520 || skewCode == 538 || skewCode == 260;
     }
@@ -494,5 +500,11 @@ public class CommonUtils {
             return "demo";
         }
         return "Add";
+    }
+
+    public boolean checkPremiumModel(UpdateUpiDetails premiumModels) {
+        return validate(Arrays.asList(isNullOrEmty(premiumModels.getPriceStag()),isNullOrEmty(premiumModels.getTextColor()),
+                isNullOrEmty(premiumModels.getTopDescription()),isNullOrEmty(premiumModels.getTopHeader()),
+                isNullOrEmty(premiumModels.getBackGroundColour()),isNullOrEmty(premiumModels.getMoneyInInr()),isNullOrEmty(premiumModels.getMoneyInUsd())));
     }
 }

@@ -50,5 +50,22 @@ public class QueryConstants {
     public static  final  String UPDATE_PUSH_NOTIFICATION =
             "update NUMBER_FOR_USERS set is_noti_enabled=? where USER_ID=? and NUMBER=? and PACKAGE_NAME=?";
 
+    public static final String UPDATE_API_PURCHASE="UPDATE UPI_DETAILS SET UPI_ID=?,PURCHASE_TYPE=?PURCHASE_DESCRIBITION=?,MONEY_IN_INR=?,MONEY_IN_USD=?,COLOR_CODE=?,COLOR_BAR=?,UPDATED_AT=current_timestamp WHERE ID=?";
+
+    public static final String ADD_API_PURCHASE ="insert into UPI_DETAILS(UPI_ID,PURCHASE_TYPE,PURCHASE_DESCRIBITION,MONEY_IN_INR,MONEY_IN_USD,COLOR_CODE,COLOR_BAR,CREATED_AT,UPDATED_AT)" +
+            "values (?,?,?,?,?,?,?,current_timestamp,current_timestamp)";
+
+    public static final  String INSERT_COUNTRY_CURRENCY =
+            "insert into CURRENCY_VALUES (SYMBOL,CODE,SYMBOL_NATIVE,COUNTRY_CODE,DECIMAL_DIGITS,ROUNDING,MONEY_ONE_DAY,MONEY_ONE_WEEK,MONEY_ONE_MONTH," +
+                    "MONEY_THREE_MONTH,MONEY_ONE_YEAR,CREATED_AT,UPDATED_AT) " +
+             "values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, current_timestamp,current_timestamp)";
+
+
+    public static  final  String UPDATE_NUMBER_CURRENCY=
+            "update CURRENCY_VALUES set SYMBOL=?,CODE=?,COUNTRY_CODE=?,DECIMAL_DIGITS=?,ROUNDING=?,MONEY_ONE_DAY=?,MONEY_ONE_WEEK=?," +
+                    "MONEY_ONE_MONTH=?,MONEY_THREE_MONTH=?,MONEY_ONE_YEAR=?," +
+                    "UPDATED_AT=current_timestamp where ID=?";
+
+    public static final  String GET_MONEY_FOR_THAT_COUNTRY = "SELECT MONEY_ONE_DAY,MONEY_ONE_WEEK,MONEY_ONE_MONTH,MONEY_THREE_MONTH,MONEY_ONE_YEAR,SYMBOL_NATIVE WHERE COUNTRY_CODE=?";
 
 }

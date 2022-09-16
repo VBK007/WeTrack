@@ -1,0 +1,22 @@
+CREATE TABLE CURRENCY_VALUES
+(
+    ID                BIGSERIAL,
+    SYMBOL            TEXT             NOT NULL,
+    CODE              TEXT             NOT NULL,
+    SYMBOL_NATIVE     TEXT             NOT NULL,
+    COUNTRY_CODE      TEXT             NOT NULL,
+    DECIMAL_DIGITS    INTEGER          NOT NULL,
+    ROUNDING          DOUBLE PRECISION NOT NULL,
+    MONEY_ONE_DAY     TEXT             NOT NULL,
+    MONEY_ONE_WEEK    TEXT             NOT NULL,
+    MONEY_ONE_MONTH   TEXT             NOT NULL,
+    MONEY_THREE_MONTH TEXT             NOT NULL,
+    MONEY_ONE_YEAR    TEXT             NOT NULL,
+    CREATED_AT        TIMESTAMP        NOT NULL,
+    UPDATED_AT        TIMESTAMP        NOT NULL,
+    PRIMARY KEY (ID,COUNTRY_CODE)
+);
+
+CREATE INDEX CURRENCY_VALUES_INDEX
+    ON CURRENCY_VALUES (ID, COUNTRY_CODE);
+

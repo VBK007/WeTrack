@@ -3,7 +3,9 @@ package nr.king.familytracker.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.model.http.ApiResponse;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
+import nr.king.familytracker.model.http.purchaseModel.PremiumModels;
 import nr.king.familytracker.model.http.purchaseModel.PurchaseRequestModel;
+import nr.king.familytracker.model.http.purchaseModel.UpdateUpiDetails;
 import nr.king.familytracker.repo.PurchaseRepo;
 import nr.king.familytracker.utils.CommonUtils;
 import nr.king.familytracker.utils.ResponseUtils;
@@ -73,6 +75,23 @@ public class PurchaseService {
                         new ApiResponse(false,"Invalid Characters")));
             }
             return  purchaseRepo.updateTiming(homeModel);
+        } catch (Exception exception) {
+            logger.error("Exception in UpdateTimning service due to" + exception.getMessage(), exception);
+            return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,new ApiResponse(
+                    false,
+                    "Unable to Update Time for Testing"
+            )));
+        }
+    }
+
+    public ResponseEntity inAppPurchase(UpdateUpiDetails premiumModels) {
+        try {
+            if (commonUtils.checkPremiumModel(premiumModels))
+            {
+                return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false,"Invalid Characters")));
+            }
+            return  purchaseRepo.updateAppPurchase(premiumModels);
         } catch (Exception exception) {
             logger.error("Exception in UpdateTimning service due to" + exception.getMessage(), exception);
             return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,new ApiResponse(

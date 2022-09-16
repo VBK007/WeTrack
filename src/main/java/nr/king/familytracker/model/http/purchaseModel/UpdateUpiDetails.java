@@ -9,17 +9,14 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class PremiumModels {
+public class UpdateUpiDetails {
     private String topHeader;
     private String topDescription;
     private String priceStag;
-    private String moneyForOneDay;
-    private String moneyForOneWeek;
-    private String moneyForOneMonth;
-    private String moneyForThreeMonth;
-    private String moneyForOneYear;
     private String backGroundColour;
     private String textColor;
-    private String productIds;
-    private String symbolNative;
+    private String upiId;
+    private String moneyInInr;
+    private String moneyInUsd;
+    private Long id;
 }

@@ -56,6 +56,9 @@ public class LocationTrackingConstants {
             "com.withcodeplays.crushtracker",
             "com.withcodeplays.onlinetracker"};
 
+    public static final String CURRECY_CONVERTER ="lkmiK7UKdmBwSqJmvXQtO73dEW5M6sor";
+
+    public static final String API_FOR_CURRENCY_CONVERTION ="https://api.apilayer.com/fixer/convert?";
     public static final String[] SUBSCRIBTION_MODEL_ARRAYLIST = {"demo", "Standard", "Popular", "PromoCode", "Deluxe"};
     public static final int[] MAX_NUMBER_ALLOWED = {1, 2, 3, 5, 5};
 

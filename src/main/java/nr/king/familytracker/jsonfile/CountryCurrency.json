@@ -1,0 +1,1220 @@
+{
+  "listofCountry": [
+    {
+      "symbol": "AED",
+      "code": "AED",
+      "countryCode": "AE",
+      "symbol_native": "د.إ.\u200F",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "AFN",
+      "code": "AFN",
+      "countryCode": "AF",
+      "symbol_native": "؋",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "ALL",
+      "code": "ALL",
+      "countryCode": "AL",
+      "symbol_native": "Lekë",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "AMD",
+      "code": "AMD",
+      "countryCode": "AM",
+      "symbol_native": "֏",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "ANG",
+      "code": "ANG",
+      "countryCode": "AN",
+      "symbol_native": "NAf.",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "AOA",
+      "code": "AOA",
+      "countryCode": "AO",
+      "symbol_native": "Kz",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "ARS",
+      "code": "ARS",
+      "countryCode": "AR",
+      "symbol_native": "$",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "A$",
+      "code": "AUD",
+      "countryCode": "AU",
+      "symbol_native": "$",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "AWG",
+      "code": "AWG",
+      "countryCode": "AW",
+      "symbol_native": "Afl.",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "AZN",
+      "code": "AZN",
+      "countryCode": "AZ",
+      "symbol_native": "\u20BC",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BAM",
+      "code": "BAM",
+      "countryCode": "BA",
+      "symbol_native": "КМ",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BBD",
+      "code": "BBD",
+      "countryCode": "BB",
+      "symbol_native": "$",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BDT",
+      "code": "BDT",
+      "countryCode": "BD",
+      "symbol_native": "৳",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BGN",
+      "code": "BGN",
+      "countryCode": "BG",
+      "symbol_native": "лв.",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BHD",
+      "code": "BHD",
+      "countryCode": "BH",
+      "symbol_native": "د.ب.\u200F",
+      "decimal_digits": 3,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BIF",
+      "code": "BIF",
+      "countryCode": "BI",
+      "symbol_native": "FBu",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BMD",
+      "code": "BMD",
+      "countryCode": "BM",
+      "symbol_native": "$",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BND",
+      "code": "BND",
+      "countryCode": "BN",
+      "symbol_native": "$",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BOB",
+      "code": "BOB",
+      "countryCode": "BO",
+      "symbol_native": "Bs",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "R$",
+      "code": "BRL",
+      "countryCode": "BR",
+      "symbol_native": "R$",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BSD",
+      "code": "BSD",
+      "countryCode": "BS",
+      "symbol_native": "$",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BTN",
+      "countryCode": "BT",
+      "code": "BTN",
+      "symbol_native": "Nu.",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BWP",
+      "code": "BWP",
+      "symbol_native": "P",
+      "countryCode": "BW",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BYN",
+      "code": "BYN",
+      "symbol_native": "Br",
+      "countryCode": "BY",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "BZD",
+      "code": "BZD",
+      "symbol_native": "$",
+      "countryCode": "BZ",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "CA$",
+      "code": "CAD",
+      "symbol_native": "$",
+      "countryCode": "CA",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "CDF",
+      "code": "CDF",
+      "symbol_native": "FC",
+      "countryCode": "CD",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "CHF",
+      "code": "CHF",
+      "symbol_native": "CHF",
+      "countryCode": "CH",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "CLP",
+      "code": "CLP",
+      "symbol_native": "$",
+      "countryCode": "CL",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "CN¥",
+      "code": "CNY",
+      "symbol_native": "¥",
+      "countryCode": "CN",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "COP",
+      "code": "COP",
+      "symbol_native": "$",
+      "countryCode": "CO",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "CRC",
+      "code": "CRC",
+      "symbol_native": "\u20A1",
+      "decimal_digits": 2,
+      "countryCode": "CR",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "CUP",
+      "code": "CUP",
+      "symbol_native": "$",
+      "countryCode": "CU",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "CVE",
+      "code": "CVE",
+      "symbol_native": "\u200B",
+      "decimal_digits": 2,
+      "countryCode": "CV",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "CZK",
+      "code": "CZK",
+      "symbol_native": "Kč",
+      "countryCode": "CZ",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "DJF",
+      "code": "DJF",
+      "symbol_native": "Fdj",
+      "countryCode": "DJ",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "DKK",
+      "code": "DKK",
+      "symbol_native": "kr.",
+      "countryCode": "DK",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "DOP",
+      "code": "DOP",
+      "symbol_native": "RD$",
+      "countryCode": "DO",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "DZD",
+      "code": "DZD",
+      "symbol_native": "د.ج.\u200F",
+      "countryCode": "DZ",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "EGP",
+      "code": "EGP",
+      "countryCode": "EG",
+      "symbol_native": "ج.م.\u200F",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "ERN",
+      "code": "ERN",
+      "symbol_native": "Nfk",
+      "countryCode": "ER",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "ETB",
+      "code": "ETB",
+      "symbol_native": "ብር",
+      "countryCode": "ET",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "\u20AC",
+      "code": "EUR",
+      "symbol_native": "\u20AC",
+      "countryCode": "EU",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "FJD",
+      "code": "FJD",
+      "symbol_native": "$",
+      "countryCode": "FJ",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "FKP",
+      "code": "FKP",
+      "symbol_native": "£",
+      "countryCode": "FK",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "£",
+      "code": "GBP",
+      "symbol_native": "£",
+      "decimal_digits": 2,
+      "rounding": 0.0,
+      "countryCode": "GB"
+    },
+    {
+      "symbol": "GEL",
+      "code": "GEL",
+      "symbol_native": "\u20BE",
+      "decimal_digits": 2,
+      "countryCode": "GE",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "GHS",
+      "code": "GHS",
+      "symbol_native": "GH\u20B5",
+      "decimal_digits": 2,
+      "countryCode": "GH",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "GIP",
+      "code": "GIP",
+      "symbol_native": "£",
+      "decimal_digits": 2,
+      "countryCode": "GI",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "GMD",
+      "code": "GMD",
+      "symbol_native": "D",
+      "countryCode": "GM",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "GNF",
+      "code": "GNF",
+      "symbol_native": "FG",
+      "decimal_digits": 0,
+      "countryCode": "GN",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "GTQ",
+      "code": "GTQ",
+      "symbol_native": "Q",
+      "countryCode": "GT",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "GYD",
+      "code": "GYD",
+      "symbol_native": "$",
+      "decimal_digits": 0,
+      "countryCode": "GY",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "HK$",
+      "code": "HKD",
+      "symbol_native": "HK$",
+      "countryCode": "HK",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "HNL",
+      "code": "HNL",
+      "symbol_native": "L",
+      "decimal_digits": 2,
+      "countryCode": "HN",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "HRK",
+      "code": "HRK",
+      "symbol_native": "HRK",
+      "countryCode": "HR",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "HTG",
+      "code": "HTG",
+      "symbol_native": "G",
+      "decimal_digits": 2,
+      "countryCode": "HT",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "HUF",
+      "code": "HUF",
+      "symbol_native": "Ft",
+      "decimal_digits": 2,
+      "countryCode": "HU",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "IDR",
+      "code": "IDR",
+      "symbol_native": "Rp",
+      "countryCode": "ID",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "\u20AA",
+      "code": "ILS",
+      "symbol_native": "\u20AA",
+      "decimal_digits": 2,
+      "rounding": 0.0,
+      "countryCode": "IL"
+    },
+    {
+      "symbol": "\u20B9",
+      "code": "INR",
+      "symbol_native": "\u20B9",
+      "countryCode": "IN",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "IQD",
+      "code": "IQD",
+      "symbol_native": "د.ع.\u200F",
+      "countryCode": "IQ",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "IRR",
+      "code": "IRR",
+      "symbol_native": "IRR",
+      "decimal_digits": 0,
+      "countryCode": "IR",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "ISK",
+      "code": "ISK",
+      "symbol_native": "ISK",
+      "countryCode": "IS",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "JMD",
+      "code": "JMD",
+      "symbol_native": "$",
+      "countryCode": "JM",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "JOD",
+      "code": "JOD",
+      "symbol_native": "د.أ.\u200F",
+      "countryCode": "JO",
+      "decimal_digits": 3,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "¥",
+      "code": "JPY",
+      "symbol_native": "￥",
+      "countryCode": "JP",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "KES",
+      "code": "KES",
+      "symbol_native": "Ksh",
+      "countryCode": "KE",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "KGS",
+      "code": "KGS",
+      "symbol_native": "сом",
+      "countryCode": "KG",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "KHR",
+      "code": "KHR",
+      "symbol_native": "៛",
+      "countryCode": "KH",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "KMF",
+      "code": "KMF",
+      "symbol_native": "CF",
+      "countryCode": "KM",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "KPW",
+      "code": "KPW",
+      "symbol_native": "KPW",
+      "countryCode": "KP",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "\u20A9",
+      "code": "KRW",
+      "symbol_native": "\u20A9",
+      "countryCode": "KR",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "KWD",
+      "code": "KWD",
+      "symbol_native": "د.ك.\u200F",
+      "countryCode": "KW",
+      "decimal_digits": 3,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "KYD",
+      "code": "KYD",
+      "symbol_native": "$",
+      "countryCode": "KY",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "KZT",
+      "code": "KZT",
+      "symbol_native": "\u20B8",
+      "countryCode": "KZ",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "LAK",
+      "code": "LAK",
+      "symbol_native": "\u20AD",
+      "countryCode": "LA",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "LBP",
+      "code": "LBP",
+      "symbol_native": "ل.ل.\u200F",
+      "countryCode": "LB",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "LKR",
+      "code": "LKR",
+      "symbol_native": "රු.",
+      "countryCode": "LK",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "LRD",
+      "code": "LRD",
+      "symbol_native": "$",
+      "countryCode": "LR",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "LSL",
+      "code": "LSL",
+      "symbol_native": "LSL",
+      "countryCode": "LS",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "LYD",
+      "code": "LYD",
+      "symbol_native": "د.ل.\u200F",
+      "countryCode": "LY",
+      "decimal_digits": 3,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "MAD",
+      "code": "MAD",
+      "symbol_native": "د.م.\u200F",
+      "countryCode": "MA",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "MDL",
+      "code": "MDL",
+      "symbol_native": "L",
+      "countryCode": "MD",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "MGA",
+      "code": "MGA",
+      "symbol_native": "Ar",
+      "countryCode": "MG",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "MKD",
+      "code": "MKD",
+      "symbol_native": "ден",
+      "countryCode": "MK",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "MMK",
+      "code": "MMK",
+      "symbol_native": "K",
+      "countryCode": "MM",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "MNT",
+      "code": "MNT",
+      "symbol_native": "\u20AE",
+      "countryCode": "MN",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "MOP",
+      "code": "MOP",
+      "symbol_native": "MOP$",
+      "countryCode": "MO",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "MRO",
+      "code": "MRO",
+      "symbol_native": "أ.م.\u200F",
+      "countryCode": "MR",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "MUR",
+      "code": "MUR",
+      "symbol_native": "Rs",
+      "countryCode": "MU",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "MWK",
+      "code": "MWK",
+      "symbol_native": "MK",
+      "countryCode": "MW",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "MX$",
+      "code": "MXN",
+      "symbol_native": "$",
+      "countryCode": "MX",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "MYR",
+      "code": "MYR",
+      "countryCode": "MY",
+      "symbol_native": "RM",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "MZN",
+      "code": "MZN",
+      "symbol_native": "MTn",
+      "countryCode": "MZ",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "NAD",
+      "code": "NAD",
+      "symbol_native": "$",
+      "countryCode": "NA",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "NGN",
+      "code": "NGN",
+      "symbol_native": "\u20A6",
+      "countryCode": "NG",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "NIO",
+      "code": "NIO",
+      "symbol_native": "C$",
+      "countryCode": "NI",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "NOK",
+      "code": "NOK",
+      "symbol_native": "kr",
+      "countryCode": "NO",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "NPR",
+      "code": "NPR",
+      "symbol_native": "नेरू",
+      "countryCode": "NP",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "NZ$",
+      "code": "NZD",
+      "symbol_native": "$",
+      "countryCode": "NZ",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "OMR",
+      "code": "OMR",
+      "symbol_native": "ر.ع.\u200F",
+      "countryCode": "OM",
+      "decimal_digits": 3,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "PAB",
+      "code": "PAB",
+      "symbol_native": "B\/.",
+      "countryCode": "PA",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "PEN",
+      "code": "PEN",
+      "symbol_native": "S\/",
+      "countryCode": "PE",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "PGK",
+      "code": "PGK",
+      "symbol_native": "K",
+      "decimal_digits": 2,
+      "countryCode": "PG",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "PHP",
+      "code": "PHP",
+      "symbol_native": "\u20B1",
+      "countryCode": "PH",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "PKR",
+      "code": "PKR",
+      "symbol_native": "Rs",
+      "countryCode": "PK",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "PLN",
+      "code": "PLN",
+      "symbol_native": "zł",
+      "countryCode": "PL",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "PYG",
+      "code": "PYG",
+      "symbol_native": "Gs.",
+      "countryCode": "PY",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "QAR",
+      "code": "QAR",
+      "symbol_native": "ر.ق.\u200F",
+      "countryCode": "QA",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "RON",
+      "code": "RON",
+      "symbol_native": "RON",
+      "countryCode": "RO",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "RSD",
+      "code": "RSD",
+      "symbol_native": "RSD",
+      "countryCode": "RS",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "RUB",
+      "code": "RUB",
+      "symbol_native": "\u20BD",
+      "countryCode": "RU",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "RWF",
+      "code": "RWF",
+      "symbol_native": "RF",
+      "countryCode": "RW",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "SAR",
+      "code": "SAR",
+      "symbol_native": "ر.س.\u200F",
+      "decimal_digits": 2,
+      "countryCode": "SA",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "SBD",
+      "code": "SBD",
+      "symbol_native": "$",
+      "countryCode": "SB",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "SCR",
+      "code": "SCR",
+      "symbol_native": "SR",
+      "decimal_digits": 2,
+      "countryCode": "SC",
+      "rounding": 0.0
+    },
+    {
+      "symbol": "SDG",
+      "code": "SDG",
+      "symbol_native": "ج.س.",
+      "countryCode": "SD",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "SEK",
+      "code": "SEK",
+      "symbol_native": "kr",
+      "countryCode": "SE",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "SGD",
+      "code": "SGD",
+      "symbol_native": "$",
+      "countryCode": "SG",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "SHP",
+      "code": "SHP",
+      "symbol_native": "£",
+      "countryCode": "SH",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "SLL",
+      "code": "SLL",
+      "symbol_native": "Le",
+      "countryCode": "SL",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "SOS",
+      "code": "SOS",
+      "symbol_native": "S",
+      "countryCode": "SO",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "SRD",
+      "code": "SRD",
+      "symbol_native": "$",
+      "countryCode": "SR",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "SSP",
+      "code": "SSP",
+      "symbol_native": "£",
+      "countryCode": "SS",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "STN",
+      "code": "STN",
+      "symbol_native": "STN",
+      "countryCode": "ST",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "SYP",
+      "code": "SYP",
+      "symbol_native": "ل.س.\u200F",
+      "countryCode": "SY",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "SZL",
+      "code": "SZL",
+      "symbol_native": "E",
+      "countryCode": "SZ",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "THB",
+      "code": "THB",
+      "symbol_native": "THB",
+      "countryCode": "TH",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "TJS",
+      "code": "TJS",
+      "symbol_native": "сом.",
+      "countryCode": "TJ",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "TND",
+      "code": "TND",
+      "symbol_native": "د.ت.\u200F",
+      "countryCode": "TN",
+      "decimal_digits": 3,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "TOP",
+      "code": "TOP",
+      "symbol_native": "T$",
+      "countryCode": "TO",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "TRY",
+      "code": "TRY",
+      "symbol_native": "\u20BA",
+      "countryCode": "TR",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "TTD",
+      "code": "TTD",
+      "symbol_native": "$",
+      "countryCode": "TT",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "NT$",
+      "code": "TWD",
+      "symbol_native": "$",
+      "countryCode": "TW",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "TZS",
+      "code": "TZS",
+      "symbol_native": "TSh",
+      "countryCode": "TZ",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "UAH",
+      "code": "UAH",
+      "symbol_native": "\u20B4",
+      "countryCode": "UA",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "UGX",
+      "code": "UGX",
+      "symbol_native": "USh",
+      "countryCode": "UG",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "$",
+      "code": "USD",
+      "symbol_native": "$",
+      "countryCode": "US",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "UYU",
+      "code": "UYU",
+      "symbol_native": "$",
+      "countryCode": "UY",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "UZS",
+      "code": "UZS",
+      "symbol_native": "сўм",
+      "countryCode": "UZ",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "VEF",
+      "code": "VEF",
+      "symbol_native": "Bs.",
+      "countryCode": "VE",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "\u20AB",
+      "code": "VND",
+      "symbol_native": "\u20AB",
+      "countryCode": "VN",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "VUV",
+      "code": "VUV",
+      "symbol_native": "VT",
+      "countryCode": "VU",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "WST",
+      "code": "WST",
+      "symbol_native": "WS$",
+      "countryCode": "WS",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "FCFA",
+      "code": "XAF",
+      "symbol_native": "FCFA",
+      "countryCode": "XA",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "EC$",
+      "code": "XCD",
+      "symbol_native": "$",
+      "countryCode": "XC",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "CFA",
+      "code": "XOF",
+      "symbol_native": "CFA",
+      "countryCode": "XO",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "CFPF",
+      "code": "XPF",
+      "symbol_native": "FCFP",
+      "countryCode": "XP",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "YER",
+      "code": "YER",
+      "symbol_native": "ر.ي.\u200F",
+      "countryCode": "YE",
+      "decimal_digits": 0,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "ZAR",
+      "code": "ZAR",
+      "symbol_native": "R",
+      "countryCode": "ZA",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    },
+    {
+      "symbol": "ZMW",
+      "code": "ZMW",
+      "countryCode": "ZM",
+      "symbol_native": "K",
+      "decimal_digits": 2,
+      "rounding": 0.0
+    }
+  ]
+}
