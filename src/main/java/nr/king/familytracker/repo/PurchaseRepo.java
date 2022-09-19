@@ -165,7 +165,15 @@ public class PurchaseRepo {
             SqlRowSet mobileRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_USER_EXIT, homeModel.getId(), homeModel.getPackageName());
             if (mobileRowSet.next()) {
                 SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_UPI_VALUES);
-                SqlRowSet countryValues = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_MONEY_FOR_THAT_COUNTRY, homeModel.getCountryName().toUpperCase());
+                String country="";
+                if (homeModel.getCountryName().equals("in"))
+                {
+                    country="IN";
+                }
+                else{
+                    country ="US";
+                }
+                SqlRowSet countryValues = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_MONEY_FOR_THAT_COUNTRY, country);
                 if (countryValues.wasNull()) {
                     countryValues = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_MONEY_FOR_THAT_COUNTRY, "US");
                 }
