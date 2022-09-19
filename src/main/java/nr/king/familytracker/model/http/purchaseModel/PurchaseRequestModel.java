@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import nr.king.familytracker.model.http.homeModel.HomeModel;
 
 @Getter
 @Setter
@@ -21,4 +22,5 @@ public class PurchaseRequestModel {
     private String createdAt;
     private String expiryAt;
     private String packageName;
+    private HomeModel homeModel;
 }

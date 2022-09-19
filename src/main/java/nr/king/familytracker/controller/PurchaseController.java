@@ -3,6 +3,7 @@ package nr.king.familytracker.controller;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.model.http.purchaseModel.PremiumModels;
 import nr.king.familytracker.model.http.purchaseModel.PurchaseRequestModel;
+import nr.king.familytracker.model.http.purchaseModel.PurchaseUpdateRequestModel;
 import nr.king.familytracker.model.http.purchaseModel.UpdateUpiDetails;
 import nr.king.familytracker.service.PurchaseService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +33,9 @@ public class PurchaseController  extends BaseController{
 
 
     @PostMapping("/v{version:[1]}/update-apiTransction")
-    public ResponseEntity updateInAppPurchase(@RequestBody UpdateUpiDetails homeModel)
+    public ResponseEntity updateInAppPurchase(@RequestBody PurchaseUpdateRequestModel purchaseUpdateRequestModel)
     {
-        return purchaseService.inAppPurchase(homeModel);
+        return purchaseService.inAppPurchase(purchaseUpdateRequestModel);
     }
 
 

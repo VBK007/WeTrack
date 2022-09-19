@@ -54,6 +54,7 @@ public class Interceptor implements HandlerInterceptor {
             return true;
         }
         else{
+            logger.info("Auth token is "+commonUtils.writeAsString(objectMapper,authToken));
             String[] tokenArray =  commonUtils.base64Decode(authToken).split(":");
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
                     .queryForRowSet("select AUTH_TOKEN from AUTH_TOKEN where  USER_ID=?",tokenArray[1]);

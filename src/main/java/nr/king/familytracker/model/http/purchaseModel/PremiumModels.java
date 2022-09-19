@@ -22,4 +22,5 @@ public class PremiumModels {
     private String textColor;
     private String productIds;
     private String symbolNative;
+    private String moneyForThatCountry;
 }

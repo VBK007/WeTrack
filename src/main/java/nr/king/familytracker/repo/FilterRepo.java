@@ -261,7 +261,6 @@ public class FilterRepo {
                                 commonUtils.writeAsString(objectMapper, localFilterModel)
                         );
                         GetPhoneHistoryMainArrayModel commonResponse = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(), GetPhoneHistoryMainArrayModel.class);
-                        logger.info("compare data "+commonUtils.writeAsString(objectMapper,commonResponse));
                         commonResponseList.add(new CommonResponse(commonResponse.getData()));
 
                     }

@@ -4,27 +4,25 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.exceptions.FailedResponseException;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
 import nr.king.familytracker.model.http.ApiResponse;
+import nr.king.familytracker.model.http.HttpResponse;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
-import nr.king.familytracker.model.http.purchaseModel.PremiumModels;
-import nr.king.familytracker.model.http.purchaseModel.PurchaseRequestModel;
-import nr.king.familytracker.model.http.purchaseModel.UpdateUpiDetails;
-import nr.king.familytracker.model.http.purchaseModel.UpiTransactionValue;
+import nr.king.familytracker.model.http.purchaseModel.*;
 import nr.king.familytracker.utils.CommonUtils;
+import nr.king.familytracker.utils.HttpUtils;
 import nr.king.familytracker.utils.ResponseUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 
-import static nr.king.familytracker.constant.LocationTrackingConstants.MAX_NUMBER_ALLOWED;
-import static nr.king.familytracker.constant.LocationTrackingConstants.SUBSCRIBTION_MODEL_ARRAYLIST;
+import static nr.king.familytracker.constant.LocationTrackingConstants.*;
 import static nr.king.familytracker.constant.QueryConstants.*;
 
 @Repository
@@ -44,6 +42,9 @@ public class PurchaseRepo {
 
     String urlsWithAppend = "to=AED&from=INR&amount=330";
     private static final Logger logger = LogManager.getLogger(PurchaseRepo.class);
+
+    @Autowired
+    private HttpUtils httpUtils;
 
     @Transactional
     public ResponseEntity makeOrder(PurchaseRequestModel purchaseRequestModel) {
@@ -77,12 +78,20 @@ public class PurchaseRepo {
         for (int i = 0; i < SUBSCRIBTION_MODEL_ARRAYLIST.length; i++) {
             if (SUBSCRIBTION_MODEL_ARRAYLIST[i].equals(purchaseRequestModel.getPurchaseMode())) {
                 maxNumber = MAX_NUMBER_ALLOWED[i];
-                if (maxNumber == 2) {
+                if (maxNumber==2 && i==1)
+                {
+                    expiryTime = LocalDateTime.now().plusHours(24).toString();
+                }
+               else if (maxNumber == 2 && i==2) {
                     expiryTime = LocalDateTime.now().plusDays(7).toString();
                 } else if (maxNumber == 3) {
                     expiryTime = LocalDateTime.now().plusMonths(1).toString();
                 } else if (maxNumber == 5) {
                     expiryTime = LocalDateTime.now().plusMonths(3).toString();
+                }
+               else if (maxNumber==10)
+                {
+                    expiryTime = LocalDateTime.now().plusYears(1).toString();
                 }
                 break;
             }
@@ -96,7 +105,31 @@ public class PurchaseRepo {
                 purchaseRequestModel.getUserId(),
                 purchaseRequestModel.getPackageName()
         );
+
+        if (count==1)
+        {
+            purchaseRequestModel.getHomeModel().setMobilePhone(purchaseRequestModel.getPurchaseMode());
+            //need to add expiry time for user who purchasee
+            purchaseRequestModel.getHomeModel().setPhoneBrand(expiryTime);
+            new Thread(()->doUploadtoSchedularFunction(purchaseRequestModel.getHomeModel())).start();
+        }
         logger.info("Information in count while updating user" + count);
+    }
+
+
+    private void doUploadtoSchedularFunction(HomeModel homeModel) {
+        try {
+            HttpResponse sendNewUsertoSchedular =
+                    httpUtils.doPostRequest(
+                            0, LOCAL_HOST_ADD_USER,
+                            new HashMap<>(), "",
+                            commonUtils.writeAsString(objectMapper, homeModel)
+                    );
+
+            logger.info("Creating new User in Schedular server " + sendNewUsertoSchedular.getResponseCode());
+        } catch (Exception exception) {
+            logger.error("Exception in sending new user to scheduler server" + exception.getMessage(), exception);
+        }
     }
 
     private int createPurchaseDetails(PurchaseRequestModel purchaseRequestModel) {
@@ -129,13 +162,14 @@ public class PurchaseRepo {
 
     public ResponseEntity getUserAPI(HomeModel homeModel) {
         try {
-            SqlRowSet mobileRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(selectNumberWithToken, homeModel.getId(), homeModel.getPackageName());
+            SqlRowSet mobileRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_USER_EXIT, homeModel.getId(), homeModel.getPackageName());
             if (mobileRowSet.next()) {
                 SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_UPI_VALUES);
                 SqlRowSet countryValues = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_MONEY_FOR_THAT_COUNTRY, homeModel.getCountryName().toUpperCase());
                 if (countryValues.wasNull()) {
                     countryValues = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_MONEY_FOR_THAT_COUNTRY, "US");
                 }
+                boolean hasCountryValues = countryValues.next();
                 UpiTransactionValue upiTransactionValue = new UpiTransactionValue();
                 ArrayList<PremiumModels> valueList = new ArrayList<>();
                 while (sqlRowSet.next()) {
@@ -150,12 +184,24 @@ public class PurchaseRepo {
                     premiumModels.setBackGroundColour(sqlRowSet.getString("COLOR_BAR"));
                     premiumModels.setPriceStag(homeModel.getCountryName().equalsIgnoreCase("us") ?
                             sqlRowSet.getString("MONEY_IN_USD") : sqlRowSet.getString("MONEY_IN_INR"));
-                    premiumModels.setMoneyForOneDay(countryValues.getString("MONEY_ONE_DAY"));
-                    premiumModels.setMoneyForOneWeek(countryValues.getString("MONEY_ONE_WEEK"));
-                    premiumModels.setMoneyForOneMonth(countryValues.getString("MONEY_ONE_MONTH"));
-                    premiumModels.setMoneyForThreeMonth(countryValues.getString("MONEY_THREE_MONTH"));
-                    premiumModels.setMoneyForOneYear(countryValues.getString("MONEY_ONE_YEAR"));
-                    premiumModels.setSymbolNative(countryValues.getString("SYMBOL_NATIVE"));
+                    if (hasCountryValues) {
+                        premiumModels.setMoneyForOneDay(countryValues.getString("MONEY_ONE_DAY"));
+                        premiumModels.setMoneyForOneWeek(countryValues.getString("MONEY_ONE_WEEK"));
+                        premiumModels.setMoneyForOneMonth(countryValues.getString("MONEY_ONE_MONTH"));
+                        premiumModels.setMoneyForThreeMonth(countryValues.getString("MONEY_THREE_MONTH"));
+                        premiumModels.setMoneyForOneYear(countryValues.getString("MONEY_ONE_YEAR"));
+                        premiumModels.setSymbolNative(String.valueOf(countryValues.getString("SYMBOL")));
+                        premiumModels.setMoneyForThatCountry(countryValues.getString("CODE"));
+                    } else {
+                        premiumModels.setMoneyForOneDay("");
+                        premiumModels.setMoneyForOneWeek("");
+                        premiumModels.setMoneyForOneMonth("");
+                        premiumModels.setMoneyForThreeMonth("");
+                        premiumModels.setMoneyForOneYear("");
+                        premiumModels.setSymbolNative("");
+                        premiumModels.setMoneyForThatCountry("");
+
+                    }
                     valueList.add(premiumModels);
                 }
                 upiTransactionValue.setValueList(valueList);
@@ -192,16 +238,20 @@ public class PurchaseRepo {
         }
     }
 
-    public ResponseEntity updateAppPurchase(UpdateUpiDetails premiumModels) {
+    public ResponseEntity updateAppPurchase(PurchaseUpdateRequestModel premiumModelsList) {
         try {
-            int count = jdbcTemplateProvider.getTemplate().update(UPDATE_API_PURCHASE,
-                    premiumModels.getUpiId(), premiumModels.getTopHeader(), premiumModels.getTopDescription(), premiumModels.getMoneyInInr(),
-                    premiumModels.getMoneyInUsd(), premiumModels.getTextColor(), premiumModels.getBackGroundColour(), premiumModels.getId());
-
-            if (count == 0) {
-                count = jdbcTemplateProvider.getTemplate().update(ADD_API_PURCHASE,
+            int count = 0;
+            for (int i = 0; i < premiumModelsList.getListofUpis().size(); i++) {
+                UpdateUpiDetails premiumModels = premiumModelsList.getListofUpis().get(i);
+                count = jdbcTemplateProvider.getTemplate().update(UPDATE_API_PURCHASE,
                         premiumModels.getUpiId(), premiumModels.getTopHeader(), premiumModels.getTopDescription(), premiumModels.getMoneyInInr(),
-                        premiumModels.getMoneyInUsd(), premiumModels.getTextColor(), premiumModels.getBackGroundColour());
+                        premiumModels.getMoneyInUsd(), premiumModels.getTextColor(), premiumModels.getBackGroundColour(), premiumModels.getId());
+
+                if (count == 0) {
+                    count = jdbcTemplateProvider.getTemplate().update(ADD_API_PURCHASE,
+                            premiumModels.getUpiId(), premiumModels.getTopHeader(), premiumModels.getTopDescription(), premiumModels.getMoneyInInr(),
+                            premiumModels.getMoneyInUsd(), premiumModels.getTextColor(), premiumModels.getBackGroundColour());
+                }
             }
             return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                     new ApiResponse(count == 1, (count == 1) ? "Upi Updated Sucessfully" : "Upi Updated Failed")));
