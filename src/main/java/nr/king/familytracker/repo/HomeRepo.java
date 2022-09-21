@@ -63,6 +63,10 @@ public class HomeRepo {
     public ResponseEntity saveUserDetails(HomeModel homeModel) {
         try {
             int count = doUpdateUser(homeModel);
+            if (count==1)
+            {
+               new Thread(()-> updateTokenForUser(homeModel.getId(),homeModel.getOneSignalExternalUserId())).start();
+            }
             if (count == 0) {
                 count = createUser(homeModel);
                 if (count == 1) {
@@ -84,6 +88,26 @@ public class HomeRepo {
             logger.error("Exception in saveuser Details" + exception.getMessage(),
                     exception);
             throw new FailedResponseException(exception.getMessage());
+        }
+    }
+
+    private void updateTokenForUser(String id, String oneSignalExternalUserId) {
+        try{
+            NotificationModel dummyModel = new NotificationModel();
+            notificationModel.setUserId(id);
+            notificationModel.setPushToken(oneSignalExternalUserId);
+            HttpResponse enableSchedularPush =
+                    httpUtils.doPostRequest(0,
+                            LOCAL_HOST_TOKEN,
+                            commonUtils.getHeadersMap(id),
+                            "",
+                            commonUtils.writeAsString(objectMapper, dummyModel)
+                    );
+            logger.info("enablePush Notification" + enableSchedularPush.getResponseCode());
+        }
+        catch (Exception exception)
+        {
+            logger.info("Exception in updating token in another server"+exception.getMessage(),exception);
         }
     }
 

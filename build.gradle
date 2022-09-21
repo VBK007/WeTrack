@@ -46,6 +46,7 @@ dependencies {
 	implementation group: 'com.typesafe.akka', name: 'akka-actor_2.12', version: '2.5.19'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-devtools', version: '2.7.3'
 	implementation 'com.razorpay:razorpay-java:1.4.3'
+	implementation('org.springframework.boot:spring-boot-starter-mail')
 
 }
 

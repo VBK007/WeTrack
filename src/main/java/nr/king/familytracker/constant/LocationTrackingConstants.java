@@ -45,7 +45,9 @@ public class LocationTrackingConstants {
 
     public static final String REMOVE_NUMBER = "http://api.wtrackonline.com/api/user/removeNumberForUser";
 
+     public static final String LOCAL_HOST_TOKEN = "http://3.92.177.250:8082/we_track/v1/update-token";
      public static final String LOCAL_HOST_NUMBER = "http://localhost:8082/we_track/v1/update-status";
+
     //public static final String LOCAL_HOST_NUMBER = "http://3.92.177.250:8082/we_track/v1/update-status";
     //public static final String LOCAL_HOST_ADD_USER = "http://3.92.177.250:8082/we_track/v1/create-deviceUser";
     public static final String LOCAL_HOST_ADD_USER = "http://localhost:8082/we_track/v1/create-deviceUser";
