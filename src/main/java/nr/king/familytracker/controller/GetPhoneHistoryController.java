@@ -14,13 +14,13 @@ public class GetPhoneHistoryController extends BaseController{
     @Autowired
     private GetHistoryService getHistoryRepo;
 
-    @PostMapping(value = "/v{version:[1]}/getUsersHistory")
+    @PostMapping(value = "/v{version:[1]}/getUsersHistory",produces = { "application/json" })
     public ResponseEntity getUserHistory (@RequestBody GetPageHistoryNumberModel getPhoneHistoryModel)
     {
         return  getHistoryRepo.getAllPhonesHistory(getPhoneHistoryModel);
     }
 
-    @PostMapping("/v{version:[1]}/enable-notify")
+    @PostMapping(value = "/v{version:[1]}/enable-notify",produces = { "application/json" })
     public ResponseEntity enableNotification(@RequestBody NotificationModel notificationModel)
     {
          return  getHistoryRepo.enableNotification(notificationModel);

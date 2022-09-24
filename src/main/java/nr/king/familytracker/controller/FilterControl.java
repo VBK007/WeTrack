@@ -14,13 +14,13 @@ public class FilterControl  extends BaseController{
     @Autowired
     private FilterService filterService;
 
-    @PostMapping("/v{version:[1]}/user/getfilterUser")
+    @PostMapping(value = "/v{version:[1]}/user/getfilterUser",produces = { "application/json" })
     public ResponseEntity getFilterData(@RequestBody FilterHistoryModel getPhoneHistoryModel)
     {
         return filterService.getFilterForUser(getPhoneHistoryModel);
     }
 
-    @PostMapping("/v{version:[1]}/user/getCompareUser")
+    @PostMapping(value = "/v{version:[1]}/user/getCompareUser",produces = { "application/json" })
     public ResponseEntity getCompareData(@RequestBody FilterHistoryModel getPhoneHistoryModel)
     {
         return filterService.getCompareData(getPhoneHistoryModel);
