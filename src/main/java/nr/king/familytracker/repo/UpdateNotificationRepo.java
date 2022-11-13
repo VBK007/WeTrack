@@ -66,9 +66,43 @@ private static final Logger logger  = LogManager.getLogger(UpdateNotificationRep
     }
 
 
+
+
+    public void createNewUser(String userId)
+    {
+        try
+        {
+            SqlRowSet innerRowset = jdbcTemplate.getTemplate().queryForRowSet(GET_CURRENT_USER,userId);
+            while (innerRowset.next()) {
+                SqlRowSet numberset = jdbcTemplate.getTemplate().queryForRowSet(selectNumberWithToken, innerRowset.getString("user_id"),
+                        innerRowset.getString("PACKAGE_NAME"));
+                if (System.currentTimeMillis() <= LocalDateTime.parse(innerRowset.getString("Expiry_TIME") )
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+                        .toEpochMilli()
+                ) {
+                    while (numberset.next())
+                    {
+                        PhoneModel phoneModel = new PhoneModel();
+                        phoneModel.setId(innerRowset.getString("user_id"));
+                        phoneModel.setPhoneNumber(numberset.getString("number"));
+                        phoneModel.setCountryCode(numberset.getString("COUNTRY_CODE"));
+                        addNewNumbeIntoWeTrackServer(phoneModel,false);
+                        Thread.sleep(1000,500);
+                    }
+                }
+            }
+
+        }
+        catch (Exception exception)
+        {
+            logger.info("Exception while adding new number while reviwing customer");
+        }
+    }
+
+
     private void addNewNumbeIntoWeTrackServer(PhoneModel phoneModel, boolean isFirstTime) throws IOException {
         HomeModel homeModel = commonUtils.getHomeModel(phoneModel.getId(), isFirstTime);
-
             HttpResponse httpResponse = httpUtils.doPostRequest(
                     0,
                     CREATE_USER,

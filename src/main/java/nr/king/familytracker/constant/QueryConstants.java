@@ -5,6 +5,7 @@ public class QueryConstants {
             "NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?";
 
     public static  final String GET_NOT_DEMO_USERS ="select user_id,Expiry_TIME,PACKAGE_NAME from WE_TRACK_USERS where purchase_mode!='demo'";
+    public static  final String GET_CURRENT_USER ="select user_id,Expiry_TIME,PACKAGE_NAME from WE_TRACK_USERS where USER_ID=?";
 
     public static final String SELECT_USER_DETAILS_COUNT ="select count(*) from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?";
     public static final String SELECT_NUMBER_DETAILS_COUNT ="select count(*) from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?";

@@ -19,27 +19,27 @@ public class PurchaseController  extends BaseController{
     private PurchaseService purchaseService;
 
 
-    @PostMapping("/v{version:[1]}/make-order")
+    @PostMapping(value = "/v{version:[1]}/make-order" , produces = { "application/json" })
     public ResponseEntity makeOrder(@RequestBody PurchaseRequestModel purchaseRequestModel)
     {
         return purchaseService.makeOrder(purchaseRequestModel);
     }
 
-    @PostMapping("/v{version:[1]}/get-apiTransction")
+    @PostMapping(value = "/v{version:[1]}/get-apiTransction",produces = { "application/json" })
     public ResponseEntity makeOrders(@RequestBody HomeModel homeModel)
     {
         return purchaseService.getUserAPI(homeModel);
     }
 
 
-    @PostMapping("/v{version:[1]}/update-apiTransction")
+    @PostMapping(value = "/v{version:[1]}/update-apiTransction",produces = { "application/json" })
     public ResponseEntity updateInAppPurchase(@RequestBody PurchaseUpdateRequestModel purchaseUpdateRequestModel)
     {
         return purchaseService.inAppPurchase(purchaseUpdateRequestModel);
     }
 
 
-    @PostMapping("/v{version:[1]}/update-timing")
+    @PostMapping(value = "/v{version:[1]}/update-timing",produces = { "application/json" })
     public ResponseEntity updateUserTiming(@RequestBody HomeModel homeModel)
     {
         return purchaseService.updateTimingForTesting(homeModel);

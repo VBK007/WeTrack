@@ -15,26 +15,26 @@ public class HomeController extends BaseController {
     @Autowired
     private HomeServices homeServices;
 
-    @PostMapping("/v{version:[1]}/create-deviceUser")
+    @PostMapping(value = "/v{version:[1]}/create-deviceUser",produces = { "application/json" })
     public ResponseEntity storeUserData(@RequestBody HomeModel homeModel) {
         return homeServices.storeUsers(homeModel);
     }
 
-    @PostMapping("/v{version:[1]}/user/getUserAbuzer")
+    @PostMapping(value = "/v{version:[1]}/user/getUserAbuzer",produces = { "application/json" })
     public ResponseEntity verifyUser(@RequestBody HomeModel homeModel) {
         return homeServices.verify_user(homeModel);
     }
 
 
 
-    @PostMapping("/v{version:[1]}/user/getUserAbuzerForAdd")
+    @PostMapping(value = "/v{version:[1]}/user/getUserAbuzerForAdd",produces = { "application/json" })
     public ResponseEntity verifyAddUser(@RequestBody HomeModel homeModel) {
         return homeServices.verifyAddUser(homeModel);
     }
 
 
 
-    @PostMapping("/v{version:[1]}/user/addNumberForUser")
+    @PostMapping(value = "/v{version:[1]}/user/addNumberForUser",produces = { "application/json" })
     public ResponseEntity addMobileNumber(@RequestBody PhoneModel phoneModel) {
         return homeServices.addMobileNumber(phoneModel);
     }
@@ -42,7 +42,7 @@ public class HomeController extends BaseController {
 
 
 
-    @PostMapping("/v{version:[1]}/user/getAllMobileNumbers")
+    @PostMapping(value = "/v{version:[1]}/user/getAllMobileNumbers",produces = { "application/json" })
     public ResponseEntity getAllMobileNumbers(@RequestBody PhoneModel phoneModel) {
         return homeServices.getAllMobileNumbers(phoneModel);
     }

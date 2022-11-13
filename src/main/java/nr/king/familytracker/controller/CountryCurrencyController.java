@@ -16,7 +16,7 @@ public class CountryCurrencyController extends BaseController {
     @Autowired
     private CountryCurrencService countryCurrencService;
 
-    @PostMapping("/v{version:[1]}/updateMoney-order")
+    @PostMapping(value = "/v{version:[1]}/updateMoney-order",produces = { "application/json" })
     public ResponseEntity updateMoneyOrder(@RequestBody CurrecyModel purchaseRequestModel)
     {
         return countryCurrencService.insertAppCountryValues(purchaseRequestModel);

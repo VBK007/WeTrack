@@ -70,7 +70,7 @@ public class HomeRepo {
             if (count == 0) {
                 count = createUser(homeModel);
                 if (count == 1) {
-                    dataBaseMigration.createSchema(homeModel.getId());
+                    //dataBaseMigration.createSchema(homeModel.getId());
                     doUploadtoSchedularFunction(homeModel);
                 }
             }
@@ -608,7 +608,8 @@ public class HomeRepo {
                         "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,purchase_mode,MAX_NUMBER,PACKAGE_NAME,CREDIT_LIMIT) " +
                         "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?,?)",
                 homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(), homeModel.getCountryName(),
-                homeModel.getOneSignalExternalUserId(), homeModel.getAppId(), LocalDateTime.now().plusHours(3).toString(), false, false,
+                homeModel.getOneSignalExternalUserId(), homeModel.getAppId(), (IS_MONEY_MODE)?LocalDateTime.now().plusHours(24).toString() :
+                        LocalDateTime.now().plusYears(1).toString(), false, false,
                 "", false, WETRACK + homeModel.getId(), commonUtils.getModel(homeModel.getPackageName()), 1, homeModel.getPackageName(),
                 100
         );
@@ -621,7 +622,7 @@ public class HomeRepo {
                         "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,PACKAGE_NAME,CREDIT_LIMIT,DAY) " +
                         "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?)",
                 homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(), homeModel.getCountryName(),
-                homeModel.getOneSignalExternalUserId(), homeModel.getAppId(), LocalDateTime.now().plusHours(3).toString(), false, false,
+                homeModel.getOneSignalExternalUserId(), homeModel.getAppId(), LocalDateTime.now().plusHours(23).toString(), false, false,
                 "", false, WETRACK + homeModel.getId(), homeModel.getPackageName(),
                 100,
                 LocalDateTime.now().toLocalDate().toString()

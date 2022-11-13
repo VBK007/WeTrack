@@ -13,6 +13,7 @@ public class LocationTrackingConstants {
     public static final String FAILED = "failed";
     public static final String MESSAGE = "message";
     public static final String EVENT_MASTER = "eventMaster";
+    public static final boolean IS_MONEY_MODE = false;
 
     /* public static final String POST_NUMBER = "http://chattrack.apiservicessarl.com/api/user/addNumberForUser";*/
     public static final String POST_NUMBER = "http://api.wtrackonline.com/api/user/addNumberForUser";
@@ -46,12 +47,11 @@ public class LocationTrackingConstants {
     public static final String REMOVE_NUMBER = "http://api.wtrackonline.com/api/user/removeNumberForUser";
 
      public static final String LOCAL_HOST_TOKEN = "http://3.92.177.250:8082/we_track/v1/update-token";
-     public static final String LOCAL_HOST_NUMBER = "http://localhost:8082/we_track/v1/update-status";
+     public static final String LOCAL_HOST_NUMBER = "http://3.92.177.250:8082/we_track/v1/update-status";
 
     //public static final String LOCAL_HOST_NUMBER = "http://3.92.177.250:8082/we_track/v1/update-status";
     //public static final String LOCAL_HOST_ADD_USER = "http://3.92.177.250:8082/we_track/v1/create-deviceUser";
     public static final String LOCAL_HOST_ADD_USER = "http://localhost:8082/we_track/v1/create-deviceUser";
-
     public static final String[] PACKAGE_ARRAY_WITHOUT_ADD = {"com.withcodeplays.familytracker","com.withcodeplays.socialmediatracker"};
     public static final String[] PACKAGE_ARRAY_WITH_ADD = {"com.withcodeplays.wetracker",
             "com.withcodeplays.whattracker",

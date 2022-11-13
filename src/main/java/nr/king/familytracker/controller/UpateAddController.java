@@ -14,7 +14,7 @@ public class UpateAddController extends BaseController{
 @Autowired
 private UpdateAddControllerService updateAddControllerService;
 
-    @PostMapping("/v{version:[1]}/update-addCredits")
+    @PostMapping(value = "/v{version:[1]}/update-addCredits",produces = { "application/json" })
     public ResponseEntity storeUserData(@RequestBody HomeModel homeModel)
     {
         return updateAddControllerService.storeUsers(homeModel);
