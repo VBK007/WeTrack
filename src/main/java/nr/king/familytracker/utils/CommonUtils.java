@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
 import nr.king.familytracker.model.http.PhoneModel;
 import nr.king.familytracker.model.http.currency.CurrecyModel;
+import nr.king.familytracker.model.http.dashboardModel.DashBoardRequestBody;
 import nr.king.familytracker.model.http.filterModel.FilterHistoryModel;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.model.http.purchaseModel.PremiumModels;
@@ -24,6 +25,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -45,7 +47,7 @@ public class CommonUtils {
     public static final HttpStatus BAD_REQUEST = HttpStatus.valueOf(406);
     private static final Logger logger = LogManager.getLogger(CommonUtils.class);
     private static final Pattern numberMinusMinusPattern = Pattern.compile("\\d+-\\d+");
-
+    DateTimeFormatter onlineActivityDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     public <R> R safeParseJSON(ObjectMapper objectMapper, String payload, Class<R> targetType) {
         try {
@@ -456,6 +458,26 @@ public class CommonUtils {
         );
     }
 
+
+
+    public long returnAccountRunningTime(String created_at)
+    {
+
+      return   (LocalDateTime.parse(created_at)
+                .atZone(ZoneId.systemDefault())
+                .toInstant()
+                .toEpochMilli() - System.currentTimeMillis());
+    }
+
+
+    public boolean checkDashBoardRequestModel(DashBoardRequestBody dashBoardRequestBody)
+    {
+        return  checkHomeModelSecurityCheck(dashBoardRequestBody.getHomeModel()) &&
+                validate(Arrays.asList(dashBoardRequestBody.getFromDate(),
+                dashBoardRequestBody.getToDate(),
+                dashBoardRequestBody.getNumber()));
+    }
+
     public boolean checkHomeModelSecurityCheck(HomeModel homeModel) {
         return validate(Arrays.asList(isNullOrEmty(homeModel.getId()),
                 isNullOrEmty(homeModel.getPackageName()),
@@ -502,9 +524,44 @@ public class CommonUtils {
         return "Add";
     }
 
+
+    public  Long getTimeDuration(String dateOne,String dateTwo)
+    {
+        LocalDateTime dateTime1= LocalDateTime.parse(dateOne, onlineActivityDateFormatter);
+        LocalDateTime dateTime2= LocalDateTime.parse(dateTwo, onlineActivityDateFormatter);
+        return Duration.between(dateTime1, dateTime2).toMinutes();
+    }
+
     public boolean checkPremiumModel(UpdateUpiDetails premiumModels) {
         return validate(Arrays.asList(isNullOrEmty(premiumModels.getPriceStag()),isNullOrEmty(premiumModels.getTextColor()),
                 isNullOrEmty(premiumModels.getTopDescription()),isNullOrEmty(premiumModels.getTopHeader()),
                 isNullOrEmty(premiumModels.getBackGroundColour()),isNullOrEmty(premiumModels.getMoneyInInr()),isNullOrEmty(premiumModels.getMoneyInUsd())));
     }
+
+    public String checkCountryState(String countryName)
+    {
+        String countryValue ="";
+        String[] chirstianCountry = new String[]{"",""};
+        String[] muslimCountry = new String[]{"",""};
+        String[] hinduCountry = new String[]{"",""};
+        String[] asianCountry = new String[]{"",""};
+        if (Arrays.asList(chirstianCountry).contains(countryName))
+        {
+            countryValue = "crs";
+        }
+        else if (Arrays.asList(muslimCountry).contains(countryName))
+        {
+            countryValue = "mus";
+        }
+        else if (Arrays.asList(hinduCountry).contains(countryName))
+        {
+            countryValue = "hin";
+        }
+        {
+            countryValue = "asi";
+        }
+        return countryValue;
+    }
+
+
 }

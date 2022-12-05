@@ -116,7 +116,8 @@ public class GetHistoryRepo {
                     return responseUtils.constructResponse(200,
                             commonUtils.writeAsString(objectMapper, new ApiResponse(true, "Got All PhoneHistory", sendStatusListToMobileModels)));
 
-                } else {
+                }
+                else {
                     return responseUtils.constructResponse(200,
                             commonUtils.writeAsString(objectMapper,
                                     new ApiResponse(false, "Plan is Expired"

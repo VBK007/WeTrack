@@ -1,7 +1,7 @@
 package nr.king.familytracker.constant;
 
 public class QueryConstants {
-    public static final String selectNumberWithToken ="select USER_ID,NUMBER,TOKEN_HEADER,COUNTRY_CODE,CREATED_AT,UPDATED_AT from " +
+    public static final String selectNumberWithToken ="select USER_ID,NUMBER,TOKEN_HEADER,NICK_NAME,COUNTRY_CODE,CREATED_AT,UPDATED_AT from " +
             "NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?";
 
     public static  final String GET_NOT_DEMO_USERS ="select user_id,Expiry_TIME,PACKAGE_NAME from WE_TRACK_USERS where purchase_mode!='demo'";
@@ -22,7 +22,7 @@ public class QueryConstants {
             " where USER_ID=? and NUMBER=? and PACKAGE_NAME=?";
 
 
-    public static final String SELECT_USER_EXPIRY_TIME ="select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,purchase_mode,MAX_NUMBER,CREDIT_LIMIT,PACKAGE_NAME from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?";
+    public static final String SELECT_USER_EXPIRY_TIME ="select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,purchase_mode,MAX_NUMBER,CREDIT_LIMIT,PACKAGE_NAME,CREATED_AT,UPDATED_AT from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?";
 
     public static final String SELECT_USER_EXPIRY_TIME_WITH_ACCOUNT_DETAILS ="select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,MAX_NUMBER," +
             "purchase_mode,CREDIT_LIMIT,PACKAGE_NAME from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?";
@@ -73,5 +73,13 @@ public class QueryConstants {
     public static final String SELECT_USER_EXIT ="select USER_ID from " +
             "WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?";
 
+
+    public static final String SELECT_EVENT_BASED_ON_COUNTRY =
+            "SELECT EVENT_NAME,EVENT_NORMAL_IMAGE,EVENT_IMAGE,EVENT_BODY,EVENT_COUNTRY,IMAGE_MORNING,IMAGE_AFTERNOON,IMAGE_EVENING,IMAGE_NIGHT,EVENT_ID FROM EVENT_TABLE " +
+                    "WHERE EVENT_COUNTRY=?";
+
+
+    public  static  final String SELECT_COUNTRY_VALUE
+            = "SELECT EVENT_ID,USER_ID,EVENT_COUNTRY FROM EVENT_HISTORY where EVENT_ID=? AND USER_ID=?";
 
 }

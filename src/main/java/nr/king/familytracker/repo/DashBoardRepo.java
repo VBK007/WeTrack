@@ -1,0 +1,170 @@
+package nr.king.familytracker.repo;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import nr.king.familytracker.exceptions.FailedResponseException;
+import nr.king.familytracker.jdbc.JdbcTemplateProvider;
+import nr.king.familytracker.model.http.ApiResponse;
+import nr.king.familytracker.model.http.HttpResponse;
+import nr.king.familytracker.model.http.dashboardModel.*;
+import nr.king.familytracker.model.http.filterModel.FilterHistoryModel;
+import nr.king.familytracker.model.http.homeModel.GetPhoneHistoryMainArrayModel;
+import nr.king.familytracker.model.http.homeModel.GetPhoneNumberHistoryModel;
+import nr.king.familytracker.utils.CommonUtils;
+import nr.king.familytracker.utils.HttpUtils;
+import nr.king.familytracker.utils.ResponseUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Repository;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import static nr.king.familytracker.constant.LocationTrackingConstants.GET_HISTORY;
+import static nr.king.familytracker.constant.QueryConstants.*;
+
+@Repository
+public class DashBoardRepo {
+    @Autowired
+    private CommonUtils commonUtils;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+
+    @Autowired
+    private ResponseUtils responseUtils;
+
+    @Autowired
+    private JdbcTemplateProvider jdbcTemplateProvider;
+
+    @Autowired
+    private HttpUtils httpUtils;
+    private static final Logger logger = LogManager.getLogger(DashBoardRepo.class);
+
+    public ResponseEntity getDashBoardResponse(DashBoardRequestBody homeModel) {
+        try {
+            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
+                    .queryForRowSet(SELECT_USER_EXPIRY_TIME, homeModel.getHomeModel().getId(),
+                            homeModel.getHomeModel().getPackageName());
+            if (sqlRowSet.next()) {
+                boolean isAccountExpired = commonUtils.checkAddOrWithoutAdd(sqlRowSet.getString("Expiry_TIME"),
+                        homeModel.getHomeModel().getPackageName(),
+                        sqlRowSet.getInt("credit_limit"));
+                return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                        getAccountModel(isAccountExpired, sqlRowSet, homeModel)));
+            }
+            return responseUtils.constructResponse(200,
+                    commonUtils.writeAsString(objectMapper,
+                            new ApiResponse(false, "No User found to Get Dashboard"
+                            )));
+        } catch (Exception exception) {
+            logger.error("Exception in the Dashboard Response is " + exception.getMessage(), exception);
+            throw new FailedResponseException("Exception in Dashboard Responses");
+        }
+    }
+
+    private DashBoardResponses getAccountModel(boolean isAccountExpired, SqlRowSet sqlRowSet, DashBoardRequestBody dashBoardRequestBody) {
+        DashBoardResponses dashBoardResponses = new DashBoardResponses();
+        AccountModel accountModel = new AccountModel();
+        List<AccountNumberWithName> accountNumbersList = new ArrayList<>();
+        accountModel.setCreatedAt(sqlRowSet.getString("CREATED_AT"));
+        accountModel.setExpiryAt(sqlRowSet.getString("EXPIRY_TIME"));
+        accountModel.setShowAdd((Objects.equals(sqlRowSet.getString("PURCHASE_MODE"), "demo")));
+        accountModel.setTracking(isAccountExpired);
+        accountModel.setTrackingTime(commonUtils.returnAccountRunningTime(sqlRowSet.getString("CREATED_AT")));
+        if (isAccountExpired) {
+            SqlRowSet innerNumberSet = jdbcTemplateProvider.getTemplate()
+                    .queryForRowSet(selectNumberWithToken, dashBoardRequestBody.getHomeModel().getId(),
+                            dashBoardRequestBody.getHomeModel().getPackageName());
+            while (innerNumberSet.next()) {
+                accountNumbersList.add(new AccountNumberWithName(sqlRowSet.getString("NUMBER"), sqlRowSet.getString("NICK_NAME")));
+                //for getting social Media Activity
+                if ((dashBoardRequestBody.getNumber().isEmpty() && innerNumberSet.isFirst()) ||
+                        dashBoardRequestBody.getNumber().equals(innerNumberSet.getString("NUMBER"))) {
+                    accountModel.setAccountNumberSocialMediaActivity(getSocialMediaActivity(innerNumberSet, dashBoardRequestBody));
+                }
+            }
+        }
+        FlashSales flashSales = getFlashSales(dashBoardRequestBody, dashBoardResponses);
+        dashBoardResponses.setFlashSales(flashSales);
+        dashBoardResponses.setFlashSales(flashSales);
+        accountModel.setAccountNumbers(new AccountNumbers(accountNumbersList));
+        dashBoardResponses.setAccountModel(accountModel);
+        return dashBoardResponses;
+    }
+
+
+    private AccountNumberSocialMediaActivity getSocialMediaActivity(SqlRowSet innerNumberSet, DashBoardRequestBody dashBoardRequestBody) {
+        AccountNumberSocialMediaActivity accountNumberSocialMediaActivity = new AccountNumberSocialMediaActivity();
+        try {
+            FilterHistoryModel localFilterModel = new FilterHistoryModel();
+            localFilterModel.setStartDate(dashBoardRequestBody.getFromDate());
+            localFilterModel.setEndDate(dashBoardRequestBody.getToDate());
+            localFilterModel.setPageLimit(400);
+            localFilterModel.setStart(0);
+            localFilterModel.setPhoneNumber(innerNumberSet.getString("NUMBER"));
+            HttpResponse httpResponse = httpUtils.doPostRequest(0,
+                    GET_HISTORY,
+                    commonUtils.getHeadersMapForSpecific(innerNumberSet.getString("TOKEN_HEADER")),
+                    "Getting Filter Data",
+                    commonUtils.writeAsString(objectMapper, localFilterModel)
+            );
+            GetPhoneHistoryMainArrayModel getPageHistoryNumberModel = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(),
+                    GetPhoneHistoryMainArrayModel.class);
+            DashBoardTimeSpending dashBoardTimeSpending = getDashBoardTiming(getPageHistoryNumberModel);
+            accountNumberSocialMediaActivity.setTotalNumberOfHours(dashBoardTimeSpending.getTotalTimeSpent());
+            accountNumberSocialMediaActivity.setTotalNumberOfOnline(dashBoardTimeSpending.getTotalTimeOnline());
+            accountNumberSocialMediaActivity.setTotalNumberOfOffline(dashBoardTimeSpending.getTotalTimeOffline());
+        } catch (Exception exception) {
+            logger.error("Exception in api call for number of timeCalculation" + exception.getMessage(), exception);
+        }
+        return accountNumberSocialMediaActivity;
+    }
+
+    private DashBoardTimeSpending getDashBoardTiming(GetPhoneHistoryMainArrayModel getPageHistoryNumberModel) {
+        int totalOnline = 0;
+        int totalOffline = 0;
+        int totalTimeSpend = 0;
+        DashBoardTimeSpending dashBoardTimeSpending = new DashBoardTimeSpending();
+        for (int i = 0; i < getPageHistoryNumberModel.getData().size(); i++) {
+            GetPhoneNumberHistoryModel lData = getPageHistoryNumberModel.getData().get(i);
+            if ("available".equalsIgnoreCase(lData.getStatus())) {
+                totalOnline++;
+            } else {
+                totalOffline++;
+            }//total time count
+            //need to add second to minutes
+            if (i % 2 != 0) {
+                totalTimeSpend += commonUtils.getTimeDuration(getPageHistoryNumberModel.getData().get(i - 1).timeStamp, lData.timeStamp);
+            }
+        }
+        dashBoardTimeSpending.setTotalTimeSpent(totalTimeSpend);
+        dashBoardTimeSpending.setTotalTimeOnline(totalOnline);
+        dashBoardTimeSpending.setTotalTimeOffline(totalOffline);
+        return dashBoardTimeSpending;
+    }
+
+    private FlashSales getFlashSales(DashBoardRequestBody dashBoardRequestBody, DashBoardResponses dashBoardResponses) {
+        FlashSales flashSales = new FlashSales();
+        SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_EVENT_BASED_ON_COUNTRY,
+                dashBoardRequestBody.getHomeModel().getCountryName());
+        SqlRowSet showFlashSales = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_COUNTRY_VALUE,sqlRowSet.getString("EVENT_ID"),
+                dashBoardRequestBody.getHomeModel().getId());
+        String countryName = commonUtils.checkCountryState(dashBoardRequestBody.getHomeModel().getCountryName());
+        flashSales.setFlashBody(sqlRowSet.getString("EVENT_BODY"));
+        flashSales.setFlashTitle(sqlRowSet.getString("EVENT_NAME"));
+        flashSales.setFlashImageUrl(sqlRowSet.getString("EVENT_NORMAL_IMAGE"));
+        flashSales.setMornigImageUrl(sqlRowSet.getString("IMAGE_MORNING"));
+        flashSales.setAfternoonImageUrl(sqlRowSet.getString("IMAGE_AFTERNOON"));
+        flashSales.setEveningImageUrl(sqlRowSet.getString("IMAGE_EVENING"));
+        flashSales.setNightImageUrl(sqlRowSet.getString("IMAGE_NIGHT"));
+        flashSales.setEventId(sqlRowSet.getString("EVENT_ID"));
+        flashSales.setShowFlash(showFlashSales.next());
+        flashSales.setNavigateToPremium(sqlRowSet.next());
+        return flashSales;
+    }
+}

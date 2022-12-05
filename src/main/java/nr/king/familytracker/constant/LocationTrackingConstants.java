@@ -53,7 +53,8 @@ public class LocationTrackingConstants {
     //public static final String LOCAL_HOST_ADD_USER = "http://3.92.177.250:8082/we_track/v1/create-deviceUser";
     public static final String LOCAL_HOST_ADD_USER = "http://localhost:8082/we_track/v1/create-deviceUser";
     public static final String[] PACKAGE_ARRAY_WITHOUT_ADD = {"com.withcodeplays.familytracker","com.withcodeplays.socialmediatracker"};
-    public static final String[] PACKAGE_ARRAY_WITH_ADD = {"com.withcodeplays.wetracker",
+    public static final String[] PACKAGE_ARRAY_WITH_ADD = {
+            "com.withcodeplays.wetracker",
             "com.withcodeplays.whattracker",
             "com.withcodeplays.crushtracker",
             "com.withcodeplays.onlinetracker"};

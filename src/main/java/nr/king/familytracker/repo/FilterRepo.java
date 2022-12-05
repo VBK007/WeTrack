@@ -73,9 +73,7 @@ public class FilterRepo {
                         localFilterModel.setPhoneNumber(filterHistoryModel.getPhoneNumber());
                         HomeModel homeModel = new HomeModel();
                         homeModel.setId(homeModel.getId());
-
                         new Thread(()-> makeApiCallFOrUpdatePhoneState(homeModel,numberSet) ).start();
-
                         HttpResponse httpResponse = httpUtils.doPostRequest(0,
                                 GET_HISTORY,
                                 commonUtils.getHeadersMapForSpecific(numberSet.getString("TOKEN_HEADER")),
@@ -248,7 +246,7 @@ public class FilterRepo {
                                     filterHistoryModel.getHomeModel().getPackageName()
                             );
                     while (numberSet.next()) {
-                         localFilterModel = new FilterHistoryModel();
+                        localFilterModel = new FilterHistoryModel();
                         localFilterModel.setStartDate(filterHistoryModel.getStartDate());
                         localFilterModel.setEndDate(filterHistoryModel.getEndDate());
                         localFilterModel.setPageLimit(400);

@@ -41,7 +41,6 @@ public class Interceptor implements HandlerInterceptor {
             return true;
         }
         else{
-
             sendUnauthenticatedResponse(request,response,"Invalid Auth Token",403);
             return false;
         }
