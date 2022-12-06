@@ -3,6 +3,8 @@ package nr.king.familytracker.service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.model.http.ApiResponse;
 import nr.king.familytracker.model.http.dashboardModel.DashBoardRequestBody;
+import nr.king.familytracker.model.http.dashboardModel.FlashSales;
+import nr.king.familytracker.model.http.dashboardModel.PublicEventRequestBody;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.repo.DashBoardRepo;
 import nr.king.familytracker.utils.CommonUtils;
@@ -42,9 +44,40 @@ public class DashBoardService {
         } catch (Exception exception) {
             logger.error("Exception in the dashboard service " + exception.getMessage(), exception);
             return responseUtils.constructResponse(406, commonUtils.writeAsString(objectMapper, new ApiResponse(false,
-                    "Invalid Characters Not allowed")));
+                    "Invalid Format Not allowed")));
         }
     }
 
 
+    public ResponseEntity publishPublicEvent(PublicEventRequestBody publicEventRequestBody) {
+        try
+        {
+           return dashBoardRepo.publishPublicEvent(publicEventRequestBody);
+        }
+        catch (Exception exception)
+        {
+            logger.error("Exception in the dashboard service " + exception.getMessage(), exception);
+            return responseUtils.constructResponse(406, commonUtils.writeAsString(objectMapper, new ApiResponse(false,
+                    "Invalid Format Not allowed")));
+        }
+    }
+
+    public ResponseEntity postPublicEventByUser(FlashSales flashSales) {
+        try
+        {
+            if (commonUtils.checkFlashSalesSecurityCheck(flashSales))
+            {
+                return responseUtils.constructResponse(406, commonUtils.writeAsString(objectMapper, new ApiResponse(false,
+                        "Invalid Format Not allowed")));
+            }
+
+            return dashBoardRepo.postPublicEvent(flashSales);
+        }
+        catch (Exception exception)
+        {
+            logger.error("Exception in the dashboard service " + exception.getMessage(), exception);
+            return responseUtils.constructResponse(406, commonUtils.writeAsString(objectMapper, new ApiResponse(false,
+                    "Invalid Format Not allowed")));
+        }
+    }
 }

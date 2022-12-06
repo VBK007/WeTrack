@@ -75,13 +75,13 @@ public class DashBoardRepo {
         accountModel.setExpiryAt(sqlRowSet.getString("EXPIRY_TIME"));
         accountModel.setShowAdd((Objects.equals(sqlRowSet.getString("PURCHASE_MODE"), "demo")));
         accountModel.setTracking(isAccountExpired);
-        accountModel.setTrackingTime(commonUtils.returnAccountRunningTime(sqlRowSet.getString("CREATED_AT")));
+        accountModel.setTrackingTime(commonUtils.checkTimeDifference(sqlRowSet.getString("CREATED_AT")));
         if (isAccountExpired) {
             SqlRowSet innerNumberSet = jdbcTemplateProvider.getTemplate()
                     .queryForRowSet(selectNumberWithToken, dashBoardRequestBody.getHomeModel().getId(),
                             dashBoardRequestBody.getHomeModel().getPackageName());
             while (innerNumberSet.next()) {
-                accountNumbersList.add(new AccountNumberWithName(sqlRowSet.getString("NUMBER"), sqlRowSet.getString("NICK_NAME")));
+                accountNumbersList.add(new AccountNumberWithName(innerNumberSet.getString("NUMBER"), innerNumberSet.getString("NICK_NAME")));
                 //for getting social Media Activity
                 if ((dashBoardRequestBody.getNumber().isEmpty() && innerNumberSet.isFirst()) ||
                         dashBoardRequestBody.getNumber().equals(innerNumberSet.getString("NUMBER"))) {
@@ -141,6 +141,10 @@ public class DashBoardRepo {
             if (i % 2 != 0) {
                 totalTimeSpend += commonUtils.getTimeDuration(getPageHistoryNumberModel.getData().get(i - 1).timeStamp, lData.timeStamp);
             }
+            else if (i==getPageHistoryNumberModel.getData().size()-1 && i!=0)
+            {
+                totalTimeSpend += commonUtils.getTimeDuration(getPageHistoryNumberModel.getData().get(i - 1).timeStamp, lData.timeStamp);
+            }
         }
         dashBoardTimeSpending.setTotalTimeSpent(totalTimeSpend);
         dashBoardTimeSpending.setTotalTimeOnline(totalOnline);
@@ -150,21 +154,80 @@ public class DashBoardRepo {
 
     private FlashSales getFlashSales(DashBoardRequestBody dashBoardRequestBody, DashBoardResponses dashBoardResponses) {
         FlashSales flashSales = new FlashSales();
-        SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_EVENT_BASED_ON_COUNTRY,
-                dashBoardRequestBody.getHomeModel().getCountryName());
-        SqlRowSet showFlashSales = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_COUNTRY_VALUE,sqlRowSet.getString("EVENT_ID"),
-                dashBoardRequestBody.getHomeModel().getId());
         String countryName = commonUtils.checkCountryState(dashBoardRequestBody.getHomeModel().getCountryName());
-        flashSales.setFlashBody(sqlRowSet.getString("EVENT_BODY"));
-        flashSales.setFlashTitle(sqlRowSet.getString("EVENT_NAME"));
-        flashSales.setFlashImageUrl(sqlRowSet.getString("EVENT_NORMAL_IMAGE"));
-        flashSales.setMornigImageUrl(sqlRowSet.getString("IMAGE_MORNING"));
-        flashSales.setAfternoonImageUrl(sqlRowSet.getString("IMAGE_AFTERNOON"));
-        flashSales.setEveningImageUrl(sqlRowSet.getString("IMAGE_EVENING"));
-        flashSales.setNightImageUrl(sqlRowSet.getString("IMAGE_NIGHT"));
-        flashSales.setEventId(sqlRowSet.getString("EVENT_ID"));
-        flashSales.setShowFlash(showFlashSales.next());
-        flashSales.setNavigateToPremium(sqlRowSet.next());
+        SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_EVENT_BASED_ON_COUNTRY,
+                countryName);
+        if (sqlRowSet.next()) {
+            SqlRowSet showFlashSales = jdbcTemplateProvider.getTemplate().queryForRowSet(
+                    SELECT_COUNTRY_VALUE, sqlRowSet.getString("EVENT_ID"),
+                    dashBoardRequestBody.getHomeModel().getId());
+            flashSales.setFlashBody(sqlRowSet.getString("EVENT_BODY"));
+            flashSales.setFlashTitle(sqlRowSet.getString("EVENT_NAME"));
+            flashSales.setEventImageUrl(sqlRowSet.getString("EVENT_IMAGE"));
+            flashSales.setFlashImageUrl(sqlRowSet.getString("EVENT_NORMAL_IMAGE"));
+            flashSales.setMornigImageUrl(sqlRowSet.getString("IMAGE_MORNING"));
+            flashSales.setAfternoonImageUrl(sqlRowSet.getString("IMAGE_AFTERNOON"));
+            flashSales.setEveningImageUrl(sqlRowSet.getString("IMAGE_EVENING"));
+            flashSales.setNightImageUrl(sqlRowSet.getString("IMAGE_NIGHT"));
+            flashSales.setEventId(sqlRowSet.getString("EVENT_ID"));
+            flashSales.setShowFlash(!showFlashSales.next());
+            flashSales.setNavigateToPremium(!sqlRowSet.next());
+        }
         return flashSales;
+    }
+
+    public ResponseEntity publishPublicEvent(PublicEventRequestBody publicEventRequestBody) {
+        try {
+            int count = 0;
+            for (int i = 0; i < publicEventRequestBody.getFlashSalesList().size(); i++) {
+                count = updatePublicEvent(publicEventRequestBody.getFlashSalesList().get(i), i + 1);
+                if (count == 0) {
+                    count = createPublicEvent(publicEventRequestBody.getFlashSalesList().get(i));
+                }
+            }
+            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                    new ApiResponse(count == 1, (count == 1) ? "Public Event Published" : "Unable to publish Public Event")));
+
+        } catch (Exception exception) {
+            throw new FailedResponseException("Exception is " + exception.getMessage());
+        }
+    }
+
+    private int createPublicEvent(FlashSales flashSales) {
+        return jdbcTemplateProvider.getTemplate().update(INSERT_VALUES_IN_EVENT,
+                flashSales.getFlashTitle(), flashSales.getEventImageUrl(),
+                flashSales.getFlashImageUrl(), flashSales.getFlashBody(), flashSales.getCountryName(), flashSales.getMornigImageUrl(), flashSales.getAfternoonImageUrl(),
+                flashSales.getEveningImageUrl(), flashSales.getNightImageUrl(), flashSales.getEventId()
+        );
+    }
+
+    private int updatePublicEvent(FlashSales flashSales, int id) {
+        return jdbcTemplateProvider.getTemplate().update(UPDATE_VALUES_IN_EVENT, flashSales.getFlashTitle(), flashSales.getEventImageUrl(),
+                flashSales.getFlashImageUrl(), flashSales.getFlashBody(), flashSales.getCountryName(), flashSales.getMornigImageUrl(), flashSales.getAfternoonImageUrl(),
+                flashSales.getEveningImageUrl(), flashSales.getNightImageUrl(), flashSales.getEventId(), id);
+
+    }
+
+
+    public ResponseEntity postPublicEvent(FlashSales flashSales) {
+        try {
+            int count = updatePostUserEventClick(flashSales);
+            if (count == 0) {
+                count = createPostUserEventClickEvent(flashSales);
+            }
+            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                    new ApiResponse(count == 1, (count == 1) ? "Posted Successfully" : "Post Failed")));
+        } catch (Exception exception) {
+            throw new FailedResponseException("Exception in Post Public Event " + exception.getMessage());
+        }
+    }
+
+    private int createPostUserEventClickEvent(FlashSales flashSales) {
+        return jdbcTemplateProvider.getTemplate().update(INSERT_POST_CLICK_VALUES, flashSales.getEventId(), flashSales.getFlashTitle(), flashSales.getFlashBody());
+    }
+
+    private int updatePostUserEventClick(FlashSales flashSales) {
+        return jdbcTemplateProvider.getTemplate().update(UPDATE_POST_CLICK_VALUES, flashSales.getEventId(), flashSales.getFlashTitle(),
+                flashSales.getFlashBody(), flashSales.getEventId());
     }
 }

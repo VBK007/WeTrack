@@ -26,5 +26,6 @@ public class FlashSales {
     private String  nightImageUrl;
 
     private String eventId;
+    private String countryName;
 
 }

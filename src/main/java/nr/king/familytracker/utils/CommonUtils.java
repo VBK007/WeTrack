@@ -4,11 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
 import nr.king.familytracker.model.http.PhoneModel;
-import nr.king.familytracker.model.http.currency.CurrecyModel;
 import nr.king.familytracker.model.http.dashboardModel.DashBoardRequestBody;
+import nr.king.familytracker.model.http.dashboardModel.FlashSales;
 import nr.king.familytracker.model.http.filterModel.FilterHistoryModel;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
-import nr.king.familytracker.model.http.purchaseModel.PremiumModels;
 import nr.king.familytracker.model.http.purchaseModel.PurchaseRequestModel;
 import nr.king.familytracker.model.http.purchaseModel.UpdateUpiDetails;
 import nr.king.familytracker.repo.NotificationModel;
@@ -23,6 +22,7 @@ import org.springframework.stereotype.Component;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -33,6 +33,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.time.format.ResolverStyle;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,6 +49,20 @@ public class CommonUtils {
     private static final Logger logger = LogManager.getLogger(CommonUtils.class);
     private static final Pattern numberMinusMinusPattern = Pattern.compile("\\d+-\\d+");
     DateTimeFormatter onlineActivityDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+    String onlineStringActivity ="yyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    DateTimeFormatter onlineDateFormaterCreatedAt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS", Locale.ENGLISH);
+
+
+    String[] europeanCountry = new String[]{"AUT", "BE", "BG", "HR", "CY", "CZ", "DK", "EE", "FI", "FR", "DE", "GR", "GRC", "HU", "IE", "IRL", "IT", "ITA", "LV", "LT", "LU", "MT", "NL", "PL", "PT", "RO", "SK", "SI", "ES", "SE"};
+
+    String[] northAmerica = new String[]{"CA", "MX", "MEX", "GL", "JM", "PA", "CR", "GT", "PR", "HT", "DO", "US"};
+    String[] russia = new String[]{"RU", "BY"};
+    String[] muslimCountry = new String[]{"AF", "DZ", "BH", "BD", "BN", "EG", "IR", "IQ", "JO", "KW", "LY", "MV", "MR", "MA", "OM", "PK", "QA", "SA", "SAU", "SO", "SOM", "TN", "AE", "ARE", "YE", "TR"};
+    String[] indiaCountry = new String[]{"IN"};
+    String[] london = new String[]{"GB"};
+    String[] australia = new String[]{"AU"};
+    String[] hinduCountry = new String[]{"NP", "MU", "LK", "BT"};
+    String[] asianCountry = new String[]{"JP", "ID", "MY", "SG", "CN", "KP", "KOR", "KR", "TH", "MM"};
 
     public <R> R safeParseJSON(ObjectMapper objectMapper, String payload, Class<R> targetType) {
         try {
@@ -382,14 +397,7 @@ public class CommonUtils {
             stringBuilder.append(String.format(" user_id = %s ", integrationAccountId));
             isAndNeed = true;
         }
-
-       /* if (Integer.valueOf(outletId) > 0) {
-            stringBuilder.append(isAndNeed ? String.format(" and outlet_customer_id  = '%s' ", outletId) : String.format(" outlet_customer_id  = '%s' ", outletId));
-        }*/
     }
-
-
-
 
 
     public boolean isValidSkewCode(int skewCode) {
@@ -459,23 +467,33 @@ public class CommonUtils {
     }
 
 
+    public long returnAccountRunningTime(String created_at) {
+        return System.currentTimeMillis() - LocalDateTime.parse(created_at, onlineDateFormaterCreatedAt)
+                .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
+    }
 
-    public long returnAccountRunningTime(String created_at)
-    {
-
-      return   (LocalDateTime.parse(created_at)
-                .atZone(ZoneId.systemDefault())
-                .toInstant()
-                .toEpochMilli() - System.currentTimeMillis());
+    public long checkTimeDifference(String dateValue) {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+            dateFormat.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
+            SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm", Locale.ENGLISH);
+            timeFormat.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
+            Date date1 = Timestamp.valueOf(dateValue);
+            Date date2 = dateFormat.parse(dateFormat.format(new Date()));
+            long difference = date2.getTime() - date1.getTime();
+            return TimeUnit.MILLISECONDS.toMinutes(difference);
+        } catch (Exception e) {
+            logger.error(String.format("Exception while checking the time "));
+        }
+        return 0l;
     }
 
 
-    public boolean checkDashBoardRequestModel(DashBoardRequestBody dashBoardRequestBody)
-    {
-        return  checkHomeModelSecurityCheck(dashBoardRequestBody.getHomeModel()) &&
+    public boolean checkDashBoardRequestModel(DashBoardRequestBody dashBoardRequestBody) {
+        return checkHomeModelSecurityCheck(dashBoardRequestBody.getHomeModel()) &&
                 validate(Arrays.asList(dashBoardRequestBody.getFromDate(),
-                dashBoardRequestBody.getToDate(),
-                dashBoardRequestBody.getNumber()));
+                        dashBoardRequestBody.getToDate(),
+                        dashBoardRequestBody.getNumber()));
     }
 
     public boolean checkHomeModelSecurityCheck(HomeModel homeModel) {
@@ -525,43 +543,59 @@ public class CommonUtils {
     }
 
 
-    public  Long getTimeDuration(String dateOne,String dateTwo)
-    {
-        LocalDateTime dateTime1= LocalDateTime.parse(dateOne, onlineActivityDateFormatter);
-        LocalDateTime dateTime2= LocalDateTime.parse(dateTwo, onlineActivityDateFormatter);
-        return Duration.between(dateTime1, dateTime2).toMinutes();
+    public Long getTimeDuration(String dateOne, String dateTwo) {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat(onlineStringActivity, Locale.ENGLISH);
+            //dateFormat.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
+            Date date1 = dateFormat.parse(dateOne);
+            Date date2 = dateFormat.parse(dateTwo);
+            long difference = date1.getTime() - date2.getTime();
+            return TimeUnit.MILLISECONDS.toMinutes(difference);
+        } catch (Exception e) {
+            logger.error("Exception while checking the time ", e);
+        }
+        return 0l;
     }
 
     public boolean checkPremiumModel(UpdateUpiDetails premiumModels) {
-        return validate(Arrays.asList(isNullOrEmty(premiumModels.getPriceStag()),isNullOrEmty(premiumModels.getTextColor()),
-                isNullOrEmty(premiumModels.getTopDescription()),isNullOrEmty(premiumModels.getTopHeader()),
-                isNullOrEmty(premiumModels.getBackGroundColour()),isNullOrEmty(premiumModels.getMoneyInInr()),isNullOrEmty(premiumModels.getMoneyInUsd())));
+        return validate(Arrays.asList(isNullOrEmty(premiumModels.getPriceStag()), isNullOrEmty(premiumModels.getTextColor()),
+                isNullOrEmty(premiumModels.getTopDescription()), isNullOrEmty(premiumModels.getTopHeader()),
+                isNullOrEmty(premiumModels.getBackGroundColour()), isNullOrEmty(premiumModels.getMoneyInInr()), isNullOrEmty(premiumModels.getMoneyInUsd())));
     }
 
-    public String checkCountryState(String countryName)
-    {
-        String countryValue ="";
-        String[] chirstianCountry = new String[]{"",""};
-        String[] muslimCountry = new String[]{"",""};
-        String[] hinduCountry = new String[]{"",""};
-        String[] asianCountry = new String[]{"",""};
-        if (Arrays.asList(chirstianCountry).contains(countryName))
-        {
-            countryValue = "crs";
-        }
-        else if (Arrays.asList(muslimCountry).contains(countryName))
-        {
+    public String checkCountryState(String countryName) {
+        String countryValue = "";
+        countryName = countryName.toUpperCase();
+        if (Arrays.asList(europeanCountry).contains(countryName)) {
+            countryValue = "euro";
+        } else if (Arrays.asList(muslimCountry).contains(countryName)) {
             countryValue = "mus";
-        }
-        else if (Arrays.asList(hinduCountry).contains(countryName))
-        {
+        } else if (Arrays.asList(hinduCountry).contains(countryName)) {
             countryValue = "hin";
-        }
-        {
-            countryValue = "asi";
+        } else if (Arrays.asList(northAmerica).contains(countryName)) {
+            countryValue = "norAm";
+        } else if (Arrays.asList(indiaCountry).contains(countryName)) {
+            countryValue = "ind";
+        } else if (Arrays.asList(asianCountry).contains(countryName)) {
+            countryValue = "asian";
+        } else if (Arrays.asList(russia).contains(countryName)) {
+            countryValue = "rus";
+        } else if (Arrays.asList(london).contains(countryName)) {
+            countryValue = "uk";
+        } else if (Arrays.asList(australia).contains(countryName)) {
+            countryValue = "aus";
+        } else {
+            countryValue = "common";
         }
         return countryValue;
     }
 
 
+    public boolean checkFlashSalesSecurityCheck(FlashSales flashSales) {
+        return validate(Arrays.asList(isNullOrEmty(flashSales.getFlashTitle()), isNullOrEmty(flashSales.getFlashBody()),
+                isNullOrEmty(flashSales.getMornigImageUrl()), isNullOrEmty(flashSales.getAfternoonImageUrl()), isNullOrEmty(flashSales.getEveningImageUrl()),
+                isNullOrEmty(flashSales.getNightImageUrl()), isNullOrEmty(flashSales.getCountryName()), isNullOrEmty(flashSales.getFlashImageUrl()),
+                isNullOrEmty(flashSales.getEventImageUrl()), isNullOrEmty(flashSales.getEventId())
+        ));
+    }
 }
