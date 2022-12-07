@@ -68,7 +68,7 @@ public class HomeRepo {
                new Thread(()-> updateTokenForUser(homeModel.getId(),homeModel.getOneSignalExternalUserId())).start();
             }
             if (count == 0) {
-                count = createUser(homeModel);
+                count = createUser(homeModel);//createUserInital
                 if (count == 1) {
                     //dataBaseMigration.createSchema(homeModel.getId());
                     doUploadtoSchedularFunction(homeModel);
@@ -77,7 +77,7 @@ public class HomeRepo {
             String authToken = "";
             if (count == 1) {
                 authToken = UUID.randomUUID().toString();
-                doUpdateTokenforUser(authToken, homeModel);
+                doUpdateTokenforUser(authToken, homeModel); //update auth token
                 doandCreateLoginNumberOfTime(homeModel);
             }
             return responseUtils.constructResponse(200,
@@ -588,8 +588,8 @@ public class HomeRepo {
 
     private int doUpdateUserCreationinWetrack(HomeModel homeModel) {
         return jdbcTemplateProvider.getTemplate()
-                .update("update WE_TRACK_USERS set IS_USER_CREATED_IN_WETRACK_SERVICE=?,TOKEN_HEADER=?,Expiry_TIME=? where USER_ID=? and PACKAGE_NAME=?",
-                        true, homeModel.getId(), LocalDateTime.now().plusHours(3).toString(), homeModel.getId(), homeModel.getPackageName());
+                .update("update WE_TRACK_USERS set IS_USER_CREATED_IN_WETRACK_SERVICE=?,TOKEN_HEADER=? where USER_ID=? and PACKAGE_NAME=?",
+                        true, homeModel.getId(), homeModel.getId(), homeModel.getPackageName());
     }
 
     private HttpResponse checkUserFromWeTrackService(HomeModel homeModel) throws IOException {
@@ -608,7 +608,8 @@ public class HomeRepo {
                         "CREATED_AT,UPDATED_AT,IS_USER_CREATED_IN_WETRACK_SERVICE,TOKEN_HEADER,IS_NUMBER_ADDER,SCHEMA_NAME,purchase_mode,MAX_NUMBER,PACKAGE_NAME,CREDIT_LIMIT) " +
                         "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?,?)",
                 homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(), homeModel.getCountryName(),
-                homeModel.getOneSignalExternalUserId(), homeModel.getAppId(), (IS_MONEY_MODE)?LocalDateTime.now().plusHours(24).toString() :
+                homeModel.getOneSignalExternalUserId(), homeModel.getAppId(),
+                (IS_MONEY_MODE)?LocalDateTime.now().plusHours(24).toString() :
                         LocalDateTime.now().plusYears(1).toString(), false, false,
                 "", false, WETRACK + homeModel.getId(), commonUtils.getModel(homeModel.getPackageName()), 1, homeModel.getPackageName(),
                 100

@@ -88,6 +88,14 @@ public class DashBoardRepo {
                 accountModel.setAccountNumberSocialMediaActivity(getSocialMediaActivity(innerNumberSet, dashBoardRequestBody,sqlRowSet.getString("MAX_NUMBER")));
             }
         }
+        if (accountModel.getAccountNumberSocialMediaActivity()==null)
+        {
+            accountModel.setAccountNumberSocialMediaActivity(new AccountNumberSocialMediaActivity(
+                    0,
+                    0,
+                    0,
+                    Integer.parseInt(commonUtils.isNullOrEmty(sqlRowSet.getString("MAX_NUMBER")))));
+        }
         FlashSales flashSales = getFlashSales(dashBoardRequestBody, dashBoardResponses);
         dashBoardResponses.setFlashSales(flashSales);
         dashBoardResponses.setFlashSales(flashSales);
