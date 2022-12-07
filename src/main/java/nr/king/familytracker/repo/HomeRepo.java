@@ -320,14 +320,14 @@ public class HomeRepo {
                         notificationModel.setNickName(numberSet.getString("NICK_NAME"));
                         notificationModel.setEnable(numberSet.getBoolean("is_noti_enabled"));
                         notificationModel.setNumberId(Long.valueOf(numberSet.getString("NUMBER")));
-                        HttpResponse enableSchedularPush =
+                      /*  HttpResponse enableSchedularPush =
                                 httpUtils.doPostRequest(0,
                                         LOCAL_HOST_NUMBER,
                                         commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
                                         "",
                                         commonUtils.writeAsString(objectMapper, notificationModel)
                                 );
-                        logger.info("enablePush Notification" + enableSchedularPush.getResponseCode());
+                        logger.info("enablePush Notification" + enableSchedularPush.getResponseCode());*/
                     }
                     if (count != 1) {
                         logger.info("Unable to update number for user " + phoneModel.getPhoneNumber());

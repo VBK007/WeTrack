@@ -74,19 +74,18 @@ public class DashBoardRepo {
         accountModel.setCreatedAt(sqlRowSet.getString("CREATED_AT"));
         accountModel.setExpiryAt(sqlRowSet.getString("EXPIRY_TIME"));
         accountModel.setShowAdd((Objects.equals(sqlRowSet.getString("PURCHASE_MODE"), "demo")));
+        accountModel.setPurchaseMode(sqlRowSet.getString("PURCHASE_MODE"));
         accountModel.setTracking(isAccountExpired);
         accountModel.setTrackingTime(commonUtils.checkTimeDifference(sqlRowSet.getString("CREATED_AT")));
-        if (isAccountExpired) {
-            SqlRowSet innerNumberSet = jdbcTemplateProvider.getTemplate()
-                    .queryForRowSet(selectNumberWithToken, dashBoardRequestBody.getHomeModel().getId(),
-                            dashBoardRequestBody.getHomeModel().getPackageName());
-            while (innerNumberSet.next()) {
-                accountNumbersList.add(new AccountNumberWithName(innerNumberSet.getString("NUMBER"), innerNumberSet.getString("NICK_NAME")));
-                //for getting social Media Activity
-                if ((dashBoardRequestBody.getNumber().isEmpty() && innerNumberSet.isFirst()) ||
-                        dashBoardRequestBody.getNumber().equals(innerNumberSet.getString("NUMBER"))) {
-                    accountModel.setAccountNumberSocialMediaActivity(getSocialMediaActivity(innerNumberSet, dashBoardRequestBody));
-                }
+        SqlRowSet innerNumberSet = jdbcTemplateProvider.getTemplate()
+                .queryForRowSet(selectNumberWithToken, dashBoardRequestBody.getHomeModel().getId(),
+                        dashBoardRequestBody.getHomeModel().getPackageName());
+        while (innerNumberSet.next()) {
+            accountNumbersList.add(new AccountNumberWithName(innerNumberSet.getString("NUMBER"), innerNumberSet.getString("NICK_NAME")));
+            //for getting social Media Activity
+            if ((dashBoardRequestBody.getNumber().isEmpty() && innerNumberSet.isFirst()) ||
+                    dashBoardRequestBody.getNumber().equals(innerNumberSet.getString("NUMBER"))) {
+                accountModel.setAccountNumberSocialMediaActivity(getSocialMediaActivity(innerNumberSet, dashBoardRequestBody,sqlRowSet.getString("MAX_NUMBER")));
             }
         }
         FlashSales flashSales = getFlashSales(dashBoardRequestBody, dashBoardResponses);
@@ -98,7 +97,7 @@ public class DashBoardRepo {
     }
 
 
-    private AccountNumberSocialMediaActivity getSocialMediaActivity(SqlRowSet innerNumberSet, DashBoardRequestBody dashBoardRequestBody) {
+    private AccountNumberSocialMediaActivity getSocialMediaActivity(SqlRowSet innerNumberSet, DashBoardRequestBody dashBoardRequestBody, String maxNumber) {
         AccountNumberSocialMediaActivity accountNumberSocialMediaActivity = new AccountNumberSocialMediaActivity();
         try {
             FilterHistoryModel localFilterModel = new FilterHistoryModel();
@@ -115,10 +114,12 @@ public class DashBoardRepo {
             );
             GetPhoneHistoryMainArrayModel getPageHistoryNumberModel = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(),
                     GetPhoneHistoryMainArrayModel.class);
+            logger.info("Response in the Delivery bills "+httpResponse.getResponse());
             DashBoardTimeSpending dashBoardTimeSpending = getDashBoardTiming(getPageHistoryNumberModel);
             accountNumberSocialMediaActivity.setTotalNumberOfHours(dashBoardTimeSpending.getTotalTimeSpent());
             accountNumberSocialMediaActivity.setTotalNumberOfOnline(dashBoardTimeSpending.getTotalTimeOnline());
             accountNumberSocialMediaActivity.setTotalNumberOfOffline(dashBoardTimeSpending.getTotalTimeOffline());
+            accountNumberSocialMediaActivity.setMaxNumber(Integer.parseInt(maxNumber));
         } catch (Exception exception) {
             logger.error("Exception in api call for number of timeCalculation" + exception.getMessage(), exception);
         }
@@ -140,9 +141,7 @@ public class DashBoardRepo {
             //need to add second to minutes
             if (i % 2 != 0) {
                 totalTimeSpend += commonUtils.getTimeDuration(getPageHistoryNumberModel.getData().get(i - 1).timeStamp, lData.timeStamp);
-            }
-            else if (i==getPageHistoryNumberModel.getData().size()-1 && i!=0)
-            {
+            } else if (i == getPageHistoryNumberModel.getData().size() - 1 && i != 0) {
                 totalTimeSpend += commonUtils.getTimeDuration(getPageHistoryNumberModel.getData().get(i - 1).timeStamp, lData.timeStamp);
             }
         }

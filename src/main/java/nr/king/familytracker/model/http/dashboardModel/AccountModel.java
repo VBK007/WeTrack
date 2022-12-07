@@ -16,8 +16,7 @@ public class AccountModel {
     private boolean showAdd;
     private String showExpiryDate;
     private boolean isTracking;
-
     private AccountNumbers accountNumbers;
     private AccountNumberSocialMediaActivity accountNumberSocialMediaActivity;
-
+    private String purchaseMode;
 }
