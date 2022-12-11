@@ -78,6 +78,25 @@ public class HomeServices {
                     new ApiResponse(false, "Unable to verify User")));
         }
     }
+
+
+
+    public ResponseEntity getUserNeed(HomeModel homeModel) {
+        try {
+            if (commonUtils.checkHomeModelSecurityCheck(homeModel))
+            {
+                return responseUtils.constructResponse(406,
+                        commonUtils.writeAsString(objectMapper,
+                                new ApiResponse(false,"Invalid Characters Not allowed")));
+            }
+            return homeRepo.getUserNeed(homeModel);
+        } catch (Exception exception) {
+            logger.error("Exception in verify  the User due to" + exception.getMessage(), exception);
+            return responseUtils.constructResponse(406, commonUtils.writeAsString(objectMapper,
+                    new ApiResponse(false, "Unable to verify User")));
+        }
+    }
+
     public ResponseEntity verifyAddUser(HomeModel homeModel) {
         try {
             if (commonUtils.checkHomeModelSecurityCheck(homeModel))

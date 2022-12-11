@@ -63,9 +63,8 @@ public class HomeRepo {
     public ResponseEntity saveUserDetails(HomeModel homeModel) {
         try {
             int count = doUpdateUser(homeModel);
-            if (count==1)
-            {
-               new Thread(()-> updateTokenForUser(homeModel.getId(),homeModel.getOneSignalExternalUserId())).start();
+            if (count == 1) {
+                new Thread(() -> updateTokenForUser(homeModel.getId(), homeModel.getOneSignalExternalUserId())).start();
             }
             if (count == 0) {
                 count = createUser(homeModel);//createUserInital
@@ -92,7 +91,7 @@ public class HomeRepo {
     }
 
     private void updateTokenForUser(String id, String oneSignalExternalUserId) {
-        try{
+        try {
             NotificationModel dummyModel = new NotificationModel();
             notificationModel.setUserId(id);
             notificationModel.setPushToken(oneSignalExternalUserId);
@@ -104,10 +103,8 @@ public class HomeRepo {
                             commonUtils.writeAsString(objectMapper, dummyModel)
                     );
             logger.info("enablePush Notification" + enableSchedularPush.getResponseCode());
-        }
-        catch (Exception exception)
-        {
-            logger.info("Exception in updating token in another server"+exception.getMessage(),exception);
+        } catch (Exception exception) {
+            logger.info("Exception in updating token in another server" + exception.getMessage(), exception);
         }
     }
 
@@ -134,7 +131,7 @@ public class HomeRepo {
         if (count == 0) {
             count = jdbcTemplateProvider.getTemplate()
                     .update("insert into AUTH_TOKEN (USER_ID,AUTH_TOKEN,CREATED_AT,UPDATED_AT,PACKAGE_NAME) values (?,?,current_timestamp,current_timestamp,?)",
-                            homeModel.getId(), authToken,homeModel.getPackageName());
+                            homeModel.getId(), authToken, homeModel.getPackageName());
         }
         logger.info("count for auth token" + count);
 
@@ -203,6 +200,44 @@ public class HomeRepo {
     }
 
 
+    public ResponseEntity getUserNeed(HomeModel homeModel) {
+        try {
+            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
+                    .queryForRowSet("select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,token_header,CREDIT_LIMIT  " +
+                            "from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?", homeModel.getId(), homeModel.getPackageName());
+            if (sqlRowSet.next()) {
+                SqlRowSet innerNumberSet = jdbcTemplateProvider.getTemplate()
+                        .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT,is_noti_enabled from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?",
+                                homeModel.getId(), homeModel.getPackageName());
+                if (commonUtils.checkAddOrWithoutAdd(sqlRowSet.getString("Expiry_TIME"),
+                        homeModel.getPackageName(),
+                        sqlRowSet.getInt("CREDIT_LIMIT"))) {
+
+                    if (!innerNumberSet.next()) {
+                        return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                                new ApiResponse(false, "Please add Mobile Number")));
+                    }
+
+                    new Thread(() -> doInBakground(homeModel, innerNumberSet)).start();
+                }
+                else {
+                    return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                            new ApiResponse(false, "Plan is Expired")));
+                }
+            }
+            else {
+                return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false, "No user found ")));
+            }
+            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                    new ApiResponse(true, "User Updated ")));
+        } catch (Exception exception) {
+            logger.error("Exception in  GetUser need due to is" + exception.getMessage(), exception);
+            throw new FailedResponseException("");
+        }
+    }
+
+
     @Transactional
     public ResponseEntity verify_user(HomeModel homeModel) {
         try {
@@ -249,7 +284,8 @@ public class HomeRepo {
                                 "User Created UnSuccessfully")));
                     }
                 }
-            } else {
+            }
+            else {
                 return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                         new ApiResponse(false, "No user found ")));
 
@@ -267,7 +303,6 @@ public class HomeRepo {
 
     private void doInBakground(HomeModel homeModel, SqlRowSet numberSet) {
         try {
-
             if (numberSet.isLast()) {
                 new Thread(() -> makeApiCallFOrUpdatePhoneState(homeModel, numberSet)).start();
             } else {
@@ -320,14 +355,15 @@ public class HomeRepo {
                         notificationModel.setNickName(numberSet.getString("NICK_NAME"));
                         notificationModel.setEnable(numberSet.getBoolean("is_noti_enabled"));
                         notificationModel.setNumberId(Long.valueOf(numberSet.getString("NUMBER")));
-                      /*  HttpResponse enableSchedularPush =
+                        HttpResponse enableSchedularPush =
                                 httpUtils.doPostRequest(0,
                                         LOCAL_HOST_NUMBER,
                                         commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
                                         "",
                                         commonUtils.writeAsString(objectMapper, notificationModel)
                                 );
-                        logger.info("enablePush Notification" + enableSchedularPush.getResponseCode());*/
+                        logger.info("enablePush Notification" + enableSchedularPush.getResponseCode());
+                        logger.info("Push Notification data is"+ notificationModel.getNumberId());
                     }
                     if (count != 1) {
                         logger.info("Unable to update number for user " + phoneModel.getPhoneNumber());
@@ -367,7 +403,7 @@ public class HomeRepo {
     public ResponseEntity addMobileNumber(PhoneModel phoneModel) {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
-                    .queryForRowSet(SELECT_USER_EXPIRY_TIME_WITH_ACCOUNT_DETAILS, phoneModel.getId(),phoneModel.getPackageName());
+                    .queryForRowSet(SELECT_USER_EXPIRY_TIME_WITH_ACCOUNT_DETAILS, phoneModel.getId(), phoneModel.getPackageName());
             SqlRowSet countSet = jdbcTemplateProvider.getTemplate().queryForRowSet("select count(*) from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?",
                     phoneModel.getId(), phoneModel.getPackageName());
 
@@ -536,7 +572,7 @@ public class HomeRepo {
                     );
             logger.info("enablePush Notification" + enableSchedularPush.getResponseCode());
         } catch (Exception exception) {
-            logger.info("Exception error while sending user number "+exception.getMessage(),exception);
+            logger.info("Exception error while sending user number " + exception.getMessage(), exception);
         }
     }
 
@@ -560,7 +596,7 @@ public class HomeRepo {
     public ResponseEntity getAllMobileNumbers(PhoneModel phoneModel) {
         try {
             List<GetMobileResponse> getMobileResponses = new ArrayList<>();
-            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_ALL_MOBILE_NUMBER, phoneModel.getId(),phoneModel.getPackageName());
+            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_ALL_MOBILE_NUMBER, phoneModel.getId(), phoneModel.getPackageName());
             while (sqlRowSet.next()) {
                 GetMobileResponse getMobileResponse = new GetMobileResponse();
                 getMobileResponse.setMobileNumber(sqlRowSet.getString("NUMBER"));
@@ -609,7 +645,7 @@ public class HomeRepo {
                         "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?,?)",
                 homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(), homeModel.getCountryName(),
                 homeModel.getOneSignalExternalUserId(), homeModel.getAppId(),
-                (IS_MONEY_MODE)?LocalDateTime.now().plusHours(24).toString() :
+                (IS_MONEY_MODE) ? LocalDateTime.now().plusHours(24).toString() :
                         LocalDateTime.now().plusYears(1).toString(), false, false,
                 "", false, WETRACK + homeModel.getId(), commonUtils.getModel(homeModel.getPackageName()), 1, homeModel.getPackageName(),
                 100
@@ -636,7 +672,7 @@ public class HomeRepo {
                                 "ONE_SIGNAL_EXTERNAL_USERID=?,MOBILE_VERSION=?,UPDATED_AT = current_timestamp" +
                                 " where USER_ID=? and package_name=?", homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(),
                         homeModel.getCountryName(), homeModel.getOneSignalExternalUserId(), homeModel.getAppId(),
-                        homeModel.getId(),homeModel.getPackageName()
+                        homeModel.getId(), homeModel.getPackageName()
                 );
     }
 

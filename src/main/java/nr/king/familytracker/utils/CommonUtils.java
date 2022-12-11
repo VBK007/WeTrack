@@ -8,6 +8,7 @@ import nr.king.familytracker.model.http.dashboardModel.DashBoardRequestBody;
 import nr.king.familytracker.model.http.dashboardModel.FlashSales;
 import nr.king.familytracker.model.http.filterModel.FilterHistoryModel;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
+import nr.king.familytracker.model.http.messages.MessageRequestBody;
 import nr.king.familytracker.model.http.purchaseModel.PurchaseRequestModel;
 import nr.king.familytracker.model.http.purchaseModel.UpdateUpiDetails;
 import nr.king.familytracker.repo.NotificationModel;
@@ -140,6 +141,8 @@ public class CommonUtils {
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
         return simpleDateFormat.format(date);
     }
+
+
 
     public String writeAsString(ObjectMapper objectMapper, Object object) {
         try {
@@ -412,13 +415,13 @@ public class CommonUtils {
         HomeModel homeModel = new HomeModel();
         String string = UUID.randomUUID().toString().substring(0, 12).replace("-", "f");
         Map<String, String[]> phoneBrandsMap = new HashMap<>();
-        phoneBrandsMap.put("Samsung", new String[]{
-                "Galaxy S22",
-                "Galaxy A13 5G",
-                "Galaxy A53 5G",
-                "S21 FE 5G",
-                "S22 Ultra",
-                "Z Flip3 5G"
+        phoneBrandsMap.put("Vivo", new String[]{
+                "Vivo Y21",
+                "Vivo V5",
+                "Vivo v20",
+                "Vivo FE 5G",
+                "Vivo Ultra",
+                "Z Flip3 4G"
         });
         if (string.equals(token_header) && !isFirstTime) {
             getHomeModel(token_header, false);
@@ -451,6 +454,11 @@ public class CommonUtils {
         return string == null || string.isEmpty() || "null".equalsIgnoreCase(string) ? "" : string;
     }
 
+
+    public boolean isNullOrEmtys(String string) {
+        return string == null || string.isEmpty() || "null".equalsIgnoreCase(string);
+    }
+
     public static boolean validation(List<String> inputValueList) {
         return inputValueList.stream().anyMatch(input -> (input.contains("<") || input.contains(">")));
     }
@@ -472,6 +480,20 @@ public class CommonUtils {
                 .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
+    public  long getTimeValue(String dateValue)
+    {
+        try {
+            SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
+            dateFormat.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
+             return  dateFormat.parse(dateValue).getTime();
+        }
+        catch (Exception exception)
+        {
+            logger.error(String.format("Exception while get TimeValue the time "));
+        }
+        return 0L;
+    }
+
     public long checkTimeDifference(String dateValue) {
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
@@ -485,7 +507,7 @@ public class CommonUtils {
         } catch (Exception e) {
             logger.error(String.format("Exception while checking the time "));
         }
-        return 0l;
+        return 0L;
     }
 
 
@@ -597,5 +619,10 @@ public class CommonUtils {
                 isNullOrEmty(flashSales.getNightImageUrl()), isNullOrEmty(flashSales.getCountryName()), isNullOrEmty(flashSales.getFlashImageUrl()),
                 isNullOrEmty(flashSales.getEventImageUrl()), isNullOrEmty(flashSales.getEventId())
         ));
+    }
+
+    public boolean checkMessageRequestBodySecurityCheck(MessageRequestBody flashSales) {
+        return  checkHomeModelSecurityCheck(flashSales.getHomeModel()) ||  validate(Arrays.asList(isNullOrEmty(flashSales.getMessageReponseBody().getMessageImageUrl()),
+                isNullOrEmty(flashSales.getMessageReponseBody().getMessage()),isNullOrEmty(flashSales.getMessageReponseBody().getMessageUserId())));
     }
 }

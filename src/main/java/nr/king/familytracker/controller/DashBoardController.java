@@ -4,6 +4,7 @@ import nr.king.familytracker.model.http.dashboardModel.DashBoardRequestBody;
 import nr.king.familytracker.model.http.dashboardModel.FlashSales;
 import nr.king.familytracker.model.http.dashboardModel.PublicEventRequestBody;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
+import nr.king.familytracker.model.http.messages.MessageRequestBody;
 import nr.king.familytracker.service.DashBoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -35,5 +36,11 @@ public class DashBoardController extends BaseController {
         return dashBoardService.postPublicEventByUser(flashSales);
     }
 
+
+    @PostMapping(value = "/v{version:[1]}/post-message", produces = {"application/json"})
+    public ResponseEntity addUserMessage(@RequestBody MessageRequestBody messageRequestBody)
+    {
+        return dashBoardService.postMessageToUser(messageRequestBody);
+    }
 
 }

@@ -6,6 +6,7 @@ import nr.king.familytracker.model.http.dashboardModel.DashBoardRequestBody;
 import nr.king.familytracker.model.http.dashboardModel.FlashSales;
 import nr.king.familytracker.model.http.dashboardModel.PublicEventRequestBody;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
+import nr.king.familytracker.model.http.messages.MessageRequestBody;
 import nr.king.familytracker.repo.DashBoardRepo;
 import nr.king.familytracker.utils.CommonUtils;
 import nr.king.familytracker.utils.ResponseUtils;
@@ -76,6 +77,25 @@ public class DashBoardService {
         catch (Exception exception)
         {
             logger.error("Exception in the dashboard service " + exception.getMessage(), exception);
+            return responseUtils.constructResponse(406, commonUtils.writeAsString(objectMapper, new ApiResponse(false,
+                    "Invalid Format Not allowed")));
+        }
+    }
+
+    public ResponseEntity postMessageToUser(MessageRequestBody flashSales) {
+        try
+        {
+            if (commonUtils.checkMessageRequestBodySecurityCheck(flashSales))
+            {
+                return responseUtils.constructResponse(406, commonUtils.writeAsString(objectMapper, new ApiResponse(false,
+                        "Invalid Format Not allowed")));
+            }
+
+            return dashBoardRepo.postUserMessage(flashSales);
+        }
+        catch (Exception exception)
+        {
+            logger.error("Exception in the post  message " + exception.getMessage(), exception);
             return responseUtils.constructResponse(406, commonUtils.writeAsString(objectMapper, new ApiResponse(false,
                     "Invalid Format Not allowed")));
         }

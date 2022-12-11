@@ -26,6 +26,12 @@ public class HomeController extends BaseController {
     }
 
 
+    @PostMapping(value = "/v{version:[1]}/user/getUserneed",produces = { "application/json" })
+    public ResponseEntity checkUserNumber(@RequestBody HomeModel homeModel) {
+        return homeServices.getUserNeed(homeModel);
+    }
+
+
 
     @PostMapping(value = "/v{version:[1]}/user/getUserAbuzerForAdd",produces = { "application/json" })
     public ResponseEntity verifyAddUser(@RequestBody HomeModel homeModel) {

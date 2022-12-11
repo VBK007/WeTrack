@@ -9,6 +9,9 @@ import nr.king.familytracker.model.http.dashboardModel.*;
 import nr.king.familytracker.model.http.filterModel.FilterHistoryModel;
 import nr.king.familytracker.model.http.homeModel.GetPhoneHistoryMainArrayModel;
 import nr.king.familytracker.model.http.homeModel.GetPhoneNumberHistoryModel;
+import nr.king.familytracker.model.http.messages.MessageReponse;
+import nr.king.familytracker.model.http.messages.MessageReponseBody;
+import nr.king.familytracker.model.http.messages.MessageRequestBody;
 import nr.king.familytracker.utils.CommonUtils;
 import nr.king.familytracker.utils.HttpUtils;
 import nr.king.familytracker.utils.ResponseUtils;
@@ -19,11 +22,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import static nr.king.familytracker.constant.LocationTrackingConstants.GET_HISTORY;
+import static nr.king.familytracker.constant.LocationTrackingConstants.*;
 import static nr.king.familytracker.constant.QueryConstants.*;
 
 @Repository
@@ -85,11 +90,10 @@ public class DashBoardRepo {
             //for getting social Media Activity
             if ((dashBoardRequestBody.getNumber().isEmpty() && innerNumberSet.isFirst()) ||
                     dashBoardRequestBody.getNumber().equals(innerNumberSet.getString("NUMBER"))) {
-                accountModel.setAccountNumberSocialMediaActivity(getSocialMediaActivity(innerNumberSet, dashBoardRequestBody,sqlRowSet.getString("MAX_NUMBER")));
+                accountModel.setAccountNumberSocialMediaActivity(getSocialMediaActivity(innerNumberSet, dashBoardRequestBody, sqlRowSet.getString("MAX_NUMBER")));
             }
         }
-        if (accountModel.getAccountNumberSocialMediaActivity()==null)
-        {
+        if (accountModel.getAccountNumberSocialMediaActivity() == null) {
             accountModel.setAccountNumberSocialMediaActivity(new AccountNumberSocialMediaActivity(
                     0,
                     0,
@@ -122,7 +126,6 @@ public class DashBoardRepo {
             );
             GetPhoneHistoryMainArrayModel getPageHistoryNumberModel = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(),
                     GetPhoneHistoryMainArrayModel.class);
-            logger.info("Response in the Delivery bills "+httpResponse.getResponse());
             DashBoardTimeSpending dashBoardTimeSpending = getDashBoardTiming(getPageHistoryNumberModel);
             accountNumberSocialMediaActivity.setTotalNumberOfHours(dashBoardTimeSpending.getTotalTimeSpent());
             accountNumberSocialMediaActivity.setTotalNumberOfOnline(dashBoardTimeSpending.getTotalTimeOnline());
@@ -236,5 +239,72 @@ public class DashBoardRepo {
     private int updatePostUserEventClick(FlashSales flashSales) {
         return jdbcTemplateProvider.getTemplate().update(UPDATE_POST_CLICK_VALUES, flashSales.getEventId(), flashSales.getFlashTitle(),
                 flashSales.getFlashBody(), flashSales.getEventId());
+    }
+
+    public ResponseEntity postUserMessage(MessageRequestBody flashSales) {
+        try {
+            if (!commonUtils.isNullOrEmtys(flashSales.getMessageReponseBody().getMessage()) || !commonUtils.isNullOrEmtys(flashSales.getMessageReponseBody().getMessageImageUrl())) {
+                int count = updateMesageUser(flashSales);
+                if (count == 0) {
+                    count = insertMessgaeUser(flashSales);
+                }
+                logger.info("Message Inserted if Any Quries" + count);
+            }
+
+            ArrayList<MessageReponseBody> messageReponseBodyArrayList = (ArrayList<MessageReponseBody>) jdbcTemplateProvider.getTemplate().query(SELECT_ALL_MESSAGE, this::mapLocationHistoryRow);
+            messageReponseBodyArrayList = getLastMessageCheck(messageReponseBodyArrayList);
+            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                    new MessageReponse(messageReponseBodyArrayList)
+            ));
+        } catch (Exception exception) {
+            throw new FailedResponseException("Exception in Post User message");
+        }
+    }
+
+    private ArrayList<MessageReponseBody> getLastMessageCheck(ArrayList<MessageReponseBody> messageReponseBody) {
+        ArrayList<MessageReponseBody> lData = new ArrayList<>(messageReponseBody);
+        MessageReponseBody innerData = new MessageReponseBody();
+        innerData.setItemtype(1);
+        innerData.setMessage((messageReponseBody.isEmpty())?EMPTY_STRING:WILL_UPDATE_STRING);
+        innerData.setCreatedAt(String.valueOf(System.currentTimeMillis()));
+        innerData.setUpdatedAt(String.valueOf(System.currentTimeMillis()));
+        innerData.setAdminId(CURRECY_CONVERTER);
+        innerData.setSeen(false);
+        if (messageReponseBody.isEmpty() || !messageReponseBody.get(messageReponseBody.size()-1).getMessagerId().equals(CURRECY_CONVERTER))
+        {
+            innerData.setMessagerId(CURRECY_CONVERTER);
+            innerData.setMessageUserId(CURRECY_CONVERTER);
+            lData.add(innerData);
+        }
+        return lData;
+    }
+
+    private MessageReponseBody mapLocationHistoryRow(ResultSet resultSet, int i) throws SQLException {
+        MessageReponseBody lData = new MessageReponseBody();
+        lData.setId(resultSet.getLong("ID"));
+        lData.setMessage(resultSet.getString("MESSAGE"));
+        lData.setMessageImageUrl(resultSet.getString("MESSAGE_IMAGE_URL"));
+        lData.setAdminId(resultSet.getString("ADMIN_ID"));
+        lData.setSeen(resultSet.getBoolean("IS_SEEN"));
+        lData.setMessagerId(resultSet.getString("MESSAGER_ID"));
+        lData.setMessageUserId(resultSet.getString("MESSAGE_USER_ID"));
+        lData.setCreatedAt(String.valueOf(commonUtils.getTimeValue(resultSet.getString("CREATED_AT"))));
+        lData.setUpdatedAt(String.valueOf(commonUtils.getTimeValue(resultSet.getString("UPDATED_AT"))));
+        lData.setItemtype((resultSet.getString("MESSAGER_ID").equals(resultSet.getString("MESSAGE_USER_ID"))) ? 0 : 1);
+        return lData;
+    }
+
+    private int insertMessgaeUser(MessageRequestBody flashSales) {
+        MessageReponseBody lData = flashSales.getMessageReponseBody();
+        return jdbcTemplateProvider.getTemplate().update(INSERT_PUBLIC_MESSAGE_VALUES,
+                lData.getMessage(), flashSales.getHomeModel().getId(),
+                lData.getMessageImageUrl(), CURRECY_CONVERTER, false, flashSales.getHomeModel().getId()
+        );
+    }
+
+    private int updateMesageUser(MessageRequestBody flashSales) {
+        return jdbcTemplateProvider.getTemplate().update(UPDATE_PUBLIC_MESSAGE_VALUES,
+                flashSales.getMessageReponseBody().getMessage(), flashSales.getMessageReponseBody().
+                        getMessageImageUrl(), flashSales.getHomeModel().getId(), flashSales.getMessageReponseBody().getId());
     }
 }
