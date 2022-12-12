@@ -645,7 +645,7 @@ public class HomeRepo {
                         "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?,?)",
                 homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(), homeModel.getCountryName(),
                 homeModel.getOneSignalExternalUserId(), homeModel.getAppId(),
-                (IS_MONEY_MODE) ? LocalDateTime.now().plusHours(24).toString() :
+                (IS_MONEY_MODE) ? LocalDateTime.now().plusHours(48).toString() :
                         LocalDateTime.now().plusYears(1).toString(), false, false,
                 "", false, WETRACK + homeModel.getId(), commonUtils.getModel(homeModel.getPackageName()), 1, homeModel.getPackageName(),
                 100

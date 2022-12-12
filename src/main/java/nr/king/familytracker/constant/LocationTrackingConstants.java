@@ -13,15 +13,16 @@ public class LocationTrackingConstants {
     public static final String FAILED = "failed";
     public static final String MESSAGE = "message";
     public static final String EVENT_MASTER = "eventMaster";
-    public static final boolean IS_MONEY_MODE = false;
-
-    public static final String EMPTY_STRING="Welcome,to Family Tracking Application.World Trusted Application.\uD83D\uDE00";
-    public static final String WILL_UPDATE_STRING="We will update your Query to user we will get back Soon.\uD83D\uDC4D";
+    public static boolean IS_MONEY_MODE = false;
+    public static String APP_VERSION = "1.3";
+    public static boolean IS_FORCE_UPDATE = false;
+    public static final String EMPTY_STRING = "Welcome,to Family Tracking Application.World Trusted Application.\uD83D\uDE00";
+    public static final String WILL_UPDATE_STRING = "We will update your Query to user we will get back Soon.\uD83D\uDC4D";
 
 
     //api for apiTracker
-     public static final String GET_HISTORY = "http://api.wtrackonline.com/api/history/GetHistoriesByDate";
-     public static final String POST_NUMBER = "http://api.wtrackonline.com/api/user/addNumberForUser";
+    public static final String GET_HISTORY = "http://api.wtrackonline.com/api/history/GetHistoriesByDate";
+    public static final String POST_NUMBER = "http://api.wtrackonline.com/api/user/addNumberForUser";
 
     public static final String CREATE_USER = "http://api.wtrackonline.com/api/user/newUser";
 
@@ -56,24 +57,24 @@ public class LocationTrackingConstants {
      public static final String GET_HISTORY = "http://chattrack.apiservicessarl.com/api/history/GetHistoriesByDate";*/
 
     public static final String LOCAL_HOST_TOKEN = "http://3.92.177.250:8082/we_track/v1/update-token";
-     public static final String LOCAL_HOST_NUMBER = "http://3.92.177.250:8082/we_track/v1/update-status";
+    public static final String LOCAL_HOST_NUMBER = "http://3.92.177.250:8082/we_track/v1/update-status";
 
     //public static final String LOCAL_HOST_NUMBER = "http://3.92.177.250:8082/we_track/v1/update-status";
     //public static final String LOCAL_HOST_ADD_USER = "http://3.92.177.250:8082/we_track/v1/create-deviceUser";
     public static final String LOCAL_HOST_ADD_USER = "http://localhost:8082/we_track/v1/create-deviceUser";
-    public static final String[] PACKAGE_ARRAY_WITHOUT_ADD = {"com.withcodeplays.familytracker","com.withcodeplays.socialmediatracker"};
+    public static final String[] PACKAGE_ARRAY_WITHOUT_ADD = {"com.withcodeplays.familytracker", "com.withcodeplays.socialmediatracker"};
     public static final String[] PACKAGE_ARRAY_WITH_ADD = {
             "com.withcodeplays.wetracker",
             "com.withcodeplays.whattracker",
             "com.withcodeplays.crushtracker",
             "com.withcodeplays.onlinetracker"};
 
-    public static final String CURRECY_CONVERTER ="lkmiK7UKdmBwSqJmvXQtO73dEW5M6sor";
+    public static final String CURRECY_CONVERTER = "lkmiK7UKdmBwSqJmvXQtO73dEW5M6sor";
 
 
-    public static final String API_FOR_CURRENCY_CONVERTION ="https://api.apilayer.com/fixer/convert?";
-    public static final String[] SUBSCRIBTION_MODEL_ARRAYLIST = {"demo","Fresher", "Standard", "Popular", "Deluxe", "Ultra Deluxe"};
-    public static final int[] MAX_NUMBER_ALLOWED = {1, 2, 2, 3, 5, 5,10};
+    public static final String API_FOR_CURRENCY_CONVERTION = "https://api.apilayer.com/fixer/convert?";
+    public static final String[] SUBSCRIBTION_MODEL_ARRAYLIST = {"demo", "Fresher", "Standard", "Popular", "Deluxe", "Ultra Deluxe"};
+    public static final int[] MAX_NUMBER_ALLOWED = {1, 2, 2, 3, 5, 5, 10};
 
     private LocationTrackingConstants() {
 

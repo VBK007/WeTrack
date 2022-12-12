@@ -42,5 +42,4 @@ public class DashBoardController extends BaseController {
     {
         return dashBoardService.postMessageToUser(messageRequestBody);
     }
-
 }

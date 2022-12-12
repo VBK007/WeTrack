@@ -78,20 +78,18 @@ public class PurchaseRepo {
         for (int i = 0; i < SUBSCRIBTION_MODEL_ARRAYLIST.length; i++) {
             if (SUBSCRIBTION_MODEL_ARRAYLIST[i].equals(purchaseRequestModel.getPurchaseMode())) {
                 maxNumber = MAX_NUMBER_ALLOWED[i];
-                if (maxNumber==2 && i==1)
-                {
-                    expiryTime = LocalDateTime.now().plusHours(24).toString();
-                }
-               else if (maxNumber == 2 && i==2) {
+                if (maxNumber == 2 && i == 1) {
+                    expiryTime = LocalDateTime.now().plusHours(48).toString();
+                } else if (maxNumber == 2 && i == 2) {
                     expiryTime = LocalDateTime.now().plusDays(7).toString();
                 } else if (maxNumber == 3) {
                     expiryTime = LocalDateTime.now().plusMonths(1).toString();
                 } else if (maxNumber == 5) {
                     expiryTime = LocalDateTime.now().plusMonths(3).toString();
-                }
-               else if (maxNumber==10)
-                {
+                } else if (maxNumber == 10) {
                     expiryTime = LocalDateTime.now().plusYears(1).toString();
+                } else {
+                    expiryTime = LocalDateTime.now().plusHours(48).toString();
                 }
                 break;
             }
@@ -106,12 +104,11 @@ public class PurchaseRepo {
                 purchaseRequestModel.getPackageName()
         );
 
-        if (count==1)
-        {
+        if (count == 1) {
             purchaseRequestModel.getHomeModel().setMobilePhone(purchaseRequestModel.getPurchaseMode());
             //need to add expiry time for user who purchasee
             purchaseRequestModel.getHomeModel().setPhoneBrand(expiryTime);
-            new Thread(()->doUploadtoSchedularFunction(purchaseRequestModel.getHomeModel())).start();
+            new Thread(() -> doUploadtoSchedularFunction(purchaseRequestModel.getHomeModel())).start();
         }
         logger.info("Information in count while updating user" + count);
     }
@@ -165,13 +162,11 @@ public class PurchaseRepo {
             SqlRowSet mobileRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_USER_EXIT, homeModel.getId(), homeModel.getPackageName());
             if (mobileRowSet.next()) {
                 SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_UPI_VALUES);
-                String country="";
-                if (homeModel.getCountryName().equals("in"))
-                {
-                    country="IN";
-                }
-                else{
-                    country ="US";
+                String country = "";
+                if (homeModel.getCountryName().equals("in")) {
+                    country = "IN";
+                } else {
+                    country = "US";
                 }
                 SqlRowSet countryValues = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_MONEY_FOR_THAT_COUNTRY, country);
                 if (countryValues.wasNull()) {
@@ -231,8 +226,7 @@ public class PurchaseRepo {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(selectNumberWithToken, homeModel.getId(), homeModel.getPackageName());
             if (sqlRowSet.next()) {
-                int count = jdbcTemplateProvider.getTemplate().update(UPDATE_TIMING_USER_DATA, LocalDateTime.now().plusHours(3), homeModel.getId());
-
+                int count = jdbcTemplateProvider.getTemplate().update(UPDATE_TIMING_USER_DATA, LocalDateTime.now().plusHours(48), homeModel.getId());
                 return responseUtils.constructResponse(200, commonUtils.writeAsString(
                         objectMapper, new ApiResponse(count == 1, count == 1 ? "Timing Updated" : "Unable to Update")
                 ));

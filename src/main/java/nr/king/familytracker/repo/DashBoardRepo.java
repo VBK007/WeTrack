@@ -82,6 +82,8 @@ public class DashBoardRepo {
         accountModel.setPurchaseMode(sqlRowSet.getString("PURCHASE_MODE"));
         accountModel.setTracking(isAccountExpired);
         accountModel.setTrackingTime(commonUtils.checkTimeDifference(sqlRowSet.getString("CREATED_AT")));
+        accountModel.setAppVersion(APP_VERSION);
+        accountModel.setForceUpdate(IS_FORCE_UPDATE);
         SqlRowSet innerNumberSet = jdbcTemplateProvider.getTemplate()
                 .queryForRowSet(selectNumberWithToken, dashBoardRequestBody.getHomeModel().getId(),
                         dashBoardRequestBody.getHomeModel().getPackageName());
@@ -100,6 +102,7 @@ public class DashBoardRepo {
                     0,
                     Integer.parseInt(commonUtils.isNullOrEmty(sqlRowSet.getString("MAX_NUMBER")))));
         }
+        //appversion
         FlashSales flashSales = getFlashSales(dashBoardRequestBody, dashBoardResponses);
         dashBoardResponses.setFlashSales(flashSales);
         dashBoardResponses.setFlashSales(flashSales);

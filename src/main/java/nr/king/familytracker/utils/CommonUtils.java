@@ -50,7 +50,7 @@ public class CommonUtils {
     private static final Logger logger = LogManager.getLogger(CommonUtils.class);
     private static final Pattern numberMinusMinusPattern = Pattern.compile("\\d+-\\d+");
     DateTimeFormatter onlineActivityDateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
-    String onlineStringActivity ="yyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+    String onlineStringActivity = "yyy-MM-dd'T'HH:mm:ss.SSS'Z'";
     DateTimeFormatter onlineDateFormaterCreatedAt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS", Locale.ENGLISH);
 
 
@@ -141,7 +141,6 @@ public class CommonUtils {
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("IST"));
         return simpleDateFormat.format(date);
     }
-
 
 
     public String writeAsString(ObjectMapper objectMapper, Object object) {
@@ -248,17 +247,24 @@ public class CommonUtils {
 
 
     public String getExpiryTime(String purchaseMode) {
-
         String expiryTime = "";
+        int maxNumber = 0;
         for (int i = 0; i < SUBSCRIBTION_MODEL_ARRAYLIST.length; i++) {
             if (SUBSCRIBTION_MODEL_ARRAYLIST[i].equals(purchaseMode)) {
-                int maxNumber = MAX_NUMBER_ALLOWED[i];
-                if (maxNumber == 10) {
+                maxNumber = MAX_NUMBER_ALLOWED[i];
+                if (maxNumber == 2 && i == 1) {
+                    expiryTime = LocalDateTime.now().plusHours(48).toString();
+                } else if (maxNumber == 2 && i == 2) {
                     expiryTime = LocalDateTime.now().plusDays(7).toString();
-                } else if (maxNumber == 30) {
+                } else if (maxNumber == 3) {
                     expiryTime = LocalDateTime.now().plusMonths(1).toString();
-                } else if (maxNumber == 100) {
+                } else if (maxNumber == 5) {
                     expiryTime = LocalDateTime.now().plusMonths(3).toString();
+                } else if (maxNumber == 10) {
+                    expiryTime = LocalDateTime.now().plusYears(1).toString();
+                }
+                else{
+                    expiryTime = LocalDateTime.now().plusHours(48).toString();
                 }
                 break;
             }
@@ -480,15 +486,12 @@ public class CommonUtils {
                 .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
     }
 
-    public  long getTimeValue(String dateValue)
-    {
+    public long getTimeValue(String dateValue) {
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.ENGLISH);
             dateFormat.setTimeZone(TimeZone.getTimeZone(ZoneId.systemDefault()));
-             return  dateFormat.parse(dateValue).getTime();
-        }
-        catch (Exception exception)
-        {
+            return dateFormat.parse(dateValue).getTime();
+        } catch (Exception exception) {
             logger.error(String.format("Exception while get TimeValue the time "));
         }
         return 0L;
@@ -622,7 +625,7 @@ public class CommonUtils {
     }
 
     public boolean checkMessageRequestBodySecurityCheck(MessageRequestBody flashSales) {
-        return  checkHomeModelSecurityCheck(flashSales.getHomeModel()) ||  validate(Arrays.asList(isNullOrEmty(flashSales.getMessageReponseBody().getMessageImageUrl()),
-                isNullOrEmty(flashSales.getMessageReponseBody().getMessage()),isNullOrEmty(flashSales.getMessageReponseBody().getMessageUserId())));
+        return checkHomeModelSecurityCheck(flashSales.getHomeModel()) || validate(Arrays.asList(isNullOrEmty(flashSales.getMessageReponseBody().getMessageImageUrl()),
+                isNullOrEmty(flashSales.getMessageReponseBody().getMessage()), isNullOrEmty(flashSales.getMessageReponseBody().getMessageUserId())));
     }
 }
