@@ -1,5 +1,7 @@
 package nr.king.familytracker.controller;
 
+import nr.king.familytracker.model.http.UpDateAppFlowRequestBody;
+import nr.king.familytracker.model.http.UpdateAuditMasterRequestBody;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.model.http.purchaseModel.PremiumModels;
 import nr.king.familytracker.model.http.purchaseModel.PurchaseRequestModel;
@@ -46,4 +48,15 @@ public class PurchaseController  extends BaseController{
     }
 
 
+    @PostMapping(value = "/v{version:[1]}/update-flow",produces = { "application/json" })
+    public ResponseEntity updateFlow(@RequestBody UpDateAppFlowRequestBody upDateAppFlowRequestBody)
+    {
+        return purchaseService.updateFlowRequest(upDateAppFlowRequestBody);
+    }
+
+    @PostMapping(value = "/v{version:[1]}/insert-audit",produces = { "application/json" })
+    public ResponseEntity insertUserAudit(@RequestBody UpdateAuditMasterRequestBody updateAuditMasterRequestBody)
+    {
+        return purchaseService.insertUserAudit(updateAuditMasterRequestBody);
+    }
 }

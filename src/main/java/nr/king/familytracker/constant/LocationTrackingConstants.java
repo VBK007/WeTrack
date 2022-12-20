@@ -16,6 +16,7 @@ public class LocationTrackingConstants {
     public static boolean IS_MONEY_MODE = false;
     public static String APP_VERSION = "1.3";
     public static boolean IS_FORCE_UPDATE = false;
+    public static boolean IS_APP_INACTIVE = false;
     public static final String EMPTY_STRING = "Welcome,to Family Tracking Application.World Trusted Application.\uD83D\uDE00";
     public static final String WILL_UPDATE_STRING = "We will update your Query to user we will get back Soon.\uD83D\uDC4D";
 
@@ -56,11 +57,11 @@ public class LocationTrackingConstants {
 
      public static final String GET_HISTORY = "http://chattrack.apiservicessarl.com/api/history/GetHistoriesByDate";*/
 
-    public static final String LOCAL_HOST_TOKEN = "http://3.92.177.250:8082/we_track/v1/update-token";
-    public static final String LOCAL_HOST_NUMBER = "http://3.92.177.250:8082/we_track/v1/update-status";
+   /* public static final String LOCAL_HOST_TOKEN = "http://3.92.177.250:8082/we_track/v1/update-token";
+    public static final String LOCAL_HOST_NUMBER = "http://3.92.177.250:8082/we_track/v1/update-status";*/
 
-    //public static final String LOCAL_HOST_NUMBER = "http://3.92.177.250:8082/we_track/v1/update-status";
-    //public static final String LOCAL_HOST_ADD_USER = "http://3.92.177.250:8082/we_track/v1/create-deviceUser";
+    public static final String LOCAL_HOST_NUMBER = "http://localhost:8082/we_track/v1/update-status";
+    public static final String LOCAL_HOST_TOKEN = "http://localhost:8082/we_track/v1/update-token";
     public static final String LOCAL_HOST_ADD_USER = "http://localhost:8082/we_track/v1/create-deviceUser";
     public static final String[] PACKAGE_ARRAY_WITHOUT_ADD = {"com.withcodeplays.familytracker", "com.withcodeplays.socialmediatracker"};
     public static final String[] PACKAGE_ARRAY_WITH_ADD = {

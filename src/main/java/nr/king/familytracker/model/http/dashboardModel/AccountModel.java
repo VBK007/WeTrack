@@ -19,8 +19,9 @@ public class AccountModel {
     private AccountNumbers accountNumbers;
     private AccountNumberSocialMediaActivity accountNumberSocialMediaActivity;
     private String purchaseMode;
-
     private String appVersion;
     private boolean isForceUpdate;
-
+    private boolean isDemoMode;
+    private boolean appInActive;
+    private String countryBasedSubscription;
 }

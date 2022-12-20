@@ -5,6 +5,8 @@ import nr.king.familytracker.exceptions.FailedResponseException;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
 import nr.king.familytracker.model.http.ApiResponse;
 import nr.king.familytracker.model.http.HttpResponse;
+import nr.king.familytracker.model.http.UpDateAppFlowRequestBody;
+import nr.king.familytracker.model.http.UpdateAuditMasterRequestBody;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.model.http.purchaseModel.*;
 import nr.king.familytracker.utils.CommonUtils;
@@ -148,7 +150,6 @@ public class PurchaseRepo {
     }
 
     private int updatePuchaseDetails(PurchaseRequestModel purchaseRequestModel) {
-
         return jdbcTemplateProvider.getTemplate().update(UPDATE_PURCHASE_DETAILS, purchaseRequestModel.getPurchaseMode(),
                 purchaseRequestModel.getPurcasePlatform(), purchaseRequestModel.getCountry(), purchaseRequestModel.getAmount(), purchaseRequestModel.getTransactionId(),
                 purchaseRequestModel.getTransactionRemarks(),
@@ -162,12 +163,12 @@ public class PurchaseRepo {
             SqlRowSet mobileRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_USER_EXIT, homeModel.getId(), homeModel.getPackageName());
             if (mobileRowSet.next()) {
                 SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_UPI_VALUES);
-                String country = "";
-                if (homeModel.getCountryName().equals("in")) {
+                String country = homeModel.getCountryName().toUpperCase();
+                /*if (homeModel.getCountryName().equals("in")) {
                     country = "IN";
                 } else {
                     country = "US";
-                }
+                }*/
                 SqlRowSet countryValues = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_MONEY_FOR_THAT_COUNTRY, country);
                 if (countryValues.wasNull()) {
                     countryValues = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_MONEY_FOR_THAT_COUNTRY, "US");
@@ -187,6 +188,12 @@ public class PurchaseRepo {
                     premiumModels.setBackGroundColour(sqlRowSet.getString("COLOR_BAR"));
                     premiumModels.setPriceStag(homeModel.getCountryName().equalsIgnoreCase("us") ?
                             sqlRowSet.getString("MONEY_IN_USD") : sqlRowSet.getString("MONEY_IN_INR"));
+                    premiumModels.setButtonColor(sqlRowSet.getString("button_color"));
+                    premiumModels.setButtonBackGround(sqlRowSet.getString("button_bg"));
+                    premiumModels.setOfferPercentage(sqlRowSet.getString("offer_price"));
+                    premiumModels.setOfferPrice(sqlRowSet.getString("offer_percentage"));
+                    premiumModels.setMaxNum(commonUtils.getMaxNumber(sqlRowSet.getString("PURCHASE_TYPE")));
+                    premiumModels.setMaxHours(commonUtils.maxTime(sqlRowSet.getString("PURCHASE_TYPE")));
                     if (hasCountryValues) {
                         premiumModels.setMoneyForOneDay(countryValues.getString("MONEY_ONE_DAY"));
                         premiumModels.setMoneyForOneWeek(countryValues.getString("MONEY_ONE_WEEK"));
@@ -208,7 +215,10 @@ public class PurchaseRepo {
                     valueList.add(premiumModels);
                 }
                 upiTransactionValue.setValueList(valueList);
-
+                insertAudit(new UpdateAuditMasterRequestBody(
+                        homeModel,
+                        "PurchaseModeView","Viewing the Upi Details",
+                        LocalDateTime.now().toLocalDate().toString()));
                 return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper, new ApiResponse(true,
                         "Value of the UPI Ids are", upiTransactionValue)));
 
@@ -247,12 +257,18 @@ public class PurchaseRepo {
                 UpdateUpiDetails premiumModels = premiumModelsList.getListofUpis().get(i);
                 count = jdbcTemplateProvider.getTemplate().update(UPDATE_API_PURCHASE,
                         premiumModels.getUpiId(), premiumModels.getTopHeader(), premiumModels.getTopDescription(), premiumModels.getMoneyInInr(),
-                        premiumModels.getMoneyInUsd(), premiumModels.getTextColor(), premiumModels.getBackGroundColour(), premiumModels.getId());
+                        premiumModels.getMoneyInUsd(), premiumModels.getTextColor(), premiumModels.getBackGroundColour(),
+                        premiumModels.getButtonColor(), premiumModels.getButtonBackGround(), premiumModels.getOfferPrice(),
+                        premiumModels.getOfferPercentage(),
+                        premiumModels.getId());
 
                 if (count == 0) {
                     count = jdbcTemplateProvider.getTemplate().update(ADD_API_PURCHASE,
                             premiumModels.getUpiId(), premiumModels.getTopHeader(), premiumModels.getTopDescription(), premiumModels.getMoneyInInr(),
-                            premiumModels.getMoneyInUsd(), premiumModels.getTextColor(), premiumModels.getBackGroundColour());
+                            premiumModels.getMoneyInUsd(), premiumModels.getTextColor(), premiumModels.getBackGroundColour(),
+                            premiumModels.getButtonColor(), premiumModels.getButtonBackGround(), premiumModels.getOfferPrice(),
+                            premiumModels.getOfferPercentage()
+                    );
                 }
             }
             return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
@@ -260,7 +276,57 @@ public class PurchaseRepo {
 
         } catch (Exception exception) {
             logger.info("Exception in app update data" + exception.getMessage(), exception);
-            throw new FailedResponseException("Unable to Update Purchase");
+            throw new FailedResponseException("Unable to Update Upi Details");
         }
+    }
+
+    public ResponseEntity updateAppFlow(UpDateAppFlowRequestBody upDateAppFlowRequestBody) {
+        try {
+            int count = updateAppFlows(upDateAppFlowRequestBody);
+            if (count == 0) {
+                count = createAppFlows(upDateAppFlowRequestBody);
+            }
+            if (count == 1) {
+                IS_FORCE_UPDATE = upDateAppFlowRequestBody.isForceUpdate();
+                IS_APP_INACTIVE = upDateAppFlowRequestBody.isAppIsActive();
+                IS_MONEY_MODE = upDateAppFlowRequestBody.isOneYearMode();
+                APP_VERSION = upDateAppFlowRequestBody.getAppVersion();
+            }
+            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                    new ApiResponse(count == 1, (count == 1) ? "Successfully updated" : "Failed in negation")));
+        } catch (Exception exception) {
+            logger.info("Exception in app update Flow" + exception.getMessage(), exception);
+            throw new FailedResponseException("Unable to Update Flow");
+        }
+    }
+
+    private int createAppFlows(UpDateAppFlowRequestBody lData) {
+        return jdbcTemplateProvider.getTemplate()
+                .update(INSERT_APP_FLOW, lData.isOneYearMode(), lData.getAppVersion(), lData.isForceUpdate());
+    }
+
+    private int updateAppFlows(UpDateAppFlowRequestBody lData) {
+        return jdbcTemplateProvider.getTemplate().update(UPDATE_APP_FLOW, lData.isOneYearMode(), lData.getAppVersion(),
+                lData.isForceUpdate());
+    }
+
+    public ResponseEntity insertAuditMaster(UpdateAuditMasterRequestBody lData) {
+        try {
+            int count = insertAudit(lData);
+
+            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                    new ApiResponse(count == 1, (count ==1) ? "Audit master inserted" : "Audit master inserted unsuccessful")));
+
+        } catch (Exception exception) {
+            logger.info("Exception insert audit master" + exception.getMessage(), exception);
+            throw new FailedResponseException("Unable to update insert audit master");
+        }
+    }
+
+    private int insertAudit(UpdateAuditMasterRequestBody lData) {
+        return jdbcTemplateProvider.getTemplate().update(INSERT_INTO_AUDIT_MASTER,
+                lData.getHomeModel().getId(), lData.getModules(), lData.getHomeModel().getIpAddress(),
+                lData.getTask(),
+                LocalDateTime.now().toLocalDate().toString(), lData.getHomeModel().getPackageName());
     }
 }

@@ -84,6 +84,9 @@ public class DashBoardRepo {
         accountModel.setTrackingTime(commonUtils.checkTimeDifference(sqlRowSet.getString("CREATED_AT")));
         accountModel.setAppVersion(APP_VERSION);
         accountModel.setForceUpdate(IS_FORCE_UPDATE);
+        accountModel.setAppInActive(IS_APP_INACTIVE);
+        accountModel.setDemoMode(IS_MONEY_MODE);
+        accountModel.setCountryBasedSubscription(commonUtils.checkCountryState(dashBoardRequestBody.getHomeModel().getCountryName()));
         SqlRowSet innerNumberSet = jdbcTemplateProvider.getTemplate()
                 .queryForRowSet(selectNumberWithToken, dashBoardRequestBody.getHomeModel().getId(),
                         dashBoardRequestBody.getHomeModel().getPackageName());

@@ -23,4 +23,16 @@ public class PremiumModels {
     private String productIds;
     private String symbolNative;
     private String moneyForThatCountry;
+
+    private String buttonColor;
+
+    private String buttonBackGround;
+
+    private String offerPrice;
+    private String offerPercentage;
+
+    private String maxNum;
+
+    private String maxHours;
+
 }

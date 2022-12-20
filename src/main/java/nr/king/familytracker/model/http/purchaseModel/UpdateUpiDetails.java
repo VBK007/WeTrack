@@ -19,4 +19,10 @@ public class UpdateUpiDetails {
     private String moneyInInr;
     private String moneyInUsd;
     private Long id;
+    private String buttonColor;
+
+    private String buttonBackGround;
+
+    private String offerPrice;
+    private String offerPercentage;
 }

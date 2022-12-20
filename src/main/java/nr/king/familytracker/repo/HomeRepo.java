@@ -213,7 +213,7 @@ public class HomeRepo {
                         homeModel.getPackageName(),
                         sqlRowSet.getInt("CREDIT_LIMIT"))) {
 
-                    if (!innerNumberSet.next()) {
+                    if (innerNumberSet.wasNull()) {
                         return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                                 new ApiResponse(false, "Please add Mobile Number")));
                     }
@@ -344,7 +344,7 @@ public class HomeRepo {
                             numberSet.getString("PUSH_TOKEN"),
                             homeModel.getPackageName()
                     );
-                    updateMobileNumbers(phoneModel, innerHomeModel);
+                    updateMobileNumbers(phoneModel, innerHomeModel); //api call for update phone number
                     phoneModel.setId(homeModel.getId());
                     int count = updatePhoneNumberWhileGetAppUser(phoneModel, innerHomeModel);
                     if (count == 1) {

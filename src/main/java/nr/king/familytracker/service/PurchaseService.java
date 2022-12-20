@@ -2,6 +2,8 @@ package nr.king.familytracker.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.model.http.ApiResponse;
+import nr.king.familytracker.model.http.UpDateAppFlowRequestBody;
+import nr.king.familytracker.model.http.UpdateAuditMasterRequestBody;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.model.http.purchaseModel.PremiumModels;
 import nr.king.familytracker.model.http.purchaseModel.PurchaseRequestModel;
@@ -15,6 +17,8 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.util.Arrays;
 
 
 @Service
@@ -39,7 +43,7 @@ public class PurchaseService {
             if (commonUtils.checkPurchaseRequestModelSecurity(purchaseRequestModel))
             {
                 return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
-                        new ApiResponse(false,"Invalid Characters")));
+                        new ApiResponse(false,"Invalid Format")));
             }
             return purchaseRepo.makeOrder(purchaseRequestModel);
         } catch (Exception exception) {
@@ -55,7 +59,7 @@ public class PurchaseService {
             if (commonUtils.checkHomeModelSecurityCheck(homeModel))
             {
                 return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
-                        new ApiResponse(false,"Invalid Characters")));
+                        new ApiResponse(false,"Invalid Format")));
             }
                 return  purchaseRepo.getUserAPI(homeModel);
         } catch (Exception exception) {
@@ -73,7 +77,7 @@ public class PurchaseService {
             if (commonUtils.checkHomeModelSecurityCheck(homeModel))
             {
                 return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
-                        new ApiResponse(false,"Invalid Characters")));
+                        new ApiResponse(false,"Invalid Format")));
             }
             return  purchaseRepo.updateTiming(homeModel);
         } catch (Exception exception) {
@@ -93,7 +97,7 @@ public class PurchaseService {
                 if (commonUtils.checkPremiumModel(purchaseUpdateRequestModel.getListofUpis().get(i)))
                 {
                     return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
-                            new ApiResponse(false,"Invalid Characters")));
+                            new ApiResponse(false,"Invalid Format")));
                 }
 
             }
@@ -104,6 +108,46 @@ public class PurchaseService {
             return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,new ApiResponse(
                     false,
                     "Unable to Update Time for Testing"
+            )));
+        }
+    }
+
+    public ResponseEntity updateFlowRequest(UpDateAppFlowRequestBody upDateAppFlowRequestBody) {
+        try
+        {
+            if (commonUtils.validate(Arrays.asList(upDateAppFlowRequestBody.getAppVersion())))
+            {
+                return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false,"Invalid Format")));
+            }
+            return purchaseRepo.updateAppFlow(upDateAppFlowRequestBody);
+
+        }
+        catch (Exception exception)
+        {
+            logger.error("Exception in Update App Flow service due to "+exception.getMessage(),exception);
+            return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,new ApiResponse(
+                    false,
+                    "Unable to Update Flow of the Application"
+            )));
+        }
+    }
+
+    public ResponseEntity insertUserAudit(UpdateAuditMasterRequestBody updateAuditMasterRequestBody) {
+        try {
+            if (commonUtils.checkUpdateAuditMasterRequestBody(updateAuditMasterRequestBody))
+            {
+                return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false,"Invalid Format")));
+            }
+            return purchaseRepo.insertAuditMaster(updateAuditMasterRequestBody);
+        }
+        catch (Exception exception)
+        {
+            logger.error("Exception in Insert Audit service due to "+exception.getMessage(),exception);
+            return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,new ApiResponse(
+                    false,
+                    "Unable to Insert Audit master"
             )));
         }
     }

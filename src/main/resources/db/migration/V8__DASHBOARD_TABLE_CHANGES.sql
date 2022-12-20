@@ -64,8 +64,32 @@ CREATE TABLE MESSAGE_BASED_APPLICATION
 CREATE INDEX MESSAGE_BASED_APPLICATION_INDEX
     ON MESSAGE_BASED_APPLICATION (ID);
 
+CREATE TABLE AUDIT_MASTER
+(
+    ID           BIGSERIAL PRIMARY KEY,
+    USER_ID      TEXT      NOT NULL,
+    MODULES      TEXT      NOT NULL,
+    IP_ADDRESS   TEXT,
+    TASK         TEXT,
+    TODAY        TEXT,
+    PACKAGE_NAME TEXT,
+    CREATED_AT   TIMESTAMP NOT NULL,
+    UPDATED_AT   TIMESTAMP NOT NULL
+);
+
+CREATE INDEX AUDIT_MASTER_INDEX
+    ON AUDIT_MASTER (ID, USER_ID, PACKAGE_NAME);
 
 
+
+alter table UPI_DETAILS
+    add column button_color TEXT;
+alter table UPI_DETAILS
+    add column button_bg TEXT;
+alter table UPI_DETAILS
+    add column offer_price TEXT;
+alter table UPI_DETAILS
+    add column offer_percentage TEXT;
 
 
 

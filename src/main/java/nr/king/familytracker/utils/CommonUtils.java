@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
 import nr.king.familytracker.model.http.PhoneModel;
+import nr.king.familytracker.model.http.UpdateAuditMasterRequestBody;
 import nr.king.familytracker.model.http.dashboardModel.DashBoardRequestBody;
 import nr.king.familytracker.model.http.dashboardModel.FlashSales;
 import nr.king.familytracker.model.http.filterModel.FilterHistoryModel;
@@ -246,6 +247,46 @@ public class CommonUtils {
     }
 
 
+    public String getMaxNumber(String purchaseMode)
+    {
+        int maxNumber = 0;
+        for (int i = 0; i < SUBSCRIBTION_MODEL_ARRAYLIST.length; i++) {
+            if (SUBSCRIBTION_MODEL_ARRAYLIST[i].equals(purchaseMode)) {
+                maxNumber = MAX_NUMBER_ALLOWED[i];
+                break;
+            }
+        }
+        return String.valueOf(maxNumber);
+    }
+
+    public  String maxTime(String purchaseMode)
+    {
+        String expiryTime = "";
+        int maxNumber = 0;
+        for (int i = 0; i < SUBSCRIBTION_MODEL_ARRAYLIST.length; i++) {
+            if (SUBSCRIBTION_MODEL_ARRAYLIST[i].equals(purchaseMode)) {
+                maxNumber = MAX_NUMBER_ALLOWED[i];
+                if (maxNumber == 2 && i == 1) {
+                    expiryTime = "2 days";
+                } else if (maxNumber == 2 && i == 2) {
+                    expiryTime = "7 days";
+                } else if (maxNumber == 3) {
+                    expiryTime = "1 mon";
+                } else if (maxNumber == 5) {
+                    expiryTime = "3 mon";
+                } else if (maxNumber == 10) {
+                    expiryTime = "1 year";
+                } else {
+                    expiryTime = "2 days";
+                }
+                break;
+            }
+        }
+
+        return expiryTime;
+    }
+
+
     public String getExpiryTime(String purchaseMode) {
         String expiryTime = "";
         int maxNumber = 0;
@@ -262,8 +303,7 @@ public class CommonUtils {
                     expiryTime = LocalDateTime.now().plusMonths(3).toString();
                 } else if (maxNumber == 10) {
                     expiryTime = LocalDateTime.now().plusYears(1).toString();
-                }
-                else{
+                } else {
                     expiryTime = LocalDateTime.now().plusHours(48).toString();
                 }
                 break;
@@ -585,7 +625,9 @@ public class CommonUtils {
     public boolean checkPremiumModel(UpdateUpiDetails premiumModels) {
         return validate(Arrays.asList(isNullOrEmty(premiumModels.getPriceStag()), isNullOrEmty(premiumModels.getTextColor()),
                 isNullOrEmty(premiumModels.getTopDescription()), isNullOrEmty(premiumModels.getTopHeader()),
-                isNullOrEmty(premiumModels.getBackGroundColour()), isNullOrEmty(premiumModels.getMoneyInInr()), isNullOrEmty(premiumModels.getMoneyInUsd())));
+                isNullOrEmty(premiumModels.getBackGroundColour()), isNullOrEmty(premiumModels.getMoneyInInr()), isNullOrEmty(premiumModels.getMoneyInUsd()),
+                isNullOrEmty(premiumModels.getOfferPrice()), isNullOrEmty(premiumModels.getOfferPercentage()),
+                isNullOrEmty(premiumModels.getButtonColor()), isNullOrEmty(premiumModels.getButtonBackGround())));
     }
 
     public String checkCountryState(String countryName) {
@@ -627,5 +669,12 @@ public class CommonUtils {
     public boolean checkMessageRequestBodySecurityCheck(MessageRequestBody flashSales) {
         return checkHomeModelSecurityCheck(flashSales.getHomeModel()) || validate(Arrays.asList(isNullOrEmty(flashSales.getMessageReponseBody().getMessageImageUrl()),
                 isNullOrEmty(flashSales.getMessageReponseBody().getMessage()), isNullOrEmty(flashSales.getMessageReponseBody().getMessageUserId())));
+    }
+
+    public boolean checkUpdateAuditMasterRequestBody(UpdateAuditMasterRequestBody lData) {
+        return checkHomeModelSecurityCheck(lData.getHomeModel()) ||
+                validate(Arrays.asList(isNullOrEmty(lData.getTask()),
+                isNullOrEmty(lData.getToday()), isNullOrEmty(lData.getModules()))
+        );
     }
 }
