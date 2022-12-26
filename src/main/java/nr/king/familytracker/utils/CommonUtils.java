@@ -7,6 +7,9 @@ import nr.king.familytracker.model.http.PhoneModel;
 import nr.king.familytracker.model.http.UpdateAuditMasterRequestBody;
 import nr.king.familytracker.model.http.dashboardModel.DashBoardRequestBody;
 import nr.king.familytracker.model.http.dashboardModel.FlashSales;
+import nr.king.familytracker.model.http.fcmModels.FcmModelData;
+import nr.king.familytracker.model.http.fcmModels.Notification;
+import nr.king.familytracker.model.http.fcmModels.PushData;
 import nr.king.familytracker.model.http.filterModel.FilterHistoryModel;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.model.http.messages.MessageRequestBody;
@@ -677,4 +680,33 @@ public class CommonUtils {
                 isNullOrEmty(lData.getToday()), isNullOrEmty(lData.getModules()))
         );
     }
+
+    private boolean checkNotificationCheck(Notification lData)
+    {
+        return validate(Arrays.asList(lData.getTitle(),lData.getSubtitle(),lData.getPriority(),lData.getOrganizationId(),
+                lData.getBody()));
+    }
+
+    public boolean checkFcmModelData(FcmModelData fcmModelData) {
+        return validate(Arrays.asList(isNullOrEmty(fcmModelData.getTo()))) || checkNotificationCheck(fcmModelData.getNotification())
+    || checkPushDataSecurityCheck(fcmModelData.getData());
+
+    }
+
+    private boolean checkPushDataSecurityCheck(PushData lData) {
+        return validate(Arrays.asList(lData.getSound(),lData.getOrganization(),lData.getBodyText(),
+                lData.getPriority(),lData.getImage()));
+    }
+
+    public static <T> ArrayList<T> listToArrayList(List<T> list) {
+        return list != null ? new ArrayList<>(list) : null;
+    }
+    public Map<String, String> getHeadersMap() {
+        Map<String, String> headersMap = new LinkedHashMap<>();
+        headersMap.put("Content-Type", "application/json");
+        headersMap.put("Authorization",
+                "key=AAAALNZGB-o:APA91bFmdGOcQfkho_jJwkyVoUwU35kOzuh202WcFT63KR_m_oMY8DaBRZ4aNQZN0KTR0tCm8YXQU2lHQtKW1I6uthOabc5g_03eaAub0cIWyTZ1jNWpLk9K-IXUdvXy1xWF0B_CEoqQ");
+        return headersMap;
+    }
+
 }

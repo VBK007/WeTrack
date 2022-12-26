@@ -3,7 +3,10 @@ package nr.king.familytracker.controller;
 import nr.king.familytracker.model.http.dashboardModel.DashBoardRequestBody;
 import nr.king.familytracker.model.http.dashboardModel.FlashSales;
 import nr.king.familytracker.model.http.dashboardModel.PublicEventRequestBody;
+import nr.king.familytracker.model.http.fcmModels.FcmModelData;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
+import nr.king.familytracker.model.http.messages.AdminMessageBody;
+import nr.king.familytracker.model.http.messages.AdminMessages;
 import nr.king.familytracker.model.http.messages.MessageRequestBody;
 import nr.king.familytracker.service.DashBoardService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,4 +45,25 @@ public class DashBoardController extends BaseController {
     {
         return dashBoardService.postMessageToUser(messageRequestBody);
     }
+
+    @PostMapping(value = "/v{version:[1]}/post-fcmmessage",produces = {"application/json"})
+    public ResponseEntity sendMessage(@RequestBody FcmModelData fcmModelData)
+    {
+        return dashBoardService.postPushNotification(fcmModelData);
+    }
+
+    @PostMapping(value = "/v{version:[1]}/get-allPostMesage", produces = {"application/json"})
+    public ResponseEntity getAllUserDetails(@RequestBody AdminMessageBody messageRequestBody)
+    {
+        return dashBoardService.getAllUserMessage(messageRequestBody);
+    }
+
+
+    @PostMapping(value = "/v{version:[1]}/get-adashboard", produces = {"application/json"})
+    public ResponseEntity adminDash(@RequestBody AdminMessages adminMessages)
+    {
+     return dashBoardService.adminDashBoard(adminMessages);
+    }
+
+
 }

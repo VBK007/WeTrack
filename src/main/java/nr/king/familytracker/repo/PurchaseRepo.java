@@ -107,12 +107,18 @@ public class PurchaseRepo {
         );
 
         if (count == 1) {
+            int updateNotification = updateNotification(purchaseRequestModel.getHomeModel(),true);
             purchaseRequestModel.getHomeModel().setMobilePhone(purchaseRequestModel.getPurchaseMode());
             //need to add expiry time for user who purchasee
             purchaseRequestModel.getHomeModel().setPhoneBrand(expiryTime);
             new Thread(() -> doUploadtoSchedularFunction(purchaseRequestModel.getHomeModel())).start();
         }
         logger.info("Information in count while updating user" + count);
+    }
+
+    private int updateNotification(HomeModel homeModel, boolean isEnabled) {
+        return jdbcTemplateProvider.getTemplate()
+                .update(UPDATE_NOTIFICATION_TRUE,isEnabled,homeModel.getId(),homeModel.getPackageName());
     }
 
 

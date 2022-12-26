@@ -7,8 +7,7 @@ public class QueryConstants {
     public static  final String GET_NOT_DEMO_USERS ="select user_id,Expiry_TIME,PACKAGE_NAME from WE_TRACK_USERS where purchase_mode!='demo'";
     public static  final String GET_CURRENT_USER ="select user_id,Expiry_TIME,PACKAGE_NAME from WE_TRACK_USERS where USER_ID=?";
 
-    public static final String SELECT_USER_DETAILS_COUNT ="select count(*) from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?";
-    public static final String SELECT_NUMBER_DETAILS_COUNT ="select count(*) from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?";
+
     public static final String UPDATE_TOKEN_HEADER_IN_NUMBER_MOBILE ="update NUMBER_FOR_USERS set NUMBER=?,TOKEN_HEADER=?," +
             "COUNTRY_CODE=?,UPDATED_AT=current_timestamp,NICK_NAME=? where USER_ID=? and NUMBER=? and PACKAGE_NAME=?";
 
@@ -36,6 +35,7 @@ public class QueryConstants {
     public static final String UPDATE_PURCHASE_USER_TIME_ZONE = "update WE_TRACK_USERS  set purchase_mode=?,MAX_NUMBER=?,IS_PURCHASED=?,Expiry_TIME=?" +
             " where USER_ID=? and PACKAGE_NAME=?";
 
+    public static final String UPDATE_PURCHASE_MODE="update WE_TRACK_USERS  set purchase_mode='demo' where USER_ID=? and PACKAGE_NAME=?";
 
     public static final String UPDATE_PURCHASE_DETAILS = "UPDATE PURCHASED_DETAILS set PURCHASE_MODE=?,PURCHASE_PLATFORM=?,COUNTRY=?,AMOUNT=?,TRANSATION_ID=?,TRANSACTION_REMARK=?," +
             "EXPIRY_DATE=?,UPDATED_AT=current_timestamp where USER_ID=?";
@@ -52,6 +52,10 @@ public class QueryConstants {
 
     public static  final  String UPDATE_PUSH_NOTIFICATION =
             "update NUMBER_FOR_USERS set is_noti_enabled=? where USER_ID=? and NUMBER=? and PACKAGE_NAME=?";
+
+
+    public static final String UPDATE_NOTIFICATION_TRUE=
+            "update NUMBER_FOR_USERS set is_noti_enabled=? where USER_ID=? and PACKAGE_NAME=?";
 
     public static final String UPDATE_API_PURCHASE="UPDATE UPI_DETAILS SET UPI_ID=?,PURCHASE_TYPE=?,PURCHASE_DESCRIBITION=?," +
             "MONEY_IN_INR=?,MONEY_IN_USD=?,COLOR_CODE=?,COLOR_BAR=?,UPDATED_AT=current_timestamp,button_color=?,button_bg=?," +
@@ -111,23 +115,43 @@ public class QueryConstants {
 
 
     public static final String SELECT_ALL_MESSAGE = "SELECT ID,MESSAGE,MESSAGE_USER_ID,MESSAGE_IMAGE_URL,ADMIN_ID,CREATED_AT,UPDATED_AT,IS_SEEN," +
-            "MESSAGER_ID FROM MESSAGE_BETWEEN_USER";
+            "MESSAGER_ID FROM MESSAGE_BETWEEN_USER WHERE MESSAGE_USER_ID=:messageId AND ADMIN_ID=:adminId";
 
     public  static  final String  UPDATE_MESSAGE_BASED_APPLICATION =
-            "UPDATE MESSAGE_BASED_APPLICATION SET IS_FREE_MODE=?,APP_VERSION=?,UPDATED_AT=?,IS_FORCE_UPDATE=? WHERE ID=?";
+            "UPDATE MESSAGE_BASED_APPLICATION SET IS_FREE_MODE=?,APP_VERSION=?,UPDATED_AT=?,IS_FORCE_UPDATE=? IS_APP_IN_LIVE=?,IS_RAZORPAY_ACTIVE=? " +
+                    "WHERE ID=?";
 
     public static final String SELECT_APP_FLOW =
-            "SELECT IS_FREE_MODE,APP_VERSION,IS_FORCE_UPDATE FROM MESSAGE_BASED_APPLICATION";
+            "SELECT IS_FREE_MODE,APP_VERSION,IS_FORCE_UPDATE FROM MESSAGE_BASED_APPLICATION WHERE ID=1";
 
     public static  final String  UPDATE_APP_FLOW="UPDATE MESSAGE_BASED_APPLICATION SET IS_FREE_MODE=?,APP_VERSION=?," +
             "IS_FORCE_UPDATE=?,UPDATED_AT=current_timestamp where ID=1";
-    public static  final String INSERT_APP_FLOW ="INSERT INTO MESSAGE_BASED_APPLICATION(IS_FREE_MODE,APP_VERSION,IS_FORCE_UPDATE,CREATED_AT,UPDATED_AT) " +
-            "VALUES (?,?,?,current_timestamp,current_timestamp)";
+    public static  final String INSERT_APP_FLOW ="INSERT INTO MESSAGE_BASED_APPLICATION(IS_FREE_MODE,APP_VERSION,IS_FORCE_UPDATE,IS_RAZORPAY_ACTIVE,IS_APP_IN_LIVE,CREATED_AT,UPDATED_AT) " +
+            "VALUES (?,?,?,?,?,current_timestamp,current_timestamp)";
 
 
     public  static  final  String INSERT_INTO_AUDIT_MASTER =
             "INSERT INTO AUDIT_MASTER (USER_ID,MODULES,IP_ADDRESS,TASK,TODAY,PACKAGE_NAME,CREATED_AT,UPDATED_AT) VALUES" +
                     "(?,?,?,?,?,?,current_timestamp,current_timestamp)";
 
+
+    public static  final String INSERT_INTO_MESSAGING_USER="insert into MESSAGED_USER(MESSAGE_USER_ID,CREATED_AT,UPDATED_AT) " +
+            "values(?,current_timestamp,current_timestamp)";
+    public static  final String UPDATE_INTO_MESSAGING_USER="update into MESSAGED_USER set UPDATED_AT=current_timestamp where MESSAGE_USER_ID=?";
+
+
+    public  static final String  GET_MESSAGE_BASED_ON_USERID="SELECT MESSAGE_USER_ID FROM MESSAGED_USER ORDER BY UPDATED_AT DESC";
+
+    public static final String GET_FINAL_MESSAGES="SELECT ID,MESSAGE,MESSAGE_USER_ID,MESSAGE_IMAGE_URL,ADMIN_ID,CREATED_AT,UPDATED_AT,IS_SEEN," +
+            "MESSAGER_ID FROM MESSAGE_BETWEEN_USER WHERE MESSAGER_ID=? ORDER BY CREATED_AT DESC LIMIT 1";
+
+
+    public static final String SELECT_USER_DETAILS_COUNT ="select count(*) from WE_TRACK_USERS";
+    public static final String SELECT_NUMBER_DETAILS_COUNT ="select count(*) from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?";
+    public static final String SELECT_NUMBER_USERS ="select count(*) from NUMBER_FOR_USERS";
+    public static final String  GET_ALL_USERS_LOGIN="SELECT COUNT(*) FROM WE_TRACK_USERS_NO_OF_LOGIN WHERE DAY=:day";
+    public static final String  TOTAL_PURCHASED = "SELECT COUNT(*) FROM PURCHASED_DETAILS";
+    public static final String  TOTAL_PURCHASED_HISTORY = "SELECT COUNT(*) FROM PURCHASED_DETAILS_HISTORY";
+    public static final String COUNTRY_BASED_USERS = "SELECT  COUNT(*) FROM WE_TRACK_USERS WHERE COUNTRY=:countryName";
 
 }

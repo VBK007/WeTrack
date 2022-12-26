@@ -32,11 +32,3 @@ server:
 logging.level.org.hibernate.SQL: DEBUG
 logging.level.org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
-#s3:
-#  access-key: AKIA2BKGUXODLOCYYNHQ
-#  access-key-secret: 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
-#  bucket-name: gf-ig-integration-qa-c0nn3c7
-#  region: us-east-1
-#  upload:
-#    max-backoff-seconds: 300
-

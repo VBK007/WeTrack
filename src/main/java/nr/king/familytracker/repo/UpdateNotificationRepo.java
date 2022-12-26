@@ -35,28 +35,31 @@ public class UpdateNotificationRepo {
     @Autowired
     private HttpUtils httpUtils;
 
-private static final Logger logger  = LogManager.getLogger(UpdateNotificationRepo.class);
+    private static final Logger logger = LogManager.getLogger(UpdateNotificationRepo.class);
 
     public void doPushNotifcation() {
         try {
 
             SqlRowSet sqlRowSet = jdbcTemplate.getTemplate().queryForRowSet(GET_NOT_DEMO_USERS);
             while (sqlRowSet.next()) {
-                SqlRowSet numberset = jdbcTemplate.getTemplate().queryForRowSet(selectNumberWithToken,sqlRowSet.getString("user_id"),sqlRowSet.getString("PACKAGE_NAME"));
-                if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME") )
+                SqlRowSet numberset = jdbcTemplate.getTemplate().queryForRowSet(selectNumberWithToken, sqlRowSet.getString("user_id"),
+                        sqlRowSet.getString("PACKAGE_NAME"));
+                if (System.currentTimeMillis() <= LocalDateTime.parse(sqlRowSet.getString("Expiry_TIME"))
                         .atZone(ZoneId.systemDefault())
                         .toInstant()
                         .toEpochMilli()
                 ) {
-                    while (numberset.next())
-                    {
+                    while (numberset.next()) {
                         PhoneModel phoneModel = new PhoneModel();
                         phoneModel.setId(sqlRowSet.getString("user_id"));
                         phoneModel.setPhoneNumber(numberset.getString("number"));
                         phoneModel.setCountryCode(numberset.getString("COUNTRY_CODE"));
-                        addNewNumbeIntoWeTrackServer(phoneModel,false);
-                        Thread.sleep(1000,500);
+                        addNewNumbeIntoWeTrackServer(phoneModel, false);
+                        Thread.sleep(1000, 500);
                     }
+                } else {
+                    int count = updateAccountDetails(sqlRowSet.getString("user_id"), sqlRowSet.getString("PACKAGE_NAME"));
+                    logger.info("Updated the account details to demo after expiry is ");
                 }
             }
 
@@ -65,37 +68,34 @@ private static final Logger logger  = LogManager.getLogger(UpdateNotificationRep
         }
     }
 
+    private int updateAccountDetails(String userId, String packageName) {
+        return jdbcTemplate.getTemplate().update(UPDATE_PURCHASE_MODE, userId, packageName);
+    }
 
 
-
-    public void createNewUser(String userId)
-    {
-        try
-        {
-            SqlRowSet innerRowset = jdbcTemplate.getTemplate().queryForRowSet(GET_CURRENT_USER,userId);
+    public void createNewUser(String userId) {
+        try {
+            SqlRowSet innerRowset = jdbcTemplate.getTemplate().queryForRowSet(GET_CURRENT_USER, userId);
             while (innerRowset.next()) {
                 SqlRowSet numberset = jdbcTemplate.getTemplate().queryForRowSet(selectNumberWithToken, innerRowset.getString("user_id"),
                         innerRowset.getString("PACKAGE_NAME"));
-                if (System.currentTimeMillis() <= LocalDateTime.parse(innerRowset.getString("Expiry_TIME") )
+                if (System.currentTimeMillis() <= LocalDateTime.parse(innerRowset.getString("Expiry_TIME"))
                         .atZone(ZoneId.systemDefault())
                         .toInstant()
                         .toEpochMilli()
                 ) {
-                    while (numberset.next())
-                    {
+                    while (numberset.next()) {
                         PhoneModel phoneModel = new PhoneModel();
                         phoneModel.setId(innerRowset.getString("user_id"));
                         phoneModel.setPhoneNumber(numberset.getString("number"));
                         phoneModel.setCountryCode(numberset.getString("COUNTRY_CODE"));
-                        addNewNumbeIntoWeTrackServer(phoneModel,false);
-                        Thread.sleep(1000,500);
+                        addNewNumbeIntoWeTrackServer(phoneModel, false);
+                        Thread.sleep(1000, 500);
                     }
                 }
             }
 
-        }
-        catch (Exception exception)
-        {
+        } catch (Exception exception) {
             logger.info("Exception while adding new number while reviwing customer");
         }
     }
@@ -103,50 +103,45 @@ private static final Logger logger  = LogManager.getLogger(UpdateNotificationRep
 
     private void addNewNumbeIntoWeTrackServer(PhoneModel phoneModel, boolean isFirstTime) throws IOException {
         HomeModel homeModel = commonUtils.getHomeModel(phoneModel.getId(), isFirstTime);
-            HttpResponse httpResponse = httpUtils.doPostRequest(
-                    0,
-                    CREATE_USER,
-                    commonUtils.getHeadersMap(homeModel.getId()),
-                    "Create New User for Mobile Creation",
-                    commonUtils.writeAsString(objectMapper,
-                            homeModel)
-            );
-            logger.info("Response in adding number with schedulers " + httpResponse.getResponse() + "\n" + httpResponse.getResponse());
+        HttpResponse httpResponse = httpUtils.doPostRequest(
+                0,
+                CREATE_USER,
+                commonUtils.getHeadersMap(homeModel.getId()),
+                "Create New User for Mobile Creation",
+                commonUtils.writeAsString(objectMapper,
+                        homeModel)
+        );
+        logger.info("Response in adding number with schedulers " + httpResponse.getResponse() + "\n" + httpResponse.getResponse());
 
-            if (httpResponse.getResponseCode() == 200) {
-                HttpResponse innerMobileRequest = httpUtils.doPostRequest(0,
-                        POST_NUMBER,
-                        commonUtils.getHeadersMap(homeModel.getId()),
-                        "Adding Number for  Mobile Creation",
-                        commonUtils.writeAsString(objectMapper,
-                                phoneModel
-                        ));
-                if (innerMobileRequest.getResponseCode() == 200) {
-                   logger.info("Response in added number with new user"+innerMobileRequest.getResponseCode());
-                   updatePhoneNumberDetails(phoneModel,homeModel);
-                }
+        if (httpResponse.getResponseCode() == 200) {
+            HttpResponse innerMobileRequest = httpUtils.doPostRequest(0,
+                    POST_NUMBER,
+                    commonUtils.getHeadersMap(homeModel.getId()),
+                    "Adding Number for  Mobile Creation",
+                    commonUtils.writeAsString(objectMapper,
+                            phoneModel
+                    ));
+            if (innerMobileRequest.getResponseCode() == 200) {
+                logger.info("Response in added number with new user" + innerMobileRequest.getResponseCode());
+                updatePhoneNumberDetails(phoneModel, homeModel);
             }
         }
+    }
 
-    private void doNotifyInNewServer(NotificationModel notificationModel, String id)  {
+    private void doNotifyInNewServer(NotificationModel notificationModel, String id) {
         try {
             HttpResponse enableSchedularPush =
                     httpUtils.doPostRequest(0,
                             LOCAL_HOST_NUMBER,
                             commonUtils.getHeadersMap(id),
                             "",
-                            commonUtils.writeAsString(objectMapper,notificationModel)
+                            commonUtils.writeAsString(objectMapper, notificationModel)
                     );
-            logger.info("enablePush Notification"+enableSchedularPush.getResponseCode());
-        }
-        catch (Exception exception)
-        {
+            logger.info("enablePush Notification" + enableSchedularPush.getResponseCode());
+        } catch (Exception exception) {
             exception.printStackTrace();
         }
     }
-
-
-
 
 
     private int updatePhoneNumberDetails(PhoneModel phoneModel, HomeModel homeModel) {
@@ -158,9 +153,6 @@ private static final Logger logger  = LogManager.getLogger(UpdateNotificationRep
                         phoneModel.getPackageName()
                 );
     }
-
-
-
 
 
 }

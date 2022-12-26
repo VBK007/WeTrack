@@ -134,14 +134,17 @@ public class HomeRepo {
                             homeModel.getId(), authToken, homeModel.getPackageName());
         }
         logger.info("count for auth token" + count);
-
     }
 
+    private int updateAccountDetails(String userId, String packageName) {
+        return jdbcTemplateProvider.getTemplate().update(UPDATE_PURCHASE_MODE, userId, packageName);
+    }
 
     public ResponseEntity verifyAddUser(HomeModel homeModel) {
         try {
             SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
-                    .queryForRowSet("select Expiry_TIME,CREDIT_LIMIT,IS_USER_CREATED_IN_WETRACK_SERVICE,token_header  from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?", homeModel.getId(), homeModel.getPackageName());
+                    .queryForRowSet("select Expiry_TIME,CREDIT_LIMIT,IS_USER_CREATED_IN_WETRACK_SERVICE,token_header,purchase_mode,PACKAGE_NAME  " +
+                            "from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?", homeModel.getId(), homeModel.getPackageName());
             if (sqlRowSet.next()) {
                 logger.info("inside Event " + homeModel.getId() + sqlRowSet.getBoolean("is_user_created_in_wetrack_service"));
                 if (sqlRowSet.getBoolean("is_user_created_in_wetrack_service")) {
@@ -158,10 +161,14 @@ public class HomeRepo {
                         }
                         new Thread(() -> doInBakground(homeModel, numberSet)).start();
                     } else {
+                        int updatedUserCount = updateAccountDetails(sqlRowSet.getString("user_id"),sqlRowSet.getString("PACKAGE_NAME"));
+                        logger.error("Response in the Update user into demo for user "+sqlRowSet.getString("user_id")+"\n response count"
+                                +updatedUserCount);
                         return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                                 new ApiResponse(false, "Plan is Expired")));
                     }
-                } else {
+                }
+                else {
                     String normalUserId = homeModel.getId();
                     homeModel.setId(commonUtils.getRandomString());
                     HttpResponse httpResponse = checkUserFromWeTrackService(homeModel);
@@ -207,7 +214,8 @@ public class HomeRepo {
                             "from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?", homeModel.getId(), homeModel.getPackageName());
             if (sqlRowSet.next()) {
                 SqlRowSet innerNumberSet = jdbcTemplateProvider.getTemplate()
-                        .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT,is_noti_enabled from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?",
+                        .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT,is_noti_enabled from " +
+                                        "NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?",
                                 homeModel.getId(), homeModel.getPackageName());
                 if (commonUtils.checkAddOrWithoutAdd(sqlRowSet.getString("Expiry_TIME"),
                         homeModel.getPackageName(),
@@ -254,7 +262,8 @@ public class HomeRepo {
                     if (commonUtils.checkAddOrWithoutAdd(sqlRowSet.getString("Expiry_TIME"), homeModel.getPackageName(),
                             sqlRowSet.getInt("CREDIT_LIMIT"))) {
                         if (!numberSet.next()) {
-                            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                            return responseUtils.constructResponse(200,
+                                    commonUtils.writeAsString(objectMapper,
                                     new ApiResponse(false, "Please add Mobile Number")));
                         }
                         new Thread(() -> doInBakground(homeModel, numberSet)).start();
@@ -645,11 +654,16 @@ public class HomeRepo {
                         "values (?,?,?,?,?,?,?,?,current_timestamp,current_timestamp,?,?,?,?,?,?,?,?)",
                 homeModel.getId(), homeModel.getPhoneModel(), homeModel.getIpAddress(), homeModel.getCountryName(),
                 homeModel.getOneSignalExternalUserId(), homeModel.getAppId(),
-                (IS_MONEY_MODE) ? LocalDateTime.now().plusHours(48).toString() :
+                (getAppStatus()) ? LocalDateTime.now().plusHours(48).toString() :
                         LocalDateTime.now().plusYears(1).toString(), false, false,
                 "", false, WETRACK + homeModel.getId(), commonUtils.getModel(homeModel.getPackageName()), 1, homeModel.getPackageName(),
                 100
         );
+    }
+
+    private boolean getAppStatus() {
+        SqlRowSet appVersionSet = jdbcTemplateProvider.getTemplate().queryForRowSet(SELECT_APP_FLOW);
+        return  appVersionSet.next() && appVersionSet.getBoolean("IS_FREE_MODE");
     }
 
 

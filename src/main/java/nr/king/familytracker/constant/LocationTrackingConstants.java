@@ -17,8 +17,9 @@ public class LocationTrackingConstants {
     public static String APP_VERSION = "1.3";
     public static boolean IS_FORCE_UPDATE = false;
     public static boolean IS_APP_INACTIVE = false;
+    public static String TOPIC_ADDING = "topic/";
     public static final String EMPTY_STRING = "Welcome,to Family Tracking Application.World Trusted Application.\uD83D\uDE00";
-    public static final String WILL_UPDATE_STRING = "We will update your Query to user we will get back Soon.\uD83D\uDC4D";
+    public static final String WILL_UPDATE_STRING = "We will update your Query to Support Team. we will get back Soon.\uD83D\uDC4D";
 
 
     //api for apiTracker
@@ -39,6 +40,8 @@ public class LocationTrackingConstants {
     public static final String INIT_VIEW = "http://api.wtrackonline.com/api/user/initNew?version=3.1.3";
 
     public static final String REMOVE_NUMBER = "http://api.wtrackonline.com/api/user/removeNumberForUser";
+
+    public static final String FCM_PUSH = "https://fcm.googleapis.com/fcm/send";
 
      /*  public static final String CREATE_USER = "http://chattrack.apiservicessarl.com/api/user/newUser";
     public static final String ENABLE_PUSH_NOTIFICATION = "http://chattrack.apiservicessarl.com/api/user/enablePush";
@@ -75,7 +78,7 @@ public class LocationTrackingConstants {
 
     public static final String API_FOR_CURRENCY_CONVERTION = "https://api.apilayer.com/fixer/convert?";
     public static final String[] SUBSCRIBTION_MODEL_ARRAYLIST = {"demo", "Fresher", "Standard", "Popular", "Deluxe", "Ultra Deluxe"};
-    public static final int[] MAX_NUMBER_ALLOWED = {1, 2, 2, 3, 5, 5, 10};
+    public static final int[] MAX_NUMBER_ALLOWED = {1, 2, 2, 3, 5, 10, 10};
 
     private LocationTrackingConstants() {
 
