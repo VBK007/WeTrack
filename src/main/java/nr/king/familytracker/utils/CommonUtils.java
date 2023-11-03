@@ -240,6 +240,15 @@ public class CommonUtils {
         return headersMap;
     }
 
+
+    public Map<String, String> getMaterialSync(String token) {
+        Map<String, String> headersMap = new LinkedHashMap<>();
+        headersMap.put("Content-Type", "application/json");
+        headersMap.put("Authorization", String.format("Bearer %s", token));
+        return headersMap;
+    }
+
+
     public Map<String, String> getHeadersMapForSpecific(String authHeader) {
         Map<String, String> headersMap = new LinkedHashMap<>();
         headersMap.put("Accept:", "application/json");

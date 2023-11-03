@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
+
 @Component
 public class HttpUtils {
 
@@ -36,9 +37,15 @@ public class HttpUtils {
     private HttpResponse getReponse(String url, OkHttpClient client, Request.Builder request) throws IOException {
         Response response = client.newCall(request.build()).execute();
         HttpResponse httpResponse = new HttpResponse(response.code(), response.body() != null ? response.body().string() : "");
-        logger.info(String.format("Requested Url is - %s - Response Code is - %s", url, httpResponse.getResponseCode()));
+        logger.info(String.format("Requested Url is - %s - Response Code is - %s -\n" +
+                        " Response is - %s", url, httpResponse.getResponseCode(),
+                httpResponse.getResponse()
+                ));
         return httpResponse;
     }
+
+
+
 
     public Response doRequest(String url, Map<String, String> headers, RequestMethod method, RequestBody body) throws IOException {
         OkHttpClient client = new OkHttpClient();
@@ -101,7 +108,8 @@ public class HttpUtils {
     private HttpResponse GetReponse(String url, OkHttpClient client, Request.Builder request, String requestBody) throws IOException {
         Response response = client.newCall(request.build()).execute();
         HttpResponse httpResponse = new HttpResponse(response.code(), response.body().string(), response.headers());
-        // logger.info(String.format("\nRequested Url is - %s - Response Code is - %s -Request Body is -%s " , url, httpResponse.getResponseCode(),requestBody));
+         logger.info(String.format("\nRequested Url is - %s - Response Code is - %s -Request Body is -%s " ,
+                 url, httpResponse.getResponseCode(),requestBody));
         return httpResponse;
     }
 }
