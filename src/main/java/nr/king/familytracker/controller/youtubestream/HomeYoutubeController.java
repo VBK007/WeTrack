@@ -29,6 +29,12 @@ public class HomeYoutubeController extends BaseController {
     }
 
 
+    @PostMapping(value = "/youtube/createuser")
+    public ResponseEntity createUser(@RequestBody HomeModel homeModel)
+    {
+        return youtubeDashBoardService.createUser(homeModel);
+    }
+
 
 
 

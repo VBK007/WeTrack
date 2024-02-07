@@ -3,6 +3,8 @@ package nr.king.familytracker.utils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
+import nr.king.familytracker.model.http.Data;
+import nr.king.familytracker.model.http.Number;
 import nr.king.familytracker.model.http.PhoneModel;
 import nr.king.familytracker.model.http.UpdateAuditMasterRequestBody;
 import nr.king.familytracker.model.http.dashboardModel.DashBoardRequestBody;
@@ -15,6 +17,7 @@ import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.model.http.messages.MessageRequestBody;
 import nr.king.familytracker.model.http.purchaseModel.PurchaseRequestModel;
 import nr.king.familytracker.model.http.purchaseModel.UpdateUpiDetails;
+import nr.king.familytracker.model.http.qrGenerator.QrGeneratorModel;
 import nr.king.familytracker.repo.NotificationModel;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +33,6 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -717,5 +719,21 @@ public class CommonUtils {
                 "key=AAAALNZGB-o:APA91bFmdGOcQfkho_jJwkyVoUwU35kOzuh202WcFT63KR_m_oMY8DaBRZ4aNQZN0KTR0tCm8YXQU2lHQtKW1I6uthOabc5g_03eaAub0cIWyTZ1jNWpLk9K-IXUdvXy1xWF0B_CEoqQ");
         return headersMap;
     }
+
+    public Data getDummyMainHomeModel() {
+        Data data = new Data();
+        data.setQrTracking(false);
+        data.setQrSessionConnected(false);
+        return data;
+    }
+
+    public boolean checkQrGeneatorSecurityCheck(QrGeneratorModel qrGeneratorModel) {
+        return checkHomeModelSecurityCheck(qrGeneratorModel.getHomeModel()) || checkNumberSecurityCheck(qrGeneratorModel.getNumber());
+    }
+
+    private boolean checkNumberSecurityCheck(Number number) {
+        return validate(Arrays.asList(number.getPhoneNumber()));
+    }
+
 
 }

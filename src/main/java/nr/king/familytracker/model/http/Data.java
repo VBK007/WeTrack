@@ -20,4 +20,6 @@ public class Data {
     private Integer maxFollowCount;
     private String pushToken;
     private String fireBaseId;
+    private boolean isQrTracking;
+    private boolean isQrSessionConnected;
 }

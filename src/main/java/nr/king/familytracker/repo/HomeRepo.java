@@ -76,7 +76,7 @@ public class HomeRepo {
             String authToken = "";
             if (count == 1) {
                 authToken = UUID.randomUUID().toString();
-                doUpdateTokenforUser(authToken, homeModel); //update auth token
+               // doUpdateTokenforUser(authToken, homeModel); //update auth token
                 doandCreateLoginNumberOfTime(homeModel);
             }
             return responseUtils.constructResponse(200,

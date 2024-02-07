@@ -54,6 +54,16 @@ public class YoutubeDashBoardService {
         }
     }
 
+    public ResponseEntity createUser(HomeModel homeModel) {
+        try {
+
+            return  youtubeDashRepo.createUser(homeModel);
+        } catch (Exception exception) {
+            logger.error("The exception in getYoutubeDashboard" + exception.getMessage(), exception);
+            throw new FailedResponseException(exception.getMessage());
+        }
+    }
+
 
 
 }

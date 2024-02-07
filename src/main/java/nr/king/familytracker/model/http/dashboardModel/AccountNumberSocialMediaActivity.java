@@ -13,6 +13,6 @@ public class AccountNumberSocialMediaActivity {
     private int totalNumberOfOnline;
     private int totalNumberOfOffline;
     private int totalNumberOfHours;
-
     private int  maxNumber;
+    private boolean isWebViewActive;
 }

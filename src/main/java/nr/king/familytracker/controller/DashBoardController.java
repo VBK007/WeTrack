@@ -8,6 +8,7 @@ import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.model.http.messages.AdminMessageBody;
 import nr.king.familytracker.model.http.messages.AdminMessages;
 import nr.king.familytracker.model.http.messages.MessageRequestBody;
+import nr.king.familytracker.model.http.qrGenerator.QrGeneratorModel;
 import nr.king.familytracker.service.DashBoardService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +51,13 @@ public class DashBoardController extends BaseController {
     public ResponseEntity sendMessage(@RequestBody FcmModelData fcmModelData)
     {
         return dashBoardService.postPushNotification(fcmModelData);
+    }
+
+
+    @PostMapping(value = "/v{version:[1]}/qrGenerator", produces = {"application/json"})
+    public ResponseEntity qrGenerator(@RequestBody QrGeneratorModel qrGeneratorModel)
+    {
+        return dashBoardService.qrGenerator(qrGeneratorModel);
     }
 
     @PostMapping(value = "/v{version:[1]}/get-allPostMesage", produces = {"application/json"})

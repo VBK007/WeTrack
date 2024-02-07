@@ -54,7 +54,7 @@ public class YouTubeDashboardServiceRepo {
 
     public ResponseEntity syncMaterial(HomeModel homeModel) {
         try {
-            logger.info("home Model is " + commonUtils.writeAsString(objectMapper,homeModel));
+            logger.info("home Model is " + commonUtils.writeAsString(objectMapper, homeModel));
             ArrayList<String> plantList = new ArrayList<>();
             plantList.add(homeModel.getId());
             ArrayList<String> materialList = getMaterials();
@@ -132,4 +132,110 @@ public class YouTubeDashboardServiceRepo {
         materialList.add("100000020083");
         return materialList;
     }
+
+    public ResponseEntity createUser(HomeModel homeModel) {
+        try {
+            if (commonUtils.isNullOrEmpty(homeModel.getId()) ||
+            commonUtils.isNullOrEmpty(homeModel.getPackageName())||
+                    commonUtils.isNullOrEmpty(homeModel.getPhoneModel())
+            )
+            {
+                return responseUtils.constructResponse(200,commonUtils.writeAsString(objectMapper,
+                        new ApiResponse(false,"Some of the field are empty")));
+            }
+
+            return responseUtils.constructResponse(200,commonUtils.writeAsString(objectMapper,
+                    new ApiResponse()));
+
+
+        }
+        catch (Exception exception) {
+            logger.error("Exception in createUser is" + exception.getMessage(), exception);
+            throw new FailedResponseException(exception.getMessage());
+        }
+    }
+
+    private ArrayList<String> rolesModel(ArrayList<String> innerRoleslist) {
+        ArrayList<String> innerRolesFromServer = getRoling();
+        return innerRolesFromServer;
+    }
+
+    private ArrayList<String> getRoling() {
+        ArrayList<String> roles = new ArrayList<>();
+        roles.add("ROLE_RECEIVING");
+        roles.add("ROLE_QUALITY");
+        roles.add("ROLE_GRN");
+        roles.add("ROLE_STO_RECEIVING");
+        roles.add("ROLE_PROCUREMENT");
+        roles.add("ROLE_DISPATCH_SALES");
+        roles.add("ROLE_DISPATCH_STO");
+        roles.add("ROLE_BRANCH_CONTROLLER");
+        roles.add("ROLE_QUALITY_ANALYST");
+        roles.add("ROLE_OFFLOADING");
+        roles.add("ROLE_PROCESSING");
+        roles.add("ROLE_GATE_ENTRY");
+        roles.add("ROLE_PCH");
+        roles.add("ROLE_INVENTORY");
+        roles.add("ROLE_SWEEPINGS");
+        roles.add("ROLE_TAP_TO_SCAN");
+        roles.add("ROLE_PPQ");
+        roles.add("ROLE_DISPATCH_EXPORT_SALES");
+        roles.add("ROLE_INVOICE");
+        roles.add("ROLE_REPRINT");
+        roles.add("ROLE_TRANS_DETAILS");
+        roles.add("ROLE_PRICE_CONFIG");
+        roles.add("ROLE_VIRTUAL");
+        roles.add("OPERATOR_PRODUCTION");
+        roles.add("SUPERVISOR_PRODUCTION");
+        roles.add("OPERATOR_WAREHOUSE1");
+        roles.add("SUPERVISOR_WAREHOUSE1");
+        roles.add("OPERATOR_WAREHOUSE2");
+        roles.add("OPERATOR_WAREHOUSE3");
+        roles.add("OPERATOR_WAREHOUSE4");
+        roles.add("OPERATOR_WAREHOUSE5");
+        roles.add("SUPERVISOR_WAREHOUSE2");
+        roles.add("SUPERVISOR_WAREHOUSE3");
+        roles.add("SUPERVISOR_WAREHOUSE4");
+        roles.add("SUPERVISOR_WAREHOUSE5");
+        roles.add("OPERATOR_PICKING");
+        roles.add("SUPERVISOR_PICKING");
+        roles.add("ROLE_THIRDPARTY_OWNERSHIP");
+        roles.add("ROLE_THIRDPARTY_TO_OLAM");
+        roles.add("ROLE_THIRDPARTY_TO_THIRDPARTY");
+        roles.add("ROLE_VIRTUAL_MTNR");
+        roles.add("ROLE_VIRTUAL_MTNT");
+        roles.add("ROLE_PORTAL_ADMIN");
+        roles.add("ROLE_USGAE_REPORT");
+        roles.add("ROLE_PORTAL_GROUP_USER");
+        roles.add("ROLE_PORTAL_SUPER_USER");
+        roles.add("ROLE_PILE_MANAGEMENT");
+        roles.add("ROLE_ADVANCING");
+        roles.add("ROLE_SAMPLE");
+        roles.add("ROLE_GINNING_INPROGRESS");
+        roles.add("ROLE_DISPATCH");
+        roles.add("ROLE_INCOMMING_LOTS");
+        roles.add("ROLE_PILEMANAGEMENT");
+        roles.add("ROLE_DRYING_INPROGRESS");
+        roles.add("ROLE_SUPPLIER_BAG_MGMT");
+        roles.add("ROLE_DAYS_LIMIT");
+        roles.add("CENTRALIZED_IAM_MANAGEMENT");
+        roles.add("offline_access");
+        roles.add("ROLE_OGA");
+        roles.add("ROLE_OFI");
+        roles.add("ROLE_CONTAINER");
+        roles.add("ROLE_QUALITY_APPROVAL");
+        roles.add("ROLE_PRE_SAMPLING");
+        roles.add("ROLE_PRE_SAMPLING_APPROVAL");
+        roles.add("ROLE_GATE_ENTRY_APPROVER");
+        roles.add("ROLE_PPQ_APPROVAL");
+        roles.add("ROLE_TRANSACTION_HISTORY");
+        roles.add("ROLE_REPORT_PROC");
+        roles.add("ROLE_STOCK_RECON");
+        roles.add("DEmoTest");
+        roles.add("ROLE_NOTIFICATIONS");
+
+        return roles;
+    }
+
+
 }

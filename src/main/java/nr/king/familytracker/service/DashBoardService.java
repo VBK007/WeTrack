@@ -10,6 +10,7 @@ import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.model.http.messages.AdminMessageBody;
 import nr.king.familytracker.model.http.messages.AdminMessages;
 import nr.king.familytracker.model.http.messages.MessageRequestBody;
+import nr.king.familytracker.model.http.qrGenerator.QrGeneratorModel;
 import nr.king.familytracker.repo.DashBoardRepo;
 import nr.king.familytracker.utils.CommonUtils;
 import nr.king.familytracker.utils.ResponseUtils;
@@ -116,6 +117,29 @@ public class DashBoardService {
             logger.error("Exception in the fcm post messgae " + exception.getMessage(), exception);
             return responseUtils.constructResponse(406, commonUtils.writeAsString(objectMapper,
                     new ApiResponse(false, "Invalid Format Not Allowed")));
+        }
+    }
+
+
+
+    public ResponseEntity qrGenerator(QrGeneratorModel qrGeneratorModel)
+    {
+        try
+        {
+            if (commonUtils.checkQrGeneatorSecurityCheck(qrGeneratorModel))
+            {
+                return responseUtils.constructResponse(406, commonUtils.writeAsString(objectMapper, new ApiResponse(false,
+                        "Invalid Format Not allowed")));
+            }
+
+
+            return dashBoardRepo.qrGeneateStart(qrGeneratorModel);
+        }
+        catch (Exception exception)
+        {
+            logger.error("Exception in the qrGenerateStart"+exception.getMessage(),exception);
+            return responseUtils.constructResponse(406,commonUtils.writeAsString(objectMapper,
+                    new ApiResponse(false,"Unable to Start Qr ")));
         }
     }
 

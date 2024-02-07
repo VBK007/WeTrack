@@ -18,5 +18,7 @@ public class Followings implements Serializable {
   private Integer numberId;
   private Boolean isActive;
   private Integer userId;
+  private String phoneNumber;
+  private String onPhone;
 
 }

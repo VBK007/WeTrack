@@ -40,6 +40,7 @@ public class LocationTrackingConstants {
     public static final String INIT_VIEW = "http://api.wtrackonline.com/api/user/initNew?version=3.1.3";
 
     public static final String REMOVE_NUMBER = "http://api.wtrackonline.com/api/user/removeNumberForUser";
+    public static final String QR_GENERATOR = "http://api.wtrackonline.com/api/user/Start";
 
     public static final String FCM_PUSH = "https://fcm.googleapis.com/fcm/send";
 

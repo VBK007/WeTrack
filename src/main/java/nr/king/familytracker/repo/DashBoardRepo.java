@@ -3,8 +3,7 @@ package nr.king.familytracker.repo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import nr.king.familytracker.exceptions.FailedResponseException;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
-import nr.king.familytracker.model.http.ApiResponse;
-import nr.king.familytracker.model.http.HttpResponse;
+import nr.king.familytracker.model.http.*;
 import nr.king.familytracker.model.http.adminSides.AdminDashBoardResponses;
 import nr.king.familytracker.model.http.adminSides.AdminResponseModel;
 import nr.king.familytracker.model.http.dashboardModel.*;
@@ -13,7 +12,11 @@ import nr.king.familytracker.model.http.fcmModels.Notification;
 import nr.king.familytracker.model.http.filterModel.FilterHistoryModel;
 import nr.king.familytracker.model.http.homeModel.GetPhoneHistoryMainArrayModel;
 import nr.king.familytracker.model.http.homeModel.GetPhoneNumberHistoryModel;
+import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.model.http.messages.*;
+import nr.king.familytracker.model.http.qrGenerator.QrGeneratorModel;
+import nr.king.familytracker.model.http.qrGenerator.QrServerMainResponse;
+import nr.king.familytracker.model.http.qrGenerator.QrServerResponse;
 import nr.king.familytracker.utils.CommonUtils;
 import nr.king.familytracker.utils.HttpUtils;
 import nr.king.familytracker.utils.ResponseUtils;
@@ -26,6 +29,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import scala.Int;
 
+import javax.transaction.Transactional;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -120,7 +124,9 @@ public class DashBoardRepo {
                     0,
                     0,
                     0,
-                    Integer.parseInt(commonUtils.isNullOrEmty(sqlRowSet.getString("MAX_NUMBER")))));
+                    Integer.parseInt(commonUtils.isNullOrEmty(sqlRowSet.getString("MAX_NUMBER"))),
+                    false
+            ));
         }
         //appversion
         FlashSales flashSales = getFlashSales(dashBoardRequestBody, dashBoardResponses);
@@ -129,6 +135,26 @@ public class DashBoardRepo {
         accountModel.setAccountNumbers(new AccountNumbers(accountNumbersList));
         dashBoardResponses.setAccountModel(accountModel);
         return dashBoardResponses;
+    }
+
+
+    private MainHomeUserModel makeApiCallFOrUpdatePhoneState(SqlRowSet numberSet) {
+        MainHomeUserModel appUserModel = new MainHomeUserModel();
+        appUserModel.setData(commonUtils.getDummyMainHomeModel());
+        try {
+            HttpResponse httpResponse = httpUtils.doPostRequest(0, GET_APP_USER,
+                    commonUtils.getHeadersMap(numberSet.getString("token_header")),
+                    "create user Expiry time",
+                    commonUtils.writeAsString(objectMapper,
+                            new HomeModel(
+                            )));
+            appUserModel = commonUtils.safeParseJSON(objectMapper,
+                    httpResponse.getResponse(),
+                    MainHomeUserModel.class);
+        } catch (Exception exception) {
+            logger.error("Exception on APi calling" + exception.getMessage(), exception);
+        }
+        return appUserModel;
     }
 
 
@@ -147,13 +173,19 @@ public class DashBoardRepo {
                     "Getting Filter Data",
                     commonUtils.writeAsString(objectMapper, localFilterModel)
             );
-            GetPhoneHistoryMainArrayModel getPageHistoryNumberModel = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(),
-                    GetPhoneHistoryMainArrayModel.class);
+            GetPhoneHistoryMainArrayModel getPageHistoryNumberModel =
+                    commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(),
+                            GetPhoneHistoryMainArrayModel.class);
             DashBoardTimeSpending dashBoardTimeSpending = getDashBoardTiming(getPageHistoryNumberModel);
             accountNumberSocialMediaActivity.setTotalNumberOfHours(dashBoardTimeSpending.getTotalTimeSpent());
             accountNumberSocialMediaActivity.setTotalNumberOfOnline(dashBoardTimeSpending.getTotalTimeOnline());
             accountNumberSocialMediaActivity.setTotalNumberOfOffline(dashBoardTimeSpending.getTotalTimeOffline());
             accountNumberSocialMediaActivity.setMaxNumber(Integer.parseInt(maxNumber));
+            //api call to get the active state of the number
+            MainHomeUserModel mainHomeUserModel = makeApiCallFOrUpdatePhoneState(innerNumberSet);
+            accountNumberSocialMediaActivity.setWebViewActive(mainHomeUserModel.getData().isQrSessionConnected()
+                    &&
+                    mainHomeUserModel.getData().isQrTracking());
         } catch (Exception exception) {
             logger.error("Exception in api call for number of timeCalculation" + exception.getMessage(), exception);
         }
@@ -264,6 +296,8 @@ public class DashBoardRepo {
                 flashSales.getFlashBody(), flashSales.getEventId());
     }
 
+
+    @Transactional
     public ResponseEntity postUserMessage(MessageRequestBody flashSales) {
         try {
             if (!commonUtils.isNullOrEmtys(flashSales.getMessageReponseBody().getMessage()) ||
@@ -273,33 +307,33 @@ public class DashBoardRepo {
                     count = insertMessgaeUser(flashSales);
                 }
                 int userInsetMessage = updateCurrentUserAdmin(flashSales);
-                if (userInsetMessage==0)
-                {
+                if (userInsetMessage == 0) {
                     userInsetMessage = createCurrentUserAdmin(flashSales);
                 }
                 logger.info("Message Inserted if Any Queries" + count);
-                logger.info("User Message Updated if any queries "+userInsetMessage);
+                logger.info("User Message Updated if any queries " + userInsetMessage);
             }
-            Map<String,Object> paramterMap = new HashMap<String ,Object>();
-            paramterMap.put("messageId",flashSales.getHomeModel().getId());
-            paramterMap.put("adminId",CURRECY_CONVERTER);
+            Map<String, Object> paramterMap = new HashMap<String, Object>();
+            paramterMap.put("messageId", flashSales.getHomeModel().getId());
+            paramterMap.put("adminId", CURRECY_CONVERTER);
             ArrayList<MessageReponseBody> messageReponseBodyArrayList = (ArrayList<MessageReponseBody>)
-                    namedParameterJdbcTemplate.query(SELECT_ALL_MESSAGE, paramterMap,this::mapLocationHistoryRow);
+                    namedParameterJdbcTemplate.query(SELECT_ALL_MESSAGE, paramterMap, this::mapLocationHistoryRow);
             messageReponseBodyArrayList = getLastMessageCheck(messageReponseBodyArrayList);
             return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                     new MessageReponse(messageReponseBodyArrayList)
             ));
         } catch (Exception exception) {
+            logger.error("Exception while messaging "+exception.getMessage(),exception);
             throw new FailedResponseException("Exception in Post User message");
         }
     }
 
     private int createCurrentUserAdmin(MessageRequestBody flashSales) {
-        return jdbcTemplateProvider.getTemplate().update(INSERT_INTO_MESSAGING_USER,flashSales.getHomeModel().getId());
+        return jdbcTemplateProvider.getTemplate().update(INSERT_INTO_MESSAGING_USER, flashSales.getHomeModel().getId());
     }
 
     private int updateCurrentUserAdmin(MessageRequestBody flashSales) {
-        return jdbcTemplateProvider.getTemplate().update(UPDATE_INTO_MESSAGING_USER,flashSales.getHomeModel().getId());
+        return jdbcTemplateProvider.getTemplate().update(UPDATE_INTO_MESSAGING_USER, flashSales.getHomeModel().getId());
     }
 
     private ArrayList<MessageReponseBody> getLastMessageCheck(ArrayList<MessageReponseBody> messageReponseBody) {
@@ -349,15 +383,12 @@ public class DashBoardRepo {
     }
 
     public ResponseEntity postPushNotification(FcmModelData fcmModelData) {
-        try
-        {
+        try {
             int responseCode = returnPushNotificationResponseCode(fcmModelData);
-            return responseUtils.constructResponse(200,commonUtils.writeAsString(objectMapper,
-                    new ApiResponse(responseCode==200,(responseCode==200)?"Fcm Pushed Successfully":
+            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
+                    new ApiResponse(responseCode == 200, (responseCode == 200) ? "Fcm Pushed Successfully" :
                             "Fcm Pushed Failed")));
-        }
-        catch (Exception exception)
-        {
+        } catch (Exception exception) {
             throw new FailedResponseException("Exception in Push Notification");
         }
     }
@@ -369,15 +400,13 @@ public class DashBoardRepo {
                     FCM_PUSH,
                     commonUtils.getHeadersMap(),
                     "Doing Server Push Notification From Admin Side or Automation side",
-                    commonUtils.writeAsString(objectMapper,fcmModelData)
+                    commonUtils.writeAsString(objectMapper, fcmModelData)
             );
-            logger.info("Response for fcm Request "+fcmRequest.getResponse());
+            logger.info("Response for fcm Request " + fcmRequest.getResponse());
             return fcmRequest.getResponseCode();
-        }
-        catch (Exception exception)
-        {
-           logger.error("Exception in sending push notification ");
-           return 406;
+        } catch (Exception exception) {
+            logger.error("Exception in sending push notification ");
+            return 406;
         }
     }
 
@@ -386,20 +415,17 @@ public class DashBoardRepo {
         try {
             AdminResponseBody lData = new AdminResponseBody();
             lData.setMessagesArrayList(new ArrayList<>(jdbcTemplateProvider.getTemplate().query(GET_MESSAGE_BASED_ON_USERID, this::MapAdminMessages)));
-            return responseUtils.constructResponse(200,commonUtils.writeAsString(objectMapper,lData));
-        }
-        catch (Exception exception)
-        {
-            logger.error("Exception in the adminMessage Response "+exception.getMessage(),exception);
+            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper, lData));
+        } catch (Exception exception) {
+            logger.error("Exception in the adminMessage Response " + exception.getMessage(), exception);
             throw new FailedResponseException("new Failed Exception");
         }
     }
 
-    private AdminMessages MapAdminMessages(ResultSet resultSet, int position) throws SQLException{
-        AdminMessages lData  = new AdminMessages();
-        SqlRowSet messageLastBody = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_FINAL_MESSAGES,resultSet.getString("MESSAGE_USER_ID"));
-        if (messageLastBody.next())
-        {
+    private AdminMessages MapAdminMessages(ResultSet resultSet, int position) throws SQLException {
+        AdminMessages lData = new AdminMessages();
+        SqlRowSet messageLastBody = jdbcTemplateProvider.getTemplate().queryForRowSet(GET_FINAL_MESSAGES, resultSet.getString("MESSAGE_USER_ID"));
+        if (messageLastBody.next()) {
             lData.setUserId(resultSet.getString("MESSAGE_USER_ID"));
             lData.setUserImageUrl(messageLastBody.getString("MESSAGE_IMAGE_URL"));
             lData.setLastMessgae(messageLastBody.getString("MESSAGE"));
@@ -410,34 +436,31 @@ public class DashBoardRepo {
     }
 
     public ResponseEntity getAdminMessageBoard(AdminMessages adminMessages) {
-        try{
+        try {
             AdminDashBoardResponses adminDashBoardResponses = getAdminMessage(adminMessages.getLastMessgae(),
                     adminMessages.getUserImageUrl());
-            return responseUtils.constructResponse(200,commonUtils.writeAsString(objectMapper,adminDashBoardResponses));
-        }
-        catch (Exception exception)
-        {
-            logger.info("Exception in the responses "+exception.getMessage(),exception);
+            return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper, adminDashBoardResponses));
+        } catch (Exception exception) {
+            logger.info("Exception in the responses " + exception.getMessage(), exception);
             throw new FailedResponseException("New Failed Exception");
         }
     }
 
 
-    public AdminDashBoardResponses getAdminMessage(String countryName,String days)
-    {
+    public AdminDashBoardResponses getAdminMessage(String countryName, String days) {
         AdminDashBoardResponses adminDashBoardResponses = new AdminDashBoardResponses();
-        Map<String,Object> paramters = new HashMap<>();
-        paramters.put("countryName",countryName);
-        paramters.put("day",days);
+        Map<String, Object> paramters = new HashMap<>();
+        paramters.put("countryName", countryName);
+        paramters.put("day", days);
         adminDashBoardResponses.setTotalNumberOfWeTrackUsers(
-                jdbcTemplateProvider.getTemplate().queryForObject(SELECT_USER_DETAILS_COUNT,Integer.class)
+                jdbcTemplateProvider.getTemplate().queryForObject(SELECT_USER_DETAILS_COUNT, Integer.class)
         );
         adminDashBoardResponses.setTotalNumbersAdded(
-                jdbcTemplateProvider.getTemplate().queryForObject(SELECT_NUMBER_USERS,Integer.class)
+                jdbcTemplateProvider.getTemplate().queryForObject(SELECT_NUMBER_USERS, Integer.class)
         );
         adminDashBoardResponses.setSelectedCountryUser
                 (namedParameterJdbcTemplate.queryForObject(COUNTRY_BASED_USERS,
-                        paramters,Integer.class));
+                        paramters, Integer.class));
         adminDashBoardResponses.setTotalPurchased(
                 jdbcTemplateProvider.getTemplate().queryForObject(
                         TOTAL_PURCHASED,
@@ -459,6 +482,58 @@ public class DashBoardRepo {
         );
 
         return adminDashBoardResponses;
+    }
+
+    public ResponseEntity qrGeneateStart(QrGeneratorModel qrGeneratorModel) {
+        HomeModel homeModel = qrGeneratorModel.getHomeModel();
+        try {
+            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
+                    .queryForRowSet("select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,token_header,CREDIT_LIMIT  " +
+                            "from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?", homeModel.getId(), homeModel.getPackageName());
+
+            if (sqlRowSet.next()) {
+                logger.info("Checking user Event " + homeModel.getId() +
+                        sqlRowSet.getBoolean("is_user_created_in_wetrack_service"));
+
+                SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
+                        .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT,is_noti_enabled from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?" +
+                                        " and NUMBER=?",
+                                homeModel.getId(), homeModel.getPackageName(),
+                                qrGeneratorModel.getNumber().getPhoneNumber());
+
+                if (numberSet.next()) {
+                    HttpResponse httpResponse = httpUtils.doPostRequest(0,
+                            QR_GENERATOR,
+                            commonUtils.getHeadersMaps(numberSet.getString("token_header")),
+                            "Create QrGenerator Code",
+                            commonUtils.writeAsString(objectMapper, homeModel));
+
+                    QrServerResponse qrServerResponse  =
+                            commonUtils.safeParseJSON(objectMapper,
+                                    httpResponse.getResponse(),
+                                    QrServerResponse.class);
+
+
+                    return responseUtils.constructResponse(200,
+                            commonUtils.writeAsString(objectMapper,
+                                    new ApiResponse(true,"Qr Generated Successfully",
+                                            new QrServerMainResponse(qrServerResponse)
+                                            )));
+                } else {
+                    return responseUtils.constructResponse(200,
+                            commonUtils.writeAsString(objectMapper, new ApiResponse(false,
+                                    "No Number is Found")));
+                }
+            } else {
+                return responseUtils.constructResponse(200,
+                        commonUtils.writeAsString(objectMapper, new ApiResponse(false, "Plan is Expired")));
+            }
+
+
+        } catch (Exception exception) {
+            logger.error("Exception while starting qr StartNumber " + exception.getMessage(), exception);
+            throw new FailedResponseException("Exception while getting qrStartNumber");
+        }
     }
 
 

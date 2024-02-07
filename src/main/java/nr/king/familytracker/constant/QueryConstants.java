@@ -137,7 +137,7 @@ public class QueryConstants {
 
     public static  final String INSERT_INTO_MESSAGING_USER="insert into MESSAGED_USER(MESSAGE_USER_ID,CREATED_AT,UPDATED_AT) " +
             "values(?,current_timestamp,current_timestamp)";
-    public static  final String UPDATE_INTO_MESSAGING_USER="update into MESSAGED_USER set UPDATED_AT=current_timestamp where MESSAGE_USER_ID=?";
+    public static  final String UPDATE_INTO_MESSAGING_USER="update  MESSAGED_USER set UPDATED_AT=current_timestamp where MESSAGE_USER_ID=?";
 
 
     public  static final String  GET_MESSAGE_BASED_ON_USERID="SELECT MESSAGE_USER_ID FROM MESSAGED_USER ORDER BY UPDATED_AT DESC";
