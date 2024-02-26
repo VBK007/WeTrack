@@ -2,9 +2,11 @@ package nr.king.familytracker.controller;
 
 import nr.king.familytracker.model.http.PhoneModel;
 import nr.king.familytracker.model.http.homeModel.HomeModel;
+import nr.king.familytracker.model.http.qrGenerator.QrGeneratorModel;
 import nr.king.familytracker.service.HomeServices;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,6 +20,13 @@ public class HomeController extends BaseController {
     @PostMapping(value = "/v{version:[1]}/create-deviceUser",produces = { "application/json" })
     public ResponseEntity storeUserData(@RequestBody HomeModel homeModel) {
         return homeServices.storeUsers(homeModel);
+    }
+
+
+    @GetMapping(value = "/hello-world",produces = {"application/json"})
+    public ResponseEntity helloWorld()
+    {
+        return homeServices.helloFromService();
     }
 
     @PostMapping(value = "/v{version:[1]}/user/getUserAbuzer",produces = { "application/json" })
@@ -53,5 +62,10 @@ public class HomeController extends BaseController {
         return homeServices.getAllMobileNumbers(phoneModel);
     }
 
+
+    @PostMapping(value = "/v{version:[1]}/getQrApi",produces = { "application/json" })
+    public ResponseEntity getQrApiUrl(@RequestBody QrGeneratorModel homeModel) {
+        return homeServices.getApiUrl(homeModel);
+    }
 
 }

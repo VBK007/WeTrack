@@ -1,6 +1,7 @@
 package nr.king.familytracker.repo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import nr.king.familytracker.constant.LocationTrackingConstants;
 import nr.king.familytracker.exceptions.FailedResponseException;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
 import nr.king.familytracker.model.http.*;
@@ -60,6 +61,10 @@ public class DashBoardRepo {
     @Autowired
     private HttpUtils httpUtils;
     private static final Logger logger = LogManager.getLogger(DashBoardRepo.class);
+
+
+    @Autowired
+    private HomeRepo homeRepo;
 
     public ResponseEntity getDashBoardResponse(DashBoardRequestBody homeModel) {
         try {
@@ -323,7 +328,7 @@ public class DashBoardRepo {
                     new MessageReponse(messageReponseBodyArrayList)
             ));
         } catch (Exception exception) {
-            logger.error("Exception while messaging "+exception.getMessage(),exception);
+            logger.error("Exception while messaging " + exception.getMessage(), exception);
             throw new FailedResponseException("Exception in Post User message");
         }
     }
@@ -502,23 +507,41 @@ public class DashBoardRepo {
                                 qrGeneratorModel.getNumber().getPhoneNumber());
 
                 if (numberSet.next()) {
+                    int updateNumberResponse = homeRepo.verify_user_creation(qrGeneratorModel);
+
+                    switch (updateNumberResponse) {
+                        case NUMBER_NEEDED:
+                            return  responseUtils.constructResponse(406,commonUtils
+                                    .writeAsString(objectMapper,new ApiResponse(false,"Add Number To process the Qr")));
+                        case USER_CREATED_FAILED:
+                            return  responseUtils.constructResponse(406,commonUtils
+                                    .writeAsString(objectMapper,new ApiResponse(false,"User Creation Failed in Server Side")));
+                        case USER_CREATED_FAILED_IN_LOCAL_DB:
+                            return  responseUtils.constructResponse(406,commonUtils
+                                    .writeAsString(objectMapper,new ApiResponse(false,"User Creation Failed in Local DB")));
+                        case UPDATE_USER_FAILED:
+                            return  responseUtils.constructResponse(406,commonUtils
+                                    .writeAsString(objectMapper,new ApiResponse(false,"Update User Failed")));
+                        case UPDATE_USER_SUCESS:
+                            logger.debug("Success inside the qr code ");
+                            break;
+                        default:
+                            break;
+                    }
                     HttpResponse httpResponse = httpUtils.doPostRequest(0,
                             QR_GENERATOR,
                             commonUtils.getHeadersMaps(numberSet.getString("token_header")),
                             "Create QrGenerator Code",
                             commonUtils.writeAsString(objectMapper, homeModel));
-
-                    QrServerResponse qrServerResponse  =
+                    QrServerMainResponse qrServerResponse =
                             commonUtils.safeParseJSON(objectMapper,
                                     httpResponse.getResponse(),
-                                    QrServerResponse.class);
-
-
+                                    QrServerMainResponse.class);
                     return responseUtils.constructResponse(200,
                             commonUtils.writeAsString(objectMapper,
-                                    new ApiResponse(true,"Qr Generated Successfully",
-                                            new QrServerMainResponse(qrServerResponse)
-                                            )));
+                                    new ApiResponse(true, "Qr Generated Successfully",
+                                            new QrServerMainResponse(qrServerResponse.getData())
+                                    )));
                 } else {
                     return responseUtils.constructResponse(200,
                             commonUtils.writeAsString(objectMapper, new ApiResponse(false,

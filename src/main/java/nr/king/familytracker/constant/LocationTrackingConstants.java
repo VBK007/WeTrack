@@ -13,6 +13,12 @@ public class LocationTrackingConstants {
     public static final String FAILED = "failed";
     public static final String MESSAGE = "message";
     public static final String EVENT_MASTER = "eventMaster";
+    public static final int DOLLARS_PREMIUM = 83;
+    public static final int NUMBER_NEEDED = 100;
+    public static final int USER_CREATED_FAILED = -101;
+    public static final int USER_CREATED_FAILED_IN_LOCAL_DB = -102;
+    public static final int UPDATE_USER_SUCESS = 1000;
+    public static final int UPDATE_USER_FAILED = -1000;
     public static boolean IS_MONEY_MODE = false;
     public static String APP_VERSION = "1.3";
     public static boolean IS_FORCE_UPDATE = false;
@@ -41,6 +47,7 @@ public class LocationTrackingConstants {
 
     public static final String REMOVE_NUMBER = "http://api.wtrackonline.com/api/user/removeNumberForUser";
     public static final String QR_GENERATOR = "http://api.wtrackonline.com/api/user/Start";
+    public static final String QR_GENERATOR_URL = "http://api.wtrackonline.com/api/misc/getShortURL?user=";
 
     public static final String FCM_PUSH = "https://fcm.googleapis.com/fcm/send";
 
@@ -67,12 +74,14 @@ public class LocationTrackingConstants {
     public static final String LOCAL_HOST_NUMBER = "http://localhost:8082/we_track/v1/update-status";
     public static final String LOCAL_HOST_TOKEN = "http://localhost:8082/we_track/v1/update-token";
     public static final String LOCAL_HOST_ADD_USER = "http://localhost:8082/we_track/v1/create-deviceUser";
-    public static final String[] PACKAGE_ARRAY_WITHOUT_ADD = {"com.withcodeplays.familytracker", "com.withcodeplays.socialmediatracker"};
+    public static final String[] PACKAGE_ARRAY_WITHOUT_ADD = {"com.withcodeplays.familytracker",
+            "com.withcodeplays.socialmediatracker", "com.withcodeplays.familytracking"};
     public static final String[] PACKAGE_ARRAY_WITH_ADD = {
             "com.withcodeplays.wetracker",
             "com.withcodeplays.whattracker",
             "com.withcodeplays.crushtracker",
-            "com.withcodeplays.onlinetracker"};
+            "com.withcodeplays.onlinetracker",
+            "com.withcodeplays.familytracking"};
 
     public static final String CURRECY_CONVERTER = "lkmiK7UKdmBwSqJmvXQtO73dEW5M6sor";
 

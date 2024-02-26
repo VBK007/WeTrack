@@ -34,6 +34,15 @@ public class HttpUtils {
         return getReponse(url, client, request);
     }
 
+    public HttpResponse doGetRequest(String url, Map<String, String> headers,Map<String,String> parameterValue) throws IOException {
+        OkHttpClient client = new OkHttpClient();
+        Request.Builder request = new Request.Builder().url(url);
+        headers.forEach(request::addHeader);
+        return getReponse(url, client, request);
+    }
+
+
+
     private HttpResponse getReponse(String url, OkHttpClient client, Request.Builder request) throws IOException {
         Response response = client.newCall(request.build()).execute();
         HttpResponse httpResponse = new HttpResponse(response.code(), response.body() != null ? response.body().string() : "");

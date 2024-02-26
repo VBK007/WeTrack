@@ -4,6 +4,9 @@ public class QueryConstants {
     public static final String selectNumberWithToken ="select USER_ID,NUMBER,TOKEN_HEADER,NICK_NAME,COUNTRY_CODE,CREATED_AT,UPDATED_AT from " +
             "NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?";
 
+    public static final String selectNumberHeader = "select USER_ID,NUMBER,TOKEN_HEADER,NICK_NAME FROM NUMBER_FOR_USERS " +
+            "where USER_ID=? and PACKAGE_NAME=? and NUMBER=?";
+
     public static  final String GET_NOT_DEMO_USERS ="select user_id,Expiry_TIME,PACKAGE_NAME from WE_TRACK_USERS where purchase_mode!='demo'";
     public static  final String GET_CURRENT_USER ="select user_id,Expiry_TIME,PACKAGE_NAME from WE_TRACK_USERS where USER_ID=?";
 
