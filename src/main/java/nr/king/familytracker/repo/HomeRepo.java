@@ -164,7 +164,7 @@ public class HomeRepo {
                             return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                                     new ApiResponse(false, "Please add Mobile Number")));
                         }
-                        new Thread(() -> doInBakground(homeModel, numberSet,false)).start();
+                        new Thread(() -> doInBakground(homeModel, numberSet, false)).start();
                     } else {
                         int updatedUserCount = updateAccountDetails(sqlRowSet.getString("user_id"), sqlRowSet.getString("PACKAGE_NAME"));
                         logger.error("Response in the Update user into demo for user " + sqlRowSet.getString("user_id") + "\n response count"
@@ -230,7 +230,7 @@ public class HomeRepo {
                                 new ApiResponse(false, "Please add Mobile Number")));
                     }
 
-                    new Thread(() -> doInBakground(homeModel, innerNumberSet,false)).start();
+                    new Thread(() -> doInBakground(homeModel, innerNumberSet, false)).start();
                 } else {
                     return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                             new ApiResponse(false, "Plan is Expired")));
@@ -248,44 +248,29 @@ public class HomeRepo {
     }
 
 
-    public int verify_user_creation(QrGeneratorModel qrGeneratorModel) {
+    public int verify_user_creation(QrGeneratorModel qrGeneratorModel, SqlRowSet sqlRowSet,SqlRowSet numberSet) {
         try {
             HomeModel homeModel = qrGeneratorModel.getHomeModel();
-            SqlRowSet sqlRowSet = jdbcTemplateProvider.getTemplate()
-                    .queryForRowSet("select Expiry_TIME,IS_USER_CREATED_IN_WETRACK_SERVICE,token_header,CREDIT_LIMIT  " +
-                                    "from WE_TRACK_USERS where USER_ID=? and PACKAGE_NAME=?", qrGeneratorModel.getHomeModel().getId(),
-                            qrGeneratorModel.getHomeModel().getPackageName());
+            logger.info("outside Event " + homeModel.getId() + sqlRowSet.getBoolean("is_user_created_in_wetrack_service"));
+            if (sqlRowSet.getBoolean("is_user_created_in_wetrack_service")) {
+                if (commonUtils.checkAddOrWithoutAdd(sqlRowSet.getString("Expiry_TIME"), homeModel.getPackageName(),
+                        sqlRowSet.getInt("CREDIT_LIMIT"))) {
+                    return makeApiCallFOrUpdatePhoneState(homeModel, numberSet, true);
 
-            if (sqlRowSet.next()) {
-                logger.info("outside Event " + homeModel.getId() + sqlRowSet.getBoolean("is_user_created_in_wetrack_service"));
-                if (sqlRowSet.getBoolean("is_user_created_in_wetrack_service")) {
-                    SqlRowSet numberSet = jdbcTemplateProvider.getTemplate()
-                            .queryForRowSet("select USER_ID,NICK_NAME,NUMBER,TOKEN_HEADER,COUNTRY_CODE,PUSH_TOKEN,CREATED_AT,UPDATED_AT,is_noti_enabled from NUMBER_FOR_USERS where USER_ID=? and PACKAGE_NAME=?" +
-                                            "and NUMBER=?",
-                                    homeModel.getId(), homeModel.getPackageName(),qrGeneratorModel.getNumber().getPhoneNumber());
-                    if (commonUtils.checkAddOrWithoutAdd(sqlRowSet.getString("Expiry_TIME"), homeModel.getPackageName(),
-                            sqlRowSet.getInt("CREDIT_LIMIT"))) {
-                        if (!numberSet.next()) {
-                            return LocationTrackingConstants.NUMBER_NEEDED;
-                        }
-
-                        return makeApiCallFOrUpdatePhoneState(homeModel,numberSet,true);
-
-                    } else {
-                        return LocationTrackingConstants.DOLLARS_PREMIUM;
-                    }
                 } else {
-                    String normalUserId = homeModel.getId();
-                    homeModel.setId(commonUtils.getRandomString());
-                    HttpResponse httpResponse = checkUserFromWeTrackService(homeModel);
-                    if (httpResponse.getResponseCode() == 200) {
-                        homeModel.setId(normalUserId);
-                        int count = doUpdateUserCreationinWetrack(homeModel);
-                        logger.info("Count of update is" + count);
-                        return (count == 1) ? 1 : LocationTrackingConstants.USER_CREATED_FAILED_IN_LOCAL_DB;
-                    } else {
-                        return USER_CREATED_FAILED;
-                    }
+                    return LocationTrackingConstants.DOLLARS_PREMIUM;
+                }
+            } else {
+                String normalUserId = homeModel.getId();
+                homeModel.setId(commonUtils.getRandomString());
+                HttpResponse httpResponse = checkUserFromWeTrackService(homeModel);
+                if (httpResponse.getResponseCode() == 200) {
+                    homeModel.setId(normalUserId);
+                    int count = doUpdateUserCreationinWetrack(homeModel);
+                    logger.info("Count of update is" + count);
+                    return (count == 1) ? 1 : LocationTrackingConstants.USER_CREATED_FAILED_IN_LOCAL_DB;
+                } else {
+                    return USER_CREATED_FAILED;
                 }
             }
 
@@ -317,7 +302,7 @@ public class HomeRepo {
                                     commonUtils.writeAsString(objectMapper,
                                             new ApiResponse(false, "Please add Mobile Number")));
                         }
-                        new Thread(() -> doInBakground(homeModel, numberSet,false)).start();
+                        new Thread(() -> doInBakground(homeModel, numberSet, false)).start();
                     } else {
                         return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper,
                                 new ApiResponse(false, "Plan is Expired")));
@@ -360,13 +345,13 @@ public class HomeRepo {
         }
     }
 
-    private void doInBakground(HomeModel homeModel, SqlRowSet numberSet,boolean isFromBackEnd) {
+    private void doInBakground(HomeModel homeModel, SqlRowSet numberSet, boolean isFromBackEnd) {
         try {
             if (numberSet.isLast()) {
-                new Thread(() -> makeApiCallFOrUpdatePhoneState(homeModel, numberSet,isFromBackEnd)).start();
+                new Thread(() -> makeApiCallFOrUpdatePhoneState(homeModel, numberSet, isFromBackEnd)).start();
             } else {
                 while (numberSet.next()) {
-                    new Thread(() -> makeApiCallFOrUpdatePhoneState(homeModel, numberSet,isFromBackEnd)).start();
+                    new Thread(() -> makeApiCallFOrUpdatePhoneState(homeModel, numberSet, isFromBackEnd)).start();
                     Thread.sleep(500, 50);
                 }
             }
@@ -376,11 +361,7 @@ public class HomeRepo {
     }
 
 
-
-
-
-
-    private int makeApiCallFOrUpdatePhoneState(HomeModel homeModel, SqlRowSet numberSet,boolean isDashBoardVerify) {
+    private int makeApiCallFOrUpdatePhoneState(HomeModel homeModel, SqlRowSet numberSet, boolean isDashBoardVerify) {
         int count = 0;
         try {
             HttpResponse httpResponse = httpUtils.doPostRequest(0, GET_APP_USER,
@@ -410,7 +391,7 @@ public class HomeRepo {
                     );
                     updateMobileNumbers(phoneModel, innerHomeModel); //api call for update phone number
                     phoneModel.setId(homeModel.getId());
-                     count = updatePhoneNumberWhileGetAppUser(phoneModel, innerHomeModel);
+                    count = updatePhoneNumberWhileGetAppUser(phoneModel, innerHomeModel);
                     if (count == 1) {
                         NotificationModel notificationModel = new NotificationModel();
                         notificationModel.setUserId(numberSet.getString("USER_ID"));
@@ -435,15 +416,14 @@ public class HomeRepo {
                 } else {
                     logger.info("Response while updating the server call " + httpResponse.getResponseCode() + httpResponse.getResponse());
                 }
-            }
-            else{
-                count=1;
+            } else {
+                count = 1;
             }
         } catch (Exception exception) {
             logger.error("Exception on APi calling" + exception.getMessage(), exception);
         }
 
-        return (count==1) ? LocationTrackingConstants.UPDATE_USER_SUCESS : LocationTrackingConstants.UPDATE_USER_FAILED;
+        return (count == 1) ? LocationTrackingConstants.UPDATE_USER_SUCESS : LocationTrackingConstants.UPDATE_USER_FAILED;
     }
 
     private void updateMobileNumbers(PhoneModel phoneModel, HomeModel homeModel) {

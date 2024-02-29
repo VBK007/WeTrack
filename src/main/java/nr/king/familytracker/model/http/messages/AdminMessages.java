@@ -13,7 +13,6 @@ import org.apache.kafka.common.protocol.types.Field;
 public class AdminMessages {
     private String lastMessgae;
     private String lastMessageTiming;
-
     private String userImageUrl;
     private String userId;
 }

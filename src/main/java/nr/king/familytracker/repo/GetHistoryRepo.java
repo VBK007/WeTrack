@@ -7,6 +7,7 @@ import nr.king.familytracker.model.http.*;
 import nr.king.familytracker.model.http.homeModel.CurrentPurchaseModel;
 import nr.king.familytracker.model.http.homeModel.GetPhoneHistoryMainArrayModel;
 import nr.king.familytracker.model.http.homeModel.GetPhoneNumberHistoryModel;
+import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.utils.CommonUtils;
 import nr.king.familytracker.utils.HttpUtils;
 import nr.king.familytracker.utils.ResponseUtils;
@@ -21,8 +22,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 
-import static nr.king.familytracker.constant.LocationTrackingConstants.GET_LAST_HISTORY;
-import static nr.king.familytracker.constant.LocationTrackingConstants.LOCAL_HOST_NUMBER;
+import static nr.king.familytracker.constant.LocationTrackingConstants.*;
 import static nr.king.familytracker.constant.QueryConstants.SELECT_USER_EXPIRY_TIME;
 import static nr.king.familytracker.constant.QueryConstants.UPDATE_PUSH_NOTIFICATION;
 
@@ -71,6 +71,19 @@ public class GetHistoryRepo {
                                 commonUtils.getHeadersMap(numberSet.getString("TOKEN_HEADER")),
                                 "Getting Phone Histories",
                                 commonUtils.writeAsString(objectMapper, getPhoneHistoryModel));
+
+                        HttpResponse checkMobileNumberAuthenticated = httpUtils.doPostRequest(0, GET_APP_USER,
+                                commonUtils.getHeadersMap(numberSet.getString("token_header")),
+                                "create user Expiry time",
+                                commonUtils.writeAsString(objectMapper,
+                                        new HomeModel(
+                                        )));
+
+                        //model for check user exists
+                        MainHomeUserModel appUserModel = commonUtils.safeParseJSON(objectMapper,
+                                checkMobileNumberAuthenticated.getResponse(),
+                                MainHomeUserModel.class);
+
                         GetPhoneHistoryMainArrayModel getPageHistoryNumberModel = commonUtils.safeParseJSON(objectMapper, httpResponse.getResponse(), GetPhoneHistoryMainArrayModel.class);
                         SendHistorystatusToAppModel sendHistorystatusToAppModel = new SendHistorystatusToAppModel();
                         if (getPageHistoryNumberModel.getData().isEmpty()) {
@@ -83,6 +96,8 @@ public class GetHistoryRepo {
                             localModel.setPhoneNumber(numberSet.getString("NUMBER"));
                             localModel.setNotifyEnabled(numberSet.getBoolean("is_noti_enabled"));
                             localModel.setTimeStamp(getTimeStamp(numberSet.getString("CREATED_AT")) + "Z");
+                            localModel.isAuthenticated= !appUserModel.getData().getFollowings().isEmpty()
+                                    && appUserModel.getData().getFollowings().get(0).getIsActive() && appUserModel.getData().isQrSessionConnected();
                             localList.add(localModel);
                             sendHistorystatusToAppModel.setStatusList(localList);
                         } else {
@@ -94,6 +109,8 @@ public class GetHistoryRepo {
                                     GetPhoneNumberHistoryModel localModel = getPageHistoryNumberModel.getData().get(i);
                                     localModel.setNotifyEnabled(numberSet.getBoolean("is_noti_enabled"));
                                     localModel.setNickName(numberSet.getString("NICK_NAME"));
+                                    localModel.isAuthenticated= !appUserModel.getData().getFollowings().isEmpty()
+                                    && appUserModel.getData().getFollowings().get(0).getIsActive() && appUserModel.getData().isQrSessionConnected();
                                     localList.add(localModel);
                                 } else {
                                     break;

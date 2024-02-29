@@ -15,4 +15,5 @@ public class GetPhoneNumberHistoryModel {
     public String timeStamp;
     public String nickName;
     public boolean notifyEnabled;
+    public boolean isAuthenticated;
 }

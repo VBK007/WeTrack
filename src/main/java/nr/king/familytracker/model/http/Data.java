@@ -5,12 +5,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serializable;
 import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Data {
+public class Data  implements Serializable {
     private String trialStartDate;
     private String createdDate;
     private String mobilePhone;
@@ -20,6 +21,8 @@ public class Data {
     private Integer maxFollowCount;
     private String pushToken;
     private String fireBaseId;
-    private boolean isQrTracking;
-    private boolean isQrSessionConnected;
+    /*private boolean isQrTracking;
+    private boolean isQrSessionConnected;*/
+    public boolean isQrTracking;
+    public boolean isQrSessionConnected;
 }

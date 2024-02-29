@@ -1,15 +1,14 @@
 package nr.king.familytracker.repo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import nr.king.familytracker.constant.LocationTrackingConstants;
 import nr.king.familytracker.exceptions.FailedResponseException;
 import nr.king.familytracker.jdbc.JdbcTemplateProvider;
-import nr.king.familytracker.model.http.*;
+import nr.king.familytracker.model.http.ApiResponse;
+import nr.king.familytracker.model.http.HttpResponse;
+import nr.king.familytracker.model.http.MainHomeUserModel;
 import nr.king.familytracker.model.http.adminSides.AdminDashBoardResponses;
-import nr.king.familytracker.model.http.adminSides.AdminResponseModel;
 import nr.king.familytracker.model.http.dashboardModel.*;
 import nr.king.familytracker.model.http.fcmModels.FcmModelData;
-import nr.king.familytracker.model.http.fcmModels.Notification;
 import nr.king.familytracker.model.http.filterModel.FilterHistoryModel;
 import nr.king.familytracker.model.http.homeModel.GetPhoneHistoryMainArrayModel;
 import nr.king.familytracker.model.http.homeModel.GetPhoneNumberHistoryModel;
@@ -17,7 +16,6 @@ import nr.king.familytracker.model.http.homeModel.HomeModel;
 import nr.king.familytracker.model.http.messages.*;
 import nr.king.familytracker.model.http.qrGenerator.QrGeneratorModel;
 import nr.king.familytracker.model.http.qrGenerator.QrServerMainResponse;
-import nr.king.familytracker.model.http.qrGenerator.QrServerResponse;
 import nr.king.familytracker.utils.CommonUtils;
 import nr.king.familytracker.utils.HttpUtils;
 import nr.king.familytracker.utils.ResponseUtils;
@@ -28,7 +26,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
-import scala.Int;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -419,7 +416,10 @@ public class DashBoardRepo {
     public ResponseEntity getAllUserMessage(AdminMessageBody messageRequestBody) {
         try {
             AdminResponseBody lData = new AdminResponseBody();
-            lData.setMessagesArrayList(new ArrayList<>(jdbcTemplateProvider.getTemplate().query(GET_MESSAGE_BASED_ON_USERID, this::MapAdminMessages)));
+            lData.setMessagesArrayList(new ArrayList<>(jdbcTemplateProvider.getTemplate().query((messageRequestBody.getAdminId().isEmpty()
+            ? GET_MESSAGE_BASED_ON_USERID : GET_ALL_MESSAGES_WITH_USER_ID+messageRequestBody.getAdminId()
+            ), this::MapAdminMessages)));
+
             return responseUtils.constructResponse(200, commonUtils.writeAsString(objectMapper, lData));
         } catch (Exception exception) {
             logger.error("Exception in the adminMessage Response " + exception.getMessage(), exception);
@@ -507,21 +507,22 @@ public class DashBoardRepo {
                                 qrGeneratorModel.getNumber().getPhoneNumber());
 
                 if (numberSet.next()) {
-                    int updateNumberResponse = homeRepo.verify_user_creation(qrGeneratorModel);
+                    int updateNumberResponse = homeRepo.verify_user_creation(qrGeneratorModel,
+                            sqlRowSet,numberSet);
 
                     switch (updateNumberResponse) {
                         case NUMBER_NEEDED:
-                            return  responseUtils.constructResponse(406,commonUtils
-                                    .writeAsString(objectMapper,new ApiResponse(false,"Add Number To process the Qr")));
+                            return responseUtils.constructResponse(406, commonUtils
+                                    .writeAsString(objectMapper, new ApiResponse(false, "Add Number To process the Qr")));
                         case USER_CREATED_FAILED:
-                            return  responseUtils.constructResponse(406,commonUtils
-                                    .writeAsString(objectMapper,new ApiResponse(false,"User Creation Failed in Server Side")));
+                            return responseUtils.constructResponse(406, commonUtils
+                                    .writeAsString(objectMapper, new ApiResponse(false, "User Creation Failed in Server Side")));
                         case USER_CREATED_FAILED_IN_LOCAL_DB:
-                            return  responseUtils.constructResponse(406,commonUtils
-                                    .writeAsString(objectMapper,new ApiResponse(false,"User Creation Failed in Local DB")));
+                            return responseUtils.constructResponse(406, commonUtils
+                                    .writeAsString(objectMapper, new ApiResponse(false, "User Creation Failed in Local DB")));
                         case UPDATE_USER_FAILED:
-                            return  responseUtils.constructResponse(406,commonUtils
-                                    .writeAsString(objectMapper,new ApiResponse(false,"Update User Failed")));
+                            return responseUtils.constructResponse(406, commonUtils
+                                    .writeAsString(objectMapper, new ApiResponse(false, "Update User Failed")));
                         case UPDATE_USER_SUCESS:
                             logger.debug("Success inside the qr code ");
                             break;
